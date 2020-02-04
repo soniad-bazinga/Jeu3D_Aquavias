@@ -1,4 +1,6 @@
 # Aquavias
 
-Aquavias est un jeu de réflexion dans lequel il faut "construire" un aqueduc permettant
-d'apporter de l'eau dans une ville. Voilà voilà...
+DAHMANI Sonia       (n°        )    @sdahma28
+KINDIA Franck       (n°21700163)    @leskerrr
+SANTOS DUARTE Elsa  (n°21618550)    @ElsaD
+VALTY "yujinedits" Eugène        (n°21805512)    @eugene

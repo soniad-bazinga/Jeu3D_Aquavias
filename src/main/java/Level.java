@@ -57,42 +57,57 @@ public class Level {
 	void rotate(int i, int j) { /* rotate the piece at i,j coord, but reset it before rotating */
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null)
 			pieces[i][j].setFull(false);
-			pieces[i][j].rotate();
+		pieces[i][j].rotate();
+		update();
 	}
 
 	void play() { /* basic method to play (very primitive, such basic) */
 		Scanner sc = new Scanner(System.in);
+		update();
 		while (true) {
 			affiche();
 			String s = sc.next();
 			int x = Character.getNumericValue(s.charAt(0));
 			int y = Character.getNumericValue(s.charAt(1));
 			rotate(x, y);
-			update(x, y);
 			System.out.println();
 		}
 	}
+	
+	void update() {	
+		//vide d'abord entièrement l'eau du circuit
+		//puis appelle update dès la source
+		voidAll();
+		update(0,0);
+	}
+	
+	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
+		for (int i=0;i<HEIGHT;i++) {
+			for(int j=1;j<WIDTH;j++) {
+				if(pieces[i][j]!=null)
+					pieces[i][j].setFull(false);
+			}
+		}
+	}
+	
+	void update(int i, int j) {
+		//vérifie que les pièces limitrophes existent, qu'elles sont connectées à l'actuelle et qu'elles ne sont pas déjà remplies
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) { 
+			setFull(i+1, j);
+			update(i+1,j);
+		}
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")&&!pieces[i - 1][j].isFull()) {
+			setFull(i-1, j);
+			update(i-1,j);
+		}
+		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")&&!pieces[i][j + 1].isFull()) {
+			setFull(i, j+1);
+			update(i,j+1);
 
-	void update(int i, int j) { 														// primitive method to update piece, the
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")) {	// if statements are good, gotta keep them
-			if(isFull(i+1,j)){															// but we should make it recursive
-				setFull(i,j);															// and check if its connected to the source
-			}
 		}
-		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")) {
-			if(isFull(i-1,j)){
-				setFull(i,j);
-			}
-		}
-		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")) {
-			if(isFull(i,j+1)){
-				setFull(i,j);
-			}
-		}
-		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")) {
-			if(isFull(i,j-1)){
-				setFull(i,j);
-			}
+		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")&&!pieces[i][j - 1].isFull()) {
+			setFull(i, j-1);
+			update(i,j-1);
 		}
 	}
 
@@ -101,15 +116,19 @@ public class Level {
 	}
 
 	boolean isInTab(int i, int j) { /* check if the piece is in the array */
-		return (i < HEIGHT && j < WIDTH && i >= 0 && j >= 0);
+		if(i < HEIGHT && j < WIDTH+2 && i >= 0 && j >= 0)
+			return pieces[i][j]!=null;
+		return false;
 	}
-	
-	boolean isFull(int i , int j) { /* check if piece i,j is full */
+
+	boolean isFull(int i, int j) { /* check if piece i,j is full */
 		return pieces[i][j].isFull();
 	}
 
-	boolean connected(Piece p1, Piece p2, String direction) { /* check if 2 piece are connected given a certain position */
-		if(p1==null || p2==null) return false;
+	boolean connected(Piece p1, Piece p2,
+			String direction) {
+		if (p1 == null || p2 == null)
+			return false;
 		switch (direction) {
 		case "UP":
 			return (p1.isUp() && p2.isDown());

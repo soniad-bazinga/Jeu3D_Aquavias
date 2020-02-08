@@ -37,6 +37,9 @@ public abstract class Piece {
 		return b;
 	}
 	
+	abstract String getType();
+	int getRotation() { return index; }
+	
 	boolean isUp() { return UP; }
 	boolean isRight() { return RIGHT; }
 	boolean isDown() { return DOWN; }
@@ -44,5 +47,9 @@ public abstract class Piece {
 	
 	public String toString() {
 		return Character.toString(symbols[index]);
+	}
+	
+	public String toJSONString() {
+		return getType()+": "+getRotation();
 	}
 }

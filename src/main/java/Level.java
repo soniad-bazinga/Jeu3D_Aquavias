@@ -220,7 +220,7 @@ public class Level {
 	}
 
 	boolean isInTab(int i, int j) { /* check if the piece is in the array */
-		return (i < HEIGHT && j <= WIDTH && i >= 0 && j > 0);
+		return (i < HEIGHT && j <= WIDTH+2 && i >= 0 && j > 0);
 	}
 
 	boolean isVerticalyOk(int i) {

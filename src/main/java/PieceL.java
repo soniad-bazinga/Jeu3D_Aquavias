@@ -5,4 +5,6 @@ public class PieceL extends Piece{
 		UP = true; RIGHT = true; DOWN = false; LEFT = false;
 		symbols = new char[] {'╚','╔','╗','╝'};
 	}
+	
+	String getType(){ return "L"; }
 }

@@ -1,4 +1,3 @@
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,70 +14,108 @@ public class Level {
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001b[36m";
 	public static final String ANSI_BOLD = "\u001B[1m";
-	public final int ID;
+	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
 	int selected_x;
 	int selected_y;
 
 	public Level(int w, int h) {
+
+		/*
+		 * Cette fonction créée seulement un tableau vide, avec une entrée et une sortie
+		 */
+
 		WIDTH = w;
 		HEIGHT = h;
+
+		setTab(w, h);
+
+		/*
+		 * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
+		 * d'un niveau
+		 */
+	}
+
+	@SuppressWarnings("unchecked")
+	public Level(int id) throws Exception {
+		
+		System.out.println("Chargement du niveau...\n");
+		FileReader reader;
+		
+		/* on récupère le fichier contenant le lvl */
+		
+		reader = new FileReader("levels/level" + id + ".json");
+		
+		/* on le parse */
+		
+		JSONParser jsonParser = new JSONParser();
+		JSONObject obj = (JSONObject) jsonParser.parse(reader);
+		
+		 /* on récupère les données de la taille et de l'id, et les initialise */
+		
+		int w = Math.toIntExact((long) obj.get("WIDTH"));
+		int h = Math.toIntExact((long) obj.get("HEIGHT"));
+		ID = Math.toIntExact((long) obj.get("ID"));
+		WIDTH = w;
+		HEIGHT = w;
+		setTab(w, h);
+		
+		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
+		
+		JSONArray y = (JSONArray) obj
+				.get("Pieces"); 
+		
+		/* on créer un itérateur pour y */
+		
+		Iterator<JSONArray> iterator = y.iterator();
+		
+		/* et des indexs */
+		
+		int i = 0;
+		int j = 0;
+		
+		/* on parcourt le tableau en récuperant chaque JSONObject piece */
+		
+		while (iterator.hasNext()) {
+			JSONArray x = iterator.next();
+			Iterator<JSONObject> iteratorX = x.iterator();
+			
+			/* Ici on passe aux sous tableaux */
+			
+			while (iteratorX.hasNext()) {
+				JSONObject p = iteratorX.next();
+				
+				/* On vérifie si le type de la pièce, pour voir si elle est null ou non */
+				
+				String type = (String) p.get("TYPE");
+				
+				/* puis si c'est une pièce non nul on l'initalise */
+				
+				if (!type.equals("NONE")) {
+					int rotation = Math.toIntExact((long) p.get("ROTATION"));
+					pieces[j][i] = getPiece(type, rotation);
+					if ((boolean) p.get("FULL"))
+						pieces[j][i].setFull(true);
+				}
+				i++;
+			}
+			i = 0;
+			j++;
+		}
+		
+		/* Tout s'est bien déroulé */
+		
+		System.out.println("Niveau chargé.");
+	}
+
+	void setTab(int w, int h) {
 		pieces = new Piece[h][w + 2]; /* first column and last column are empty and only contains start and end */
 		pieces[0][0] = new PieceI(); /* placing first piece at 0,0 */
 		pieces[0][0].rotate();
 		pieces[0][0].setFull(true);
 		pieces[h - 1][w + 1] = new PieceI();
 		pieces[h - 1][w + 1].rotate(); /* placing last piece at max coord */
-		ID = 0; /* to change with file storage */
-	}
-
-	public Level(int id) {
-		System.out.println("Chargement du niveau...\n");
-		FileReader reader;
-		int w = -1;
-		int h = -1;
-		try {
-			reader = new FileReader("levels/level" + id + ".json"); /* on récupère le fichier contenant le lvl */
-			JSONParser jsonParser = new JSONParser();
-			JSONObject obj = (JSONObject) jsonParser.parse(reader); /* on le parse */
-			w = Math.toIntExact((long) obj.get("WIDTH")); /* on récupère les données */
-			h = Math.toIntExact((long) obj.get("HEIGHT"));
-			id = Math.toIntExact((long) obj.get("ID"));
-			JSONArray y = (JSONArray) obj.get("Pieces"); /* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
-			/* same que dans level normal, peut être combiner les 2? */
-			pieces = new Piece[h][w + 2]; /* first column and last column are empty and only contains start and end */
-			pieces[0][0] = new PieceI(); /* placing first piece at 0,0 */
-			pieces[0][0].rotate();
-			pieces[0][0].setFull(true);
-			pieces[h - 1][w + 1] = new PieceI();
-			pieces[h - 1][w + 1].rotate(); /* placing last piece at max coord */
-			Iterator<JSONArray> iterator = y.iterator(); /* on créer un itérateur pour y */
-			int i = 0;
-			int j = 0;
-			while (iterator.hasNext()) { /* on parcourt le tableau en récuperant chaque JOBject piece */
-				JSONArray x = iterator.next();
-				Iterator<JSONObject> iteratorX = x.iterator();
-				while (iteratorX.hasNext()) {
-					JSONObject p = iteratorX.next();
-					String type = (String) p.get("TYPE");
-					if(!type.equals("NONE")) { /* puis si c'est une pièce non nul on l'initalise */
-						int rotation = Math.toIntExact((long) p.get("ROTATION"));
-						pieces[j][i] = getPiece(type,rotation);
-						if((boolean) p.get("FULL")) pieces[j][i].setFull(true);
-					}
-					i++;
-				}
-				i=0;
-				j++;
-			}
-			System.out.println("Niveau chargé.");
-		} catch (IOException | ParseException e) {
-			System.out.println("Impossible de charger le niveau");
-		}
-		WIDTH = w;
-		HEIGHT = h;
-		ID = 0; /* to change with file storage */
 	}
 
 	Piece getPiece(String s, int i) {
@@ -238,39 +275,76 @@ public class Level {
 		System.out.println("#" + ANSI_RESET + "\n");
 	}
 
+	@SuppressWarnings("unchecked")
 	void saveLevel() { /* pour sauvegarder le niveau */
+		
 		System.out.println("Sauvegarde du niveau...\n");
 		JSONObject obj = new JSONObject();
-		JSONArray y = new JSONArray(); /* on créer un array, qui sera l'array vertical (y) */
+		
+		/* on créer un array, qui sera l'array vertical (y) */
+		
+		JSONArray y = new JSONArray(); 
 		for (int i = 0; i < HEIGHT; i++) {
-			JSONArray x = new JSONArray(); /* ici on créer repetitivement des array horizontaux */
+			
+			/* ici on créer repetitivement des array horizontaux */
+			
+			JSONArray x = new JSONArray(); 
 			for (int j = 0; j < WIDTH + 2; j++) {
-				JSONObject p = new JSONObject(); /* on créer un JSONObject immitant une pièce, avec les arguments ci dessous */
+				
+				/* On créer un JSONObject contenant les attributs d'une pièce */
+				/* son type, sa rotation et si elle est pleine ou non */
+				
+				JSONObject p = new JSONObject();
 				if (pieces[i][j] != null) {
-					p.put("TYPE",pieces[i][j].getType());
+					p.put("TYPE", pieces[i][j].getType());
 					p.put("ROTATION", pieces[i][j].getRotation());
-					if(pieces[i][j].isFull()) {
-						p.put("FULL",true);
-					}else {
-						p.put("FULL",false);
+					if (pieces[i][j].isFull()) {
+						p.put("FULL", true);
+					} else {
+						p.put("FULL", false);
 					}
 				} else {
-					p.put("TYPE","NONE");
+					p.put("TYPE", "NONE");
 				}
 				x.add(p);
 			}
 			y.add(x);
 		}
-		obj.put("ID", ID); /* puis on rajoute qques infos utiles */
+		
+		/* puis on rajoute qques infos utiles */
+		
 		obj.put("HEIGHT", HEIGHT);
 		obj.put("WIDTH", WIDTH);
 		obj.put("Pieces", y);
 		try {
-			FileWriter file = new FileWriter("levels/level" + ID + ".json"); /* enfin ici, on sauvegarde le fichier */
+			
+			/* on récupère l'id dans id.json, puis on l'incrémente de 1 */
+
+			FileReader reader = new FileReader("levels/id.json");
+			JSONParser jsonParser = new JSONParser();
+			JSONObject JSONId = (JSONObject) jsonParser.parse(reader); /* on le parse */
+			int id = Math.toIntExact((long) JSONId.get("ID"));
+			ID = id;
+			
+			 /* on rajoute l'id dans le json du niveau */
+			
+			obj.put("ID", ID);
+
+			/* l'id est stocké, on l'incrémente */
+
+			JSONObject JSONnewId = new JSONObject();
+			JSONnewId.put("ID", id + 1);
+			FileWriter IDfile = new FileWriter("levels/id.json"); /* enfin ici, on sauvegarde le fichier */
+			IDfile.write(JSONnewId.toString());
+			IDfile.close();
+
+			/* l'id a été incrementé, on sauvegarde maintenant le niveau avec l'ancien id */
+
+			FileWriter file = new FileWriter("levels/level" + id + ".json"); /* enfin ici, on sauvegarde le fichier */
 			file.write(obj.toString());
 			System.out.println("Niveau sauvegardé.");
 			file.close();
-		} catch (IOException e) {
+		} catch (IOException | ParseException e) {
 			System.out.println("Impossible de sauvegarder le niveau.");
 		}
 

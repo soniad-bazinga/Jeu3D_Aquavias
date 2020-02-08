@@ -8,8 +8,10 @@ public class Level {
 	public static final String ANSI_BLUE = "\u001b[36m";
 	public final int WIDTH;
 	public final int HEIGHT;
+	private final char type; //Type of lvl (Leaking, Move Counter, Normal) -> 'l' = Leaking, 'c' = Move counter, 'n' = normal
 
-	public Level(int w, int h) {
+	public Level(int w, int h, char t) {
+		type = t;
 		WIDTH = w;
 		HEIGHT = h;
 		pieces = new Piece[h][w + 2]; /* first column and last column are empty and only contains start and end */
@@ -23,28 +25,90 @@ public class Level {
 				Random r = new Random();
 				int rand = r.nextInt(3);
 				switch (rand) {
-				case 0:
-					pieces[i][j] = new PieceT();
-					break;
-				case 1:
-					pieces[i][j] = new PieceI();
-					break;
-				case 2:
-					pieces[i][j] = new PieceL();
-					break;
+					case 0:
+						pieces[i][j] = new PieceT();
+						break;
+					case 1:
+						pieces[i][j] = new PieceI();
+						break;
+					case 2:
+						pieces[i][j] = new PieceL();
+						break;
 				}
 			}
 		}
 	}
 
-	void affiche() { /* print the state of the game */
+	boolean isLeaking() {
 		for (int i = 0; i < pieces.length; i++) {
-			for (int j = 0; j < pieces[i].length; j++) {
+			for (int j = 1; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null) {
-					if (pieces[i][j].isFull())
+					if (pieces[i][j].isFull()) { //If the piece contains water
+						if (pieces[i][j].isDown()) { //If the piece has an exit facing down
+							if (i == pieces.length - 1) {
+								System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+								return true; //If the piece is in the last line of the array/level
+							} else {
+								if (pieces[i + 1][j] != null) { //If there is a piece below
+									if (!connected(pieces[i][j], pieces[i + 1][j], "DOWN")) { //If the two pieces don't connect
+										System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+										return true; //It is leaking
+									}
+								}
+								return true; //If there is nothing below, it is leaking
+							}
+						} else if (pieces[i][j].isLeft()) { //If the piece has an exit facing left
+							if (j == 1 && i != 0) {
+								System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+								return true; //If it's the first in its line, it's leaking
+							}
+							if (pieces[i][j - 1] != null) {
+								if (!connected(pieces[i][j], pieces[i][j - 1], "LEFT")) { //If the two pieces don't connect
+									System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+									return true; //It is leaking
+								}
+							}
+							return true; //If there's nothing left of the piece
+						} else if (pieces[i][j].isRight()) { //If the piece has an exit facing right
+							if (j == pieces[i].length - 1 && i != pieces.length - 1) {
+								System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+								return true; //If it's the last in its line, it's leaking
+							}
+							if (pieces[i][j + 1] != null) {
+								if (!connected(pieces[i][j], pieces[i][j + 1], "RIGHT")) { //If the two pieces don't connect
+									System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+									return true; //It is leaking
+								}
+							}
+							return true; //If there's nothing right of the piece
+						} else if (pieces[i][j].isUp()) { //If the piece has an exit facing up
+							if (i == 0) {
+								System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+								return true; //If it's in the first line, it's leaking
+							}
+							if (pieces[i - 1][j] != null) {
+								if (!connected(pieces[i][j], pieces[i - 1][j], "LEFT")) { //If the two pieces don't connect
+									System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+									return true; //It is leaking
+								}
+							}
+							return true; //If there's nothing above the piece, then it's leaking
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	void affiche() { /* print the state of the game */
+		for (Piece[] piece : pieces) {
+			for (Piece value : piece) {
+				if (value != null) {
+					if (value.isFull())
 						System.out.print(ANSI_BLUE); /* if piece is full print it in blue */
-					System.out.print(pieces[i][j].toString());
-					if (pieces[i][j].isFull())
+					System.out.print(value.toString());
+					if (value.isFull())
 						System.out.print(ANSI_RESET); /* and stop the blue */
 				} else {
 					System.out.print(" ");
@@ -73,27 +137,36 @@ public class Level {
 		}
 	}
 
-	void update(int i, int j) { 														// primitive method to update piece, the
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")) {	// if statements are good, gotta keep them
-			if(isFull(i+1,j)){															// but we should make it recursive
-				setFull(i,j);															// and check if its connected to the source
+	void update(int i, int j) {                                                                                    // primitive method to update piece, the
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")) {    // if statements are good, gotta keep them
+			if (isFull(i + 1, j)) {                                                            // but we should make it recursive
+				setFull(i, j);                                                            // and check if its connected to the source
 			}
 		}
 		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")) {
-			if(isFull(i-1,j)){
-				setFull(i,j);
+			if (isFull(i - 1, j)) {
+				setFull(i, j);
 			}
 		}
 		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")) {
-			if(isFull(i,j+1)){
-				setFull(i,j);
+			if (isFull(i, j + 1)) {
+				setFull(i, j);
 			}
 		}
 		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")) {
-			if(isFull(i,j-1)){
-				setFull(i,j);
+			if (isFull(i, j - 1)) {
+				setFull(i, j);
 			}
 		}
+		if (Character.toLowerCase(type) == 'l') {
+			if (isLeaking()) System.out.println("Careful! There's a leak!");
+		}
+		if (Victory()) //Victory !!
+			System.out.print("You Win!!");
+	}
+
+	boolean Victory() {
+		return (pieces[HEIGHT - 1][WIDTH - 1].isFull());
 	}
 
 	void setFull(int i, int j) { /* to set piece i,j full */
@@ -103,22 +176,22 @@ public class Level {
 	boolean isInTab(int i, int j) { /* check if the piece is in the array */
 		return (i < HEIGHT && j < WIDTH && i >= 0 && j >= 0);
 	}
-	
-	boolean isFull(int i , int j) { /* check if piece i,j is full */
+
+	boolean isFull(int i, int j) { /* check if piece i,j is full */
 		return pieces[i][j].isFull();
 	}
 
 	boolean connected(Piece p1, Piece p2, String direction) { /* check if 2 piece are connected given a certain position */
-		if(p1==null || p2==null) return false;
+		if (p1 == null || p2 == null) return false;
 		switch (direction) {
-		case "UP":
-			return (p1.isUp() && p2.isDown());
-		case "RIGHT":
-			return (p1.isRight() && p2.isLeft());
-		case "DOWN":
-			return (p1.isDown() && p2.isUp());
-		case "LEFT":
-			return (p1.isLeft() && p2.isRight());
+			case "UP":
+				return (p1.isUp() && p2.isDown());
+			case "RIGHT":
+				return (p1.isRight() && p2.isLeft());
+			case "DOWN":
+				return (p1.isDown() && p2.isUp());
+			case "LEFT":
+				return (p1.isLeft() && p2.isRight());
 		}
 		return false;
 	}

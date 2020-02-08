@@ -4,7 +4,8 @@ public class Main {
 
 	
 	public static void main(String[] args) {
-		Level lvl = new Level(20,5);
-		lvl.play();
-	}
+        Level lvl = new Level(8, 5, 'l');
+        lvl.play();
+    }
 }
+

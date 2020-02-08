@@ -9,8 +9,40 @@ public class Level {
 	public final int WIDTH;
 	public final int HEIGHT;
 	private final char type; //Type of lvl (Leaking, Move Counter, Normal) -> 'l' = Leaking, 'c' = Move counter, 'n' = normal
+	private int count;
 
 	public Level(int w, int h, char t) {
+		type = Character.toLowerCase(t);
+		if (type == 'c') count = 25;
+		WIDTH = w;
+		HEIGHT = h;
+		pieces = new Piece[h][w + 2]; /* first column and last column are empty and only contains start and end */
+		pieces[0][0] = new PieceI(); /* placing first piece at 0,0 */
+		pieces[0][0].rotate();
+		pieces[0][0].setFull(true);
+		pieces[h - 1][w + 1] = new PieceI();
+		pieces[h - 1][w + 1].rotate(); /* placing last piece at max coord */
+		for (int i = 0; i < h; i++) {
+			for (int j = 1; j < w + 1; j++) { /* placing random pieces for the moment */
+				Random r = new Random();
+				int rand = r.nextInt(3);
+				switch (rand) {
+					case 0:
+						pieces[i][j] = new PieceT();
+						break;
+					case 1:
+						pieces[i][j] = new PieceI();
+						break;
+					case 2:
+						pieces[i][j] = new PieceL();
+						break;
+				}
+			}
+		}
+	}
+
+	public Level(int w, int h, char t, int c) { //Second constructor in case the level is of the "Counter" type
+		count = c;
 		type = t;
 		WIDTH = w;
 		HEIGHT = h;
@@ -102,6 +134,9 @@ public class Level {
 	}
 
 	void affiche() { /* print the state of the game */
+		if (type == 'c') {
+			System.out.println("Moves left : " + count);
+		}
 		for (Piece[] piece : pieces) {
 			for (Piece value : piece) {
 				if (value != null) {
@@ -158,15 +193,24 @@ public class Level {
 				setFull(i, j);
 			}
 		}
-		if (Character.toLowerCase(type) == 'l') {
+
+		if (type == 'c') {
+			if (DefeatCount()) System.out.println("You have no more hits allowed.....");
+			else count--;
+		} else if (type == 'l') {
 			if (isLeaking()) System.out.println("Careful! There's a leak!");
 		}
-		if (Victory()) //Victory !!
+
+		if (Victory())
 			System.out.print("You Win!!");
 	}
 
 	boolean Victory() {
 		return (pieces[HEIGHT - 1][WIDTH - 1].isFull());
+	}
+
+	boolean DefeatCount() {
+		return count == 0;
 	}
 
 	void setFull(int i, int j) { /* to set piece i,j full */

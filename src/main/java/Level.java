@@ -10,7 +10,7 @@ public class Level {
 	public final int HEIGHT;
 
 	public Level(int w, int h) {
-		WIDTH = w+2;
+		WIDTH = w;
 		HEIGHT = h;
 		pieces = new Piece[h][w + 2]; /* first column and last column are empty and only contains start and end */
 		pieces[0][0] = new PieceI(); /* placing first piece at 0,0 */

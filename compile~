@@ -1,2 +1,0 @@
-#!/bin/bash
-javac -d src/main/java/classes src/main/java/*.java

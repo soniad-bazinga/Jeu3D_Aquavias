@@ -110,12 +110,12 @@ public class Level {
 	}
 
 	void setTab(int w, int h) {
-		pieces = new Piece[h][w + 2]; /* first column and last column are empty and only contains start and end */
-		pieces[0][0] = new PieceI(); /* placing first piece at 0,0 */
+		pieces = new Piece[h][w + 2]; /* La première et la dernière colonne sont presque vides, elles ne contiennent que les pièces de début et de fin */
+		pieces[0][0] = new PieceI(); /* On place la première pièce à  0, 0*/
 		pieces[0][0].rotate();
 		pieces[0][0].setFull(true);
 		pieces[h - 1][w + 1] = new PieceI();
-		pieces[h - 1][w + 1].rotate(); /* placing last piece at max coord */
+		pieces[h - 1][w + 1].rotate(); /* Et la dernière pièce au dernier indice du tableau */
 	}
 
 	Piece getPiece(String s, int i) {
@@ -140,15 +140,15 @@ public class Level {
 		return pc;
 	}
 
-	void affiche() { /* print the state of the game */
+	void affiche() { /* Affiche l'état du jeu */
 		for (int i = 0; i < pieces.length; i++) {
 			for (int j = 0; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null) {
 					if (pieces[i][j].isFull())
-						System.out.print(ANSI_BLUE); /* if piece is full print it in blue */
+						System.out.print(ANSI_BLUE); /* Si la pièce contient de l'eau elle s'affiche en bleu */
 					System.out.print(pieces[i][j].toString());
 					if (pieces[i][j].isFull())
-						System.out.print(ANSI_RESET); /* and stop the blue */
+						System.out.print(ANSI_RESET); /* Et on arrête le bleu */
 
 				} else {
 					System.out.print(" ");
@@ -158,14 +158,14 @@ public class Level {
 		}
 	}
 
-	void rotate(int i, int j) { /* rotate the piece at i,j coord, but reset it before rotating */
+	void rotate(int i, int j) { /* Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle contient avant */
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null)
 			pieces[i][j].setFull(false);
 		pieces[i][j].rotate();
 		update();
 	}
 
-	void play() { /* basic method to play (very primitive, such basic) */
+	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
 		Scanner sc = new Scanner(System.in);
 		update();
 		while (true) {
@@ -215,11 +215,11 @@ public class Level {
 		}
 	}
 
-	void setFull(int i, int j) { /* to set piece i,j full */
+	void setFull(int i, int j) { /* Pour remplir la pièce de coordonnées i et j */
 		pieces[i][j].setFull(true);
 	}
 
-	boolean isInTab(int i, int j) { /* check if the piece is in the array */
+	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
 		return (i < HEIGHT && j <= WIDTH+2 && i >= 0 && j > 0);
 	}
 
@@ -231,12 +231,12 @@ public class Level {
 		return (j <= WIDTH && j > 0);
 	}
 
-	boolean isFull(int i, int j) { /* check if piece i,j is full */
+	boolean isFull(int i, int j) { /* Vérifie que le pièce de coordonnées i et j est pleine */
 		return pieces[i][j].isFull();
 	}
 
 	boolean connected(Piece p1, Piece p2,
-			String direction) { /* check if 2 piece are connected given a certain position */
+			String direction) { /* Vérifie le connection des pièces étant donnée une direction */
 		if (p1 == null || p2 == null)
 			return false;
 		switch (direction) {

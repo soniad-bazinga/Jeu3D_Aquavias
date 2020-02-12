@@ -1,5 +1,4 @@
 
-
 public abstract class Piece {
 	boolean UP;
 	boolean RIGHT;
@@ -12,7 +11,7 @@ public abstract class Piece {
 	
 	
 	
-	/* rotate 90° */
+	/* Fais tourner la pièce de 90° */
 	void rotate() {
 		boolean tmp1 = UP;
 		boolean tmp2 = RIGHT;

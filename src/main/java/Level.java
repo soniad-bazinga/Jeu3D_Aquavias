@@ -29,6 +29,7 @@ public class Level {
         t = Character.toLowerCase(t);
         if (t == 'f' || t == 'c' || t == 'n') type = t;
         else type = 'n';
+        if(type == 'f') compteur = 0;
         compteur = compt;
         WIDTH = w;
         HEIGHT = h;
@@ -42,7 +43,7 @@ public class Level {
 
     @SuppressWarnings("unchecked")
     public Level(int id) throws Exception {
-        System.out.println("Chargement du niveau...\n");
+        //System.out.println("Chargement du niveau...\n");
         FileReader reader;
 
         /* on récupère le fichier contenant le lvl */
@@ -60,7 +61,7 @@ public class Level {
         int h = Math.toIntExact((long) obj.get("HEIGHT"));
         ID = Math.toIntExact((long) obj.get("ID"));
         WIDTH = w;
-        HEIGHT = w;
+        HEIGHT = h;
         setTab(w, h);
 
         /* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
@@ -108,7 +109,7 @@ public class Level {
 
         /* Tout s'est bien déroulé */
 
-        System.out.println("Niveau chargé.");
+        //System.out.println("Niveau chargé.");
     }
 
     void setTab(int w, int h) {
@@ -143,6 +144,7 @@ public class Level {
     }
 
     void affiche() { /* print the state of the game */
+        System.out.println("------ AQUAVIAS ------");
         if (type == 'c' && compteur > 10) System.out.println("---- Coups restants : " + compteur + " ----");
         else if (type == 'c' && compteur > 1) System.out.println("---- Plus que " + compteur + " coups ! ----");
         else if (type == 'c' && compteur == 1) System.out.println("----  C'est votre denier coup ! ----");

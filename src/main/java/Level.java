@@ -14,6 +14,7 @@ public class Level {
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001b[36m";
 	public static final String ANSI_BOLD = "\u001B[1m";
+	public static final String ANSI_SELECTED = "\u001b[48;5;240m";
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
@@ -35,63 +36,63 @@ public class Level {
 		 * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
 		 * d'un niveau
 		 */
+		System.out.println("Level created");
 	}
 
 	@SuppressWarnings("unchecked")
 	public Level(int id) throws Exception {
-		
+
 		System.out.println("Chargement du niveau...\n");
 		FileReader reader;
-		
+
 		/* on récupère le fichier contenant le lvl */
-		
+
 		reader = new FileReader("levels/level" + id + ".json");
-		
+
 		/* on le parse */
-		
+
 		JSONParser jsonParser = new JSONParser();
 		JSONObject obj = (JSONObject) jsonParser.parse(reader);
-		
-		 /* on récupère les données de la taille et de l'id, et les initialise */
-		
+
+		/* on récupère les données de la taille et de l'id, et les initialise */
+
 		int w = Math.toIntExact((long) obj.get("WIDTH"));
 		int h = Math.toIntExact((long) obj.get("HEIGHT"));
 		ID = Math.toIntExact((long) obj.get("ID"));
 		WIDTH = w;
-		HEIGHT = w;
+		HEIGHT = h;
 		setTab(w, h);
-		
+
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
-		
-		JSONArray y = (JSONArray) obj
-				.get("Pieces"); 
-		
+
+		JSONArray y = (JSONArray) obj.get("Pieces");
+
 		/* on créer un itérateur pour y */
-		
+
 		Iterator<JSONArray> iterator = y.iterator();
-		
+
 		/* et des indexs */
-		
+
 		int i = 0;
 		int j = 0;
-		
+
 		/* on parcourt le tableau en récuperant chaque JSONObject piece */
-		
+
 		while (iterator.hasNext()) {
 			JSONArray x = iterator.next();
 			Iterator<JSONObject> iteratorX = x.iterator();
-			
+
 			/* Ici on passe aux sous tableaux */
-			
+
 			while (iteratorX.hasNext()) {
 				JSONObject p = iteratorX.next();
-				
+
 				/* On vérifie si le type de la pièce, pour voir si elle est null ou non */
-				
+
 				String type = (String) p.get("TYPE");
-				
+
 				/* puis si c'est une pièce non nul on l'initalise */
-				
+
 				if (!type.equals("NONE")) {
 					int rotation = Math.toIntExact((long) p.get("ROTATION"));
 					pieces[j][i] = getPiece(type, rotation);
@@ -103,15 +104,18 @@ public class Level {
 			i = 0;
 			j++;
 		}
-		
+
 		/* Tout s'est bien déroulé */
-		
+
 		System.out.println("Niveau chargé.");
 	}
 
 	void setTab(int w, int h) {
-		pieces = new Piece[h][w + 2]; /* La première et la dernière colonne sont presque vides, elles ne contiennent que les pièces de début et de fin */
-		pieces[0][0] = new PieceI(); /* On place la première pièce à  0, 0*/
+		pieces = new Piece[h][w + 2]; /*
+										 * La première et la dernière colonne sont presque vides, elles ne contiennent
+										 * que les pièces de début et de fin
+										 */
+		pieces[0][0] = new PieceI(); /* On place la première pièce à 0, 0 */
 		pieces[0][0].rotate();
 		pieces[0][0].setFull(true);
 		pieces[h - 1][w + 1] = new PieceI();
@@ -144,74 +148,85 @@ public class Level {
 		for (int i = 0; i < pieces.length; i++) {
 			for (int j = 0; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null) {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
 					if (pieces[i][j].isFull())
 						System.out.print(ANSI_BLUE); /* Si la pièce contient de l'eau elle s'affiche en bleu */
 					System.out.print(pieces[i][j].toString());
-					if (pieces[i][j].isFull())
+					if (pieces[i][j].isFull() || (i == selected_y && j == selected_x))
 						System.out.print(ANSI_RESET); /* Et on arrête le bleu */
-
 				} else {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
 					System.out.print(" ");
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_RESET);
 				}
 			}
 			System.out.println();
 		}
 	}
 
-	void rotate(int i, int j) { /* Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle contient avant */
-		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null)
+	void rotate(int i, int j) { /*
+								 * Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle
+								 * contient avant
+								 */
+		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
-		pieces[i][j].rotate();
-		update();
+			pieces[i][j].rotate();
+		}
 	}
 
 	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
-		Scanner sc = new Scanner(System.in);
-		update();
-		while (true) {
+		while (!hasWon()) {
+			update();
 			affiche();
-			String s = sc.next();
-			int x = Character.getNumericValue(s.charAt(0));
-			int y = Character.getNumericValue(s.charAt(1));
-			rotate(x, y);
+			getPiecePos();
+			rotate(selected_y, selected_x);
 			System.out.println();
 		}
 	}
-	
-	void update() {	
-		//vide d'abord entièrement l'eau du circuit
-		//puis appelle update dès la source
-		voidAll();
-		update(0,0);
+
+	boolean hasWon() {
+		return pieces[HEIGHT - 1][WIDTH + 1].isFull();
 	}
-	
-	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
-		for (int i=0;i<HEIGHT;i++) {
-			for(int j=1;j<WIDTH;j++) {
-				if(pieces[i][j]!=null)
+
+	void update() {
+		// vide d'abord entièrement l'eau du circuit
+		// puis appelle update dès la source
+		voidAll();
+		update(0, 0);
+	}
+
+	private void voidAll() { // vide l'eau de tout le circuit sauf de la source
+		for (int i = 0; i < HEIGHT; i++) {
+			for (int j = 1; j < WIDTH; j++) {
+				if (pieces[i][j] != null)
 					pieces[i][j].setFull(false);
 			}
 		}
 	}
-	
+
 	void update(int i, int j) {
-		//vérifie que les pièces limitrophes existent, qu'elles sont connectées à l'actuelle et qu'elles ne sont pas déjà remplies
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) { 
-			setFull(i+1, j);
-			update(i+1,j);
+		if(i==HEIGHT-1 && j==WIDTH+1) return;
+		// vérifie que les pièces limitrophes existent, qu'elles sont connectées à
+		// l'actuelle et qu'elles ne sont pas déjà remplies
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
+			setFull(i + 1, j);
+			update(i + 1, j);
 		}
-		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")&&!pieces[i - 1][j].isFull()) {
-			setFull(i-1, j);
-			update(i-1,j);
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP") && !pieces[i - 1][j].isFull()) {
+			setFull(i - 1, j);
+			update(i - 1, j);
 		}
-		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")&&!pieces[i][j + 1].isFull()) {
-			setFull(i, j+1);
-			update(i,j+1);
+		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT") && !pieces[i][j + 1].isFull()) {
+			setFull(i, j + 1);
+			update(i, j + 1);
 
 		}
-		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")&&!pieces[i][j - 1].isFull()) {
-			setFull(i, j-1);
-			update(i,j-1);
+		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !pieces[i][j - 1].isFull()) {
+			setFull(i, j - 1);
+			update(i, j - 1);
 		}
 	}
 
@@ -220,7 +235,7 @@ public class Level {
 	}
 
 	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
-		return (i < HEIGHT && j <= WIDTH+2 && i >= 0 && j > 0);
+		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
 	}
 
 	boolean isVerticalyOk(int i) {
@@ -293,23 +308,23 @@ public class Level {
 
 	@SuppressWarnings("unchecked")
 	void saveLevel() { /* pour sauvegarder le niveau */
-		
+
 		System.out.println("Sauvegarde du niveau...\n");
 		JSONObject obj = new JSONObject();
-		
+
 		/* on créer un array, qui sera l'array vertical (y) */
-		
-		JSONArray y = new JSONArray(); 
+
+		JSONArray y = new JSONArray();
 		for (int i = 0; i < HEIGHT; i++) {
-			
+
 			/* ici on créer repetitivement des array horizontaux */
-			
-			JSONArray x = new JSONArray(); 
+
+			JSONArray x = new JSONArray();
 			for (int j = 0; j < WIDTH + 2; j++) {
-				
+
 				/* On créer un JSONObject contenant les attributs d'une pièce */
 				/* son type, sa rotation et si elle est pleine ou non */
-				
+
 				JSONObject p = new JSONObject();
 				if (pieces[i][j] != null) {
 					p.put("TYPE", pieces[i][j].getType());
@@ -326,14 +341,14 @@ public class Level {
 			}
 			y.add(x);
 		}
-		
+
 		/* puis on rajoute qques infos utiles */
-		
+
 		obj.put("HEIGHT", HEIGHT);
 		obj.put("WIDTH", WIDTH);
 		obj.put("Pieces", y);
 		try {
-			
+
 			/* on récupère l'id dans id.json, puis on l'incrémente de 1 */
 
 			FileReader reader = new FileReader("levels/id.json");
@@ -341,9 +356,9 @@ public class Level {
 			JSONObject JSONId = (JSONObject) jsonParser.parse(reader); /* on le parse */
 			int id = Math.toIntExact((long) JSONId.get("ID"));
 			ID = id;
-			
-			 /* on rajoute l'id dans le json du niveau */
-			
+
+			/* on rajoute l'id dans le json du niveau */
+
 			obj.put("ID", ID);
 
 			/* l'id est stocké, on l'incrémente */
@@ -363,6 +378,37 @@ public class Level {
 		} catch (IOException | ParseException e) {
 			System.out.println("Impossible de sauvegarder le niveau.");
 		}
+	}
 
+	void movePointer(String dir) {
+		int x = selected_x;
+		int y = selected_y;
+		switch (dir) {
+		case "UP":
+			y--;
+			break;
+		case "DOWN":
+			y++;
+			break;
+		case "RIGHT":
+			x++;
+			break;
+		case "LEFT":
+			x--;
+			break;
+		}
+		if (isInTab(y, x)) {
+			selected_x = x;
+			selected_y = y;
+			affiche();
+		}
+	}
+
+	void rotatePointer() {
+		if (pieces[selected_y][selected_x] != null) {
+			rotate(selected_y, selected_x);
+			update();
+			affiche();
+		}
 	}
 }

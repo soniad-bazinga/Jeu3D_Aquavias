@@ -201,7 +201,6 @@ public class Level {
 		// vide d'abord entièrement l'eau du circuit
 		// puis appelle update dès la source
 		voidAll();
-		affiche();
 		update(0,0);
 	}
 	

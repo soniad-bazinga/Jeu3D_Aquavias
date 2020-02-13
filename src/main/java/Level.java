@@ -147,13 +147,13 @@ public class Level {
         if (type == 'c' && compteur > 10) System.out.println("---- Coups restants : " + compteur + " ----");
         else if (type == 'c' && compteur > 1) System.out.println("---- Plus que " + compteur + " coups ! ----");
         else if (type == 'c' && compteur == 1) System.out.println("----  C'est votre denier coup ! ----");
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[i].length; j++) {
-                if (pieces[i][j] != null) {
-                    if (pieces[i][j].isFull())
+        for (Piece[] piece : pieces) {
+            for (Piece value : piece) {
+                if (value != null) {
+                    if (value.isFull())
                         System.out.print(ANSI_BLUE); /* if piece is full print it in blue */
-                    System.out.print(pieces[i][j].toString());
-                    if (pieces[i][j].isFull())
+                    System.out.print(value.toString());
+                    if (value.isFull())
                         System.out.print(ANSI_RESET); /* and stop the blue */
 
                 } else {
@@ -185,8 +185,12 @@ public class Level {
     void update() {
         //vide d'abord entièrement l'eau du circuit
         //puis appelle update dès la source
-        voidAll();
-        update(0, 0);
+        if(type == 'c') {
+            if(!Victory() && compteur > 0) {
+                voidAll();
+                update(0, 0);
+            }
+        }
     }
 
     private void voidAll() {    //vide l'eau de tout le circuit sauf de la source
@@ -231,7 +235,10 @@ public class Level {
     }
 
     boolean Victory() {
-        return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
+        if(type == 'n') return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
+        if(type == 'f') return (pieces[HEIGHT - 1][WIDTH + 1].isFull()) && !isLeaking();
+        if(type == 'c') return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur > 0);
+        return false;
     }
 
     boolean DefeatCount() {
@@ -258,7 +265,7 @@ public class Level {
                             }
                             return true; //If the piece is in the last line of the array/level
                         } else if (pieces[i][j].isLeft() && i != 0 && j != 0) { //If the piece has an exit facing left
-                            if (j == 1 && i != 0) {
+                            if (j == 1) {
                                 System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
                                 return true; //If it's the first in its line, it's leaking
                             }

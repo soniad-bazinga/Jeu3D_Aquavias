@@ -20,7 +20,8 @@ public class Level {
 	public final int HEIGHT;
 	int selected_x;
 	int selected_y;
-
+	int counter=50;
+	
 	public Level(int w, int h) {
 
 		/*
@@ -146,12 +147,27 @@ public class Level {
 
 	void affiche() { /* Affiche l'état du jeu */
 		System.out.print("  ");
-		for (int i=0;i<WIDTH+2;i++) {
-			System.out.print(i);
+		for(int i=0;i<WIDTH+2;i++) {
+			if(i<10) {
+				System.out.print("\u001b[38;5;255m");
+				System.out.print(i);
+			}
+			else {
+				int code=47-(i/10)*5;
+				System.out.print("\u001b[38;5;2"+Integer.toString(code)+"m");
+				System.out.print(i-10*(i/10));
+			}
 		}
-		System.out.println();
+		System.out.print(ANSI_RESET);
+		System.out.println("              compteur:"+counter);
 		for (int i = 0; i < pieces.length; i++) {
-			System.out.print(i+" ");
+			if(i>=10) {
+				int code=47-(i/10)*5;
+				System.out.print("\u001b[38;5;2"+Integer.toString(code)+"m");
+				System.out.print(i-10*(i/10)+" ");
+			}
+			else System.out.print(i);
+			System.out.print(ANSI_RESET);
 			for (int j = 0; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null) {
 					if (i == selected_y && j == selected_x)

@@ -20,7 +20,8 @@ public class Level {
 	public final int HEIGHT;
 	int selected_x;
 	int selected_y;
-
+	int counter=50;
+	
 	public Level(int w, int h) {
 
 		/*
@@ -145,14 +146,12 @@ public class Level {
 	}
 
 	void affiche() { /* Affiche l'état du jeu */
-		System.out.print("  ");
-		for (int i=0;i<WIDTH+2;i++) {
-			System.out.print(i);
-		}
-		System.out.println();
+		
+		System.out.println(ANSI_BOLD+"              ["+counter+"]"+ANSI_RESET);
 		for (int i = 0; i < pieces.length; i++) {
-			System.out.print(i+" ");
+			
 			for (int j = 0; j < pieces[i].length; j++) {
+				
 				if (pieces[i][j] != null) {
 					if (i == selected_y && j == selected_x)
 						System.out.print(ANSI_SELECTED);
@@ -180,6 +179,7 @@ public class Level {
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
+        	counter--;
 		}
 	}
 

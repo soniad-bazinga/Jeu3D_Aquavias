@@ -145,7 +145,13 @@ public class Level {
 	}
 
 	void affiche() { /* Affiche l'état du jeu */
+		System.out.print("  ");
+		for (int i=0;i<WIDTH+2;i++) {
+			System.out.print(i);
+		}
+		System.out.println();
 		for (int i = 0; i < pieces.length; i++) {
+			System.out.print(i+" ");
 			for (int j = 0; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null) {
 					if (i == selected_y && j == selected_x)
@@ -195,25 +201,25 @@ public class Level {
 		// vide d'abord entièrement l'eau du circuit
 		// puis appelle update dès la source
 		voidAll();
-		update(0, 0);
+		affiche();
+		update(0,0);
 	}
-
-	private void voidAll() { // vide l'eau de tout le circuit sauf de la source
-		for (int i = 0; i < HEIGHT; i++) {
-			for (int j = 1; j < WIDTH; j++) {
-				if (pieces[i][j] != null)
+	
+	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
+		for (int i=0;i<HEIGHT;i++) {
+			for(int j=1;j<WIDTH+2;j++) {
+				if(pieces[i][j]!=null)
 					pieces[i][j].setFull(false);
 			}
 		}
 	}
 
 	void update(int i, int j) {
+		//vérifie que les pièces limitrophes existent, qu'elles sont connectées à l'actuelle et qu'elles ne sont pas déjà remplies
 		if(i==HEIGHT-1 && j==WIDTH+1) return;
-		// vérifie que les pièces limitrophes existent, qu'elles sont connectées à
-		// l'actuelle et qu'elles ne sont pas déjà remplies
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
-			setFull(i + 1, j);
-			update(i + 1, j);
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) { 
+			setFull(i+1, j);
+			update(i+1,j);
 		}
 		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP") && !pieces[i - 1][j].isFull()) {
 			setFull(i - 1, j);
@@ -376,7 +382,7 @@ public class Level {
 			System.out.println("Niveau sauvegardé.");
 			file.close();
 		} catch (IOException | ParseException e) {
-			System.out.println("Impossible de sauvegarder le niveau.");
+			System.out.println(e+"Impossible de sauvegarder le niveau.");
 		}
 	}
 

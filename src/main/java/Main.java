@@ -8,7 +8,7 @@ public class Main {
 		try {
 			Level lvl2 = new Level(1);
 			InputsWindow iw = new InputsWindow(lvl2);
-			lvl2.play();
+			lvl2.affiche();
 			//lvl2.play();
 			
 		} catch (Exception e) {

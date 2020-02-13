@@ -58,7 +58,7 @@ public class Level {
 		int h = Math.toIntExact((long) obj.get("HEIGHT"));
 		ID = Math.toIntExact((long) obj.get("ID"));
 		WIDTH = w;
-		HEIGHT = w;
+		HEIGHT = h;
 		setTab(w, h);
 		
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
@@ -141,7 +141,13 @@ public class Level {
 	}
 
 	void affiche() { /* Affiche l'état du jeu */
+		System.out.print("  ");
+		for (int i=0;i<WIDTH+2;i++) {
+			System.out.print(i);
+		}
+		System.out.println();
 		for (int i = 0; i < pieces.length; i++) {
+			System.out.print(i+" ");
 			for (int j = 0; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null) {
 					if (pieces[i][j].isFull())
@@ -159,21 +165,21 @@ public class Level {
 	}
 
 	void rotate(int i, int j) { /* Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle contient avant */
-		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null)
+		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
-		pieces[i][j].rotate();
-		update();
+			pieces[i][j].rotate();
+			update();
+		}
 	}
 
 	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
 		Scanner sc = new Scanner(System.in);
 		update();
 		while (true) {
+			update();
 			affiche();
-			String s = sc.next();
-			int x = Character.getNumericValue(s.charAt(0));
-			int y = Character.getNumericValue(s.charAt(1));
-			rotate(x, y);
+			getPiecePos();
+			rotate(selected_y,selected_x);
 			System.out.println();
 		}
 	}
@@ -182,12 +188,13 @@ public class Level {
 		//vide d'abord entièrement l'eau du circuit
 		//puis appelle update dès la source
 		voidAll();
+		affiche();
 		update(0,0);
 	}
 	
 	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
 		for (int i=0;i<HEIGHT;i++) {
-			for(int j=1;j<WIDTH;j++) {
+			for(int j=1;j<WIDTH+2;j++) {
 				if(pieces[i][j]!=null)
 					pieces[i][j].setFull(false);
 			}
@@ -196,6 +203,7 @@ public class Level {
 	
 	void update(int i, int j) {
 		//vérifie que les pièces limitrophes existent, qu'elles sont connectées à l'actuelle et qu'elles ne sont pas déjà remplies
+		if(i==HEIGHT-1 && j==WIDTH+1) return;
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) { 
 			setFull(i+1, j);
 			update(i+1,j);
@@ -361,7 +369,7 @@ public class Level {
 			System.out.println("Niveau sauvegardé.");
 			file.close();
 		} catch (IOException | ParseException e) {
-			System.out.println("Impossible de sauvegarder le niveau.");
+			System.out.println(e+"Impossible de sauvegarder le niveau.");
 		}
 
 	}

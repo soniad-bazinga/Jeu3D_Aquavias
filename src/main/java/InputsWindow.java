@@ -25,23 +25,18 @@ public class InputsWindow extends JFrame implements KeyListener{
 	    switch( keyCode ) { 
 	        case KeyEvent.VK_UP:
 	        	level.movePointer("UP");
-	        	level.counter--;
 	            break;
 	        case KeyEvent.VK_DOWN:
 	        	level.movePointer("DOWN");
-	        	level.counter--;
 	            break;
 	        case KeyEvent.VK_LEFT:
 	        	level.movePointer("LEFT");
-	        	level.counter--;
 	            break;
 	        case KeyEvent.VK_RIGHT :
 	        	level.movePointer("RIGHT");
-	        	level.counter--;
 	            break;
 	        case KeyEvent.VK_ENTER :
 	        	level.rotatePointer();
-	        	level.counter--;
 	        	break;
 	     }	
 	}

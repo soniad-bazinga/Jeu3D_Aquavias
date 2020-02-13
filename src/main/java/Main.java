@@ -6,9 +6,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			Level lvl2 = new Level(1);
-			InputsWindow iw = new InputsWindow(lvl2);
-			lvl2.play();
+			Level lvl = new Level(1);
+			lvl.affiche();
+			InputsWindow iw = new InputsWindow(lvl);
 			//lvl2.play();
 			
 		} catch (Exception e) {

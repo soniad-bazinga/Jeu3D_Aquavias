@@ -146,29 +146,12 @@ public class Level {
 	}
 
 	void affiche() { /* Affiche l'état du jeu */
-		System.out.print("  ");
-		for(int i=0;i<WIDTH+2;i++) {
-			if(i<10) {
-				System.out.print("\u001b[38;5;255m");
-				System.out.print(i);
-			}
-			else {
-				int code=47-(i/10)*5;
-				System.out.print("\u001b[38;5;2"+Integer.toString(code)+"m");
-				System.out.print(i-10*(i/10));
-			}
-		}
-		System.out.print(ANSI_RESET);
-		System.out.println("              compteur:"+counter);
+		
+		System.out.println(ANSI_BOLD+"              ["+counter+"]"+ANSI_RESET);
 		for (int i = 0; i < pieces.length; i++) {
-			if(i>=10) {
-				int code=47-(i/10)*5;
-				System.out.print("\u001b[38;5;2"+Integer.toString(code)+"m");
-				System.out.print(i-10*(i/10)+" ");
-			}
-			else System.out.print(i);
-			System.out.print(ANSI_RESET);
+			
 			for (int j = 0; j < pieces[i].length; j++) {
+				
 				if (pieces[i][j] != null) {
 					if (i == selected_y && j == selected_x)
 						System.out.print(ANSI_SELECTED);

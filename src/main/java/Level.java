@@ -28,15 +28,15 @@ public class Level {
          * Cette fonction créée seulement un tableau vide, avec une entrée et une sortie
          */
         Level(int w, int h, char t, int compt){
-            t = Character.toLowerCase(t);
-            if (t == 'f' || t == 'c' || t == 'n') type = t;
-            else type = 'n';
-            if(type == 'f') compteur = 0;
-            compteur = compt;
-            WIDTH = w;
-            HEIGHT = h;
+        t = Character.toLowerCase(t);
+        if (t == 'f' || t == 'c' || t == 'n') type = t;
+        else type = 'n';
+        if(type == 'f' || type == 'n') compteur = 0;
+        compteur = compt;
+        WIDTH = w;
+        HEIGHT = h;
 
-            setTab(w, h);
+        setTab(w, h);
         /*
          * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
          * d'un niveau

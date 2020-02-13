@@ -30,7 +30,7 @@ public class Level {
         t = Character.toLowerCase(t);
         if (t == 'f' || t == 'c' || t == 'n') type = t;
         else type = 'n';
-        if(type == 'f') compteur = 0;
+        if(type == 'f' || type == 'n') compteur = 0;
         compteur = compt;
         WIDTH = w;
         HEIGHT = h;

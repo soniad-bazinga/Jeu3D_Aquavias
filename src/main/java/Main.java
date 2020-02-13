@@ -5,7 +5,11 @@ import org.json.simple.parser.ParseException;
 public class Main {
 
 	public static void main(String[] args) {
-		Level l1 = new Level(9, 8, 'c', 9);
-		l1.play();
+		try {
+			Level lvl=new Level(0);
+			lvl.play();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

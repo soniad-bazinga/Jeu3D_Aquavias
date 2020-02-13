@@ -6,9 +6,12 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			Level lvl=new Level(0);
-			lvl.play();
-		}catch (Exception e) {
+			Level lvl2 = new Level(1);
+			InputsWindow iw = new InputsWindow(lvl2);
+			lvl2.play();
+			//lvl2.play();
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

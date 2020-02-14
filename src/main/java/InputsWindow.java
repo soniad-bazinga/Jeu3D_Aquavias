@@ -16,6 +16,11 @@ public class InputsWindow extends JFrame implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
+		if (level.counter<=0) {
+			System.out.println();
+			System.out.println("OUPS ! C'est perdu !");
+			return;
+		}
 		int keyCode = arg0.getKeyCode();
 	    switch( keyCode ) { 
 	        case KeyEvent.VK_UP:

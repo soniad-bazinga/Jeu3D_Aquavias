@@ -18,7 +18,7 @@ public class Menu {
             s = player.next();
             while(!s.matches("-?\\d+(\\.\\d+)?") || Integer.parseInt(s) > numberOfLevels(folder) || Integer.parseInt(s) < 0){
                 System.out.println("------ AQUAVIAS ------\n\n");
-                System.out.println("Tu me prends pour un guignol ???\n\n");
+                System.out.println("Tu me prends pour un guignol ???\n(Excusez le, choisissez un numéro valable s'il vous plait)\n");
                 printFolderLevels(folder);
                 s = player.next();
             }

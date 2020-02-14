@@ -84,13 +84,10 @@ public class Level {
 
         while (iterator.hasNext()) {
             JSONArray x = iterator.next();
-            Iterator<JSONObject> iteratorX = x.iterator();
 
             /* Ici on passe aux sous tableaux */
 
-            while (iteratorX.hasNext()) {
-                JSONObject p = iteratorX.next();
-
+            for (JSONObject p : (Iterable<JSONObject>) x) {
                 /* On vérifie si le type de la pièce, pour voir si elle est null ou non */
 
                 String type = (String) p.get("TYPE");
@@ -189,7 +186,7 @@ public class Level {
         //vide d'abord entièrement l'eau du circuit
         //puis appelle update dès la source
         if(type == 'c') {
-            if(!Victory() && compteur > 0) {
+            if(!Victory() && !DefeatCount()) {
                 voidAll();
                 update(0, 0);
             }

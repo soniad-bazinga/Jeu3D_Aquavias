@@ -9,8 +9,5 @@
         <module name="aquavias-game" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="aquavias-game" target="8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

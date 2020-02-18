@@ -316,6 +316,65 @@ public class Level {
 		System.out.println("#" + ANSI_RESET + "\n");
 	}
 
+
+	  void createLevel(){
+
+		Scanner sc= new Scanner(System.in);
+		int h, w;
+		String type;
+		int rotation;
+
+		char c;
+
+
+		System.out.println("** WELCOME TO THE LEVEL CREATION WORKSHOP! **");
+		System.out.println("Choose the size : ");
+		System.out.println("HEIGHT = ");
+		h= sc.nextInt();
+		sc.nextLine();
+		System.out.print("WIDTH = ");
+		w= sc.nextInt();
+		sc.nextLine();
+		Level level= new Level(h, w);
+		System.out.println("Yay! You created the board! Now, fill it with the game pieces of your choice: ");
+		for(int i=0; i< h; i++){
+			for(int j=1; j< w-1; j++) {
+				System.out.println("Which type? { I, L, T, X} ");  //instruction back
+				type = sc.nextLine();
+				while (!type.equals("L") && !type.equals("T") && !type.equals("I") && !type.equals("X")) {
+					System.out.println("Choose again {I, L, T, X}: ");
+					type = sc.nextLine();
+				}
+
+				System.out.println("Number of rotations ? ");
+				rotation = sc.nextInt();
+				sc.nextLine();
+				while (rotation < 0) {
+					System.out.println("Choose again: ");
+					rotation = sc.nextInt();
+					sc.nextLine();
+				}
+				level.pieces[i][j] = level.getPiece(type, rotation);
+
+				level.affiche();
+			}
+		}
+
+
+		System.out.println("Level created with success! Do you want to save it ? Y/N");
+		c= sc.nextLine().charAt(0);
+		if(c=='Y'){
+			level.saveLevel();
+			System.out.println("Saved, come back soon! ");
+		}else{
+			System.out.println();
+		}
+
+
+
+	}
+
+
 	@SuppressWarnings("unchecked")
 	void saveLevel() { /* pour sauvegarder le niveau */
 

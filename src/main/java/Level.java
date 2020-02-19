@@ -3,6 +3,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Stack;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -316,6 +318,153 @@ public class Level {
 		System.out.println("#" + ANSI_RESET + "\n");
 	}
 
+	boolean theEnd(int x, int y){
+		return x== HEIGHT-1 && y== WIDTH+1;
+	}
+
+	boolean theStart(int x, int y){
+		return x== 0 && y==0;
+	}
+
+	public boolean canGo(int i, int j){
+		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")) {
+
+			return isFull(i, j - 1) ;
+		}
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")) { // if statements are good, gotta
+			return isFull(i+1, j);
+		}
+
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")) {
+			return isFull(i-1, j);
+		}
+
+		if (isInTab(i, j + 1) ) {
+
+			return isFull(i, j+1);
+		}
+
+		return false;
+
+
+
+	}
+
+
+	private void parcours(int i, int j, Stack<Coordinates> pile) {
+		if(theStart(i, j)){
+			if(connected(pieces[i][j], pieces[i][j+1], "RIGHT") && !pieces[i][j+1].isFull()){
+				setFull(i, j+1);
+				pile.push(new Coordinates(i, j+1));
+				parcours(i, j+1, pile);
+			}
+		}
+
+
+	if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) {
+			setFull(i+1, j);
+			pile.push(new Coordinates(i+1, j));
+			parcours(i+1,j, pile);
+		}
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")&&!pieces[i - 1][j].isFull()) {
+			setFull(i-1, j);
+			pile.push(new Coordinates(i-1, j));
+			parcours(i-1,j, pile);
+		}
+		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")&&!pieces[i][j + 1].isFull()) {
+			System.out.println(i+"     "+ j);
+			setFull(i, j+1);
+			pile.push(new Coordinates(i, j+1));
+			parcours(i,j+1, pile);
+
+		}
+		if (isInTab(i, j-1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")&&!pieces[i][j - 1].isFull()) {
+			setFull(i, j-1);
+			pile.push(new Coordinates(i, j-1));
+			parcours(i,j-1, pile);
+		}
+
+
+	}
+	public boolean possible(int x, int y){
+		if(isInTab(x, y)){
+			if(canGo(x, y)){
+				return true;
+			}else{
+				int rotation = pieces[x][y].index;
+				do {
+
+					pieces[x][y].rotate();
+					affiche();
+
+				}while(rotation != pieces[x][y].index && !canGo(x, y));
+
+				return canGo(x, y);
+			}
+		}
+		return false;
+	}
+
+
+	public boolean recursiveSolve(int x, int y){
+		Stack<Coordinates> pile= new Stack<>();
+		Coordinates temp;
+		int rotation;
+
+		if(theEnd(x, y)){
+			return true;
+		}
+
+		if(possible(x, y+1)){
+			voidAll();
+			parcours(0,0,pile);
+			affiche();
+			temp= pile.peek();
+			if(recursiveSolve(temp.x, temp.y)) return true;
+		}
+
+		if(possible(x, y-1)){
+			voidAll();
+			parcours(0,0,pile);
+			affiche();
+			temp= pile.peek();
+			if(recursiveSolve(temp.x, temp.y)) return true;
+		}
+
+		if(possible(x+1, y)){
+			voidAll();
+			parcours(0,0,pile);
+			affiche();
+			temp= pile.peek();
+			if(recursiveSolve(temp.x, temp.y)) return true;
+		}
+
+		if(possible(x-1, y)){
+			voidAll();
+			parcours(0,0,pile);
+			affiche();
+			temp= pile.peek();
+			if(recursiveSolve(temp.x, temp.y)) return true;
+		}
+
+
+		rotation= pieces[x][y].index;
+		pieces[x][y].rotate();
+		if(pieces[x][y].index != rotation){
+			voidAll();
+			parcours(0,0,pile);
+			affiche();
+			temp= pile.peek();
+			return recursiveSolve(temp.x, temp.y);
+		}else{
+			pieces[x][y].setFull(false);
+			return false;
+		}
+
+
+	}
+
+
 
 	  void createLevel(){
 
@@ -478,6 +627,15 @@ public class Level {
 			rotate(selected_y, selected_x);
 			update();
 			affiche();
+		}
+	}
+
+	private static class Coordinates{
+
+		int x, y;
+		Coordinates(int x, int y){
+			this.x= x;
+			this.y= y;
 		}
 	}
 }

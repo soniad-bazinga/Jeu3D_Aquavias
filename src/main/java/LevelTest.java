@@ -1,3 +1,5 @@
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class LevelTest {
@@ -56,6 +58,50 @@ class LevelTest {
         p5.rotate();
         p6.rotate();
         assertTrue(l.connected(p5, p6, "LEFT"), "p1 and p2 are connected from below");
+
+
+    }
+
+    @Test
+    void theEnd() {
+    }
+
+    @Test
+    void theStart() {
+    }
+
+    @Test
+    void canGo() {
+    }
+
+    @Test
+    void possible() {
+    }
+
+    @Test
+    void recursiveSolve() {
+        l.pieces[0][1]= l.getPiece("I", 0);
+        l.pieces[0][2]= l.getPiece("L", 1);
+        l.pieces[0][3]= l.getPiece("T", 1);
+        l.pieces[0][4]= l.getPiece("I", 1);
+        l.pieces[1][1]= l.getPiece("L", 0);
+        l.pieces[1][2]= l.getPiece("L", 0);
+        l.pieces[1][3]= l.getPiece("T", 3);
+        l.pieces[1][4]= l.getPiece("L", 3);
+        l.pieces[2][1]= l.getPiece("I", 3);
+        l.pieces[2][2]= l.getPiece("L", 3);
+        l.pieces[2][3]= l.getPiece("T", 3);
+        l.pieces[2][4]= l.getPiece("I", 3);
+        l.pieces[3][1]= l.getPiece("L", 3);
+        l.pieces[3][2]= l.getPiece("T", 3);
+        l.pieces[3][3]= l.getPiece("L", 3);
+        l.pieces[3][4]= l.getPiece("I", 3);
+
+
+        l.affiche();
+
+        assertTrue(l.recursiveSolve(0,0), "this level has a solution");
+
 
 
     }

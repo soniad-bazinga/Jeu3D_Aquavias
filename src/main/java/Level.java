@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class Level {
+public class Level implements Cloneable{
 	Piece[][] pieces;
 
 	public static final String ANSI_RESET = "\u001B[0m";
@@ -18,6 +18,8 @@ public class Level {
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
+	public final int END_X;
+	public final int END_Y;
 	int selected_x;
 	int selected_y;
 	int counter=50;
@@ -30,6 +32,8 @@ public class Level {
 
 		WIDTH = w;
 		HEIGHT = h;
+		END_X = WIDTH+1;
+		END_Y = HEIGHT-1;
 
 		setTab(w, h);
 
@@ -37,7 +41,6 @@ public class Level {
 		 * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
 		 * d'un niveau
 		 */
-		System.out.println("Level created");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -62,6 +65,8 @@ public class Level {
 		ID = Math.toIntExact((long) obj.get("ID"));
 		WIDTH = w;
 		HEIGHT = h;
+		END_X = WIDTH+1;
+		END_Y = HEIGHT-1;
 		setTab(w, h);
 
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
@@ -105,6 +110,8 @@ public class Level {
 			i = 0;
 			j++;
 		}
+		
+		
 
 		/* Tout s'est bien déroulé */
 
@@ -177,7 +184,7 @@ public class Level {
 	    System.out.flush();  
 	}  
 
-	void rotate(int i, int j) { /*
+	void rotate(int i, int j) { /* i = y, j = x
 								 * Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle
 								 * contient avant
 								 */
@@ -207,6 +214,10 @@ public class Level {
 		// puis appelle update dès la source
 		voidAll();
 		update(0,0);
+	}
+	
+	boolean isEnd(int x, int y) {
+		return x==END_X && y==END_Y;
 	}
 	
 	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
@@ -247,6 +258,7 @@ public class Level {
 	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
 		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
 	}
+	// i = y j = x
 
 	boolean isVerticalyOk(int i) {
 		return (i < HEIGHT && i >= 0);
@@ -257,7 +269,7 @@ public class Level {
 	}
 
 	boolean isFull(int i, int j) { /* Vérifie que le pièce de coordonnées i et j est pleine */
-		return pieces[i][j].isFull();
+		return pieces[i][j] != null && pieces[i][j].isFull(); // i = y, j = x
 	}
 
 	boolean connected(Piece p1, Piece p2,
@@ -420,5 +432,18 @@ public class Level {
 			update();
 			affiche();
 		}
+	}
+	
+	public Level clone() {
+		Level cloned = new Level(WIDTH,HEIGHT);
+		for(int i = 0; i < HEIGHT; i++) {
+			for(int j = 0; j < WIDTH+2 ; j++) {
+				if(pieces[i][j] != null ) cloned.pieces[i][j] = pieces[i][j].clone();
+			}
+		}
+		cloned.selected_x  = selected_x;
+		cloned.selected_y = selected_y;
+		cloned.counter = counter;
+		return cloned;
 	}
 }

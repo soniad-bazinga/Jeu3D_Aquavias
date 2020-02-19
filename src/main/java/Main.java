@@ -7,8 +7,12 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			Level lvl = new Level(1);
+			System.out.println("\n Le niveau : \n");
 			lvl.affiche();
-			InputsWindow iw = new InputsWindow(lvl);
+			LevelChecker lvlcheck = new LevelChecker(lvl);
+			//lvlcheck.testClone();
+			lvlcheck.searchPath(); 
+			//InputsWindow iw = new InputsWindow(lvl);
 			//lvl2.play();
 			
 		} catch (Exception e) {

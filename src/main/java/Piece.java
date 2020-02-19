@@ -51,4 +51,25 @@ public abstract class Piece {
 	public String toJSONString() {
 		return getType()+": "+getRotation();
 	}
+	
+	public Piece clone() {
+		Piece p = null;
+		if(this instanceof PieceT) {
+			p = new PieceT();
+		}
+		if(this instanceof PieceL) {
+			p = new PieceL();
+		}
+		if(this instanceof PieceX) {
+			p = new PieceX();
+		}
+		if(this instanceof PieceI) {
+			p = new PieceI();
+		}
+		for(int i = 0; i < index;i++) {
+			p.rotate();
+		}
+		if(isFull()) p.setFull(true);
+		return p;
+	}
 }

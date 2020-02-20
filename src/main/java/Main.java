@@ -6,15 +6,13 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			Level lvl = new Level(1);
+			Level lvl = new Level(15,5);
 			System.out.println("\n Le niveau : \n");
+			lvl.randomizeLevel();
 			lvl.affiche();
+			System.out.println("\nTrouvons un chemin :\n ");
 			LevelChecker lvlcheck = new LevelChecker(lvl);
-			//lvlcheck.testClone();
 			lvlcheck.searchPath(); 
-			//InputsWindow iw = new InputsWindow(lvl);
-			//lvl2.play();
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -8,7 +8,7 @@ public class LevelChecker {
 	}
 
 	public boolean searchPath() {
-		return searchPath(lvl, 0, 0);
+		return searchPath(lvl.clone(), 0, 0);
 	}
 	
 	public void testClone() {
@@ -25,53 +25,59 @@ public class LevelChecker {
 	}
 
 	public boolean searchPath(Level level, int x, int y) {
-		System.out.println("\n");
-		if (level.isEnd(x, y))
+		level.selected_x = x;
+		level.selected_y = y;
+		level.setFull(y,x);
+		level.affiche();
+		if (level.isEnd(x, y)) {
+			System.out.println("\n//=====//\n");
+			level.update();
+			level.affiche();
+			System.out.println("\n Le niveau est finissable :)");
 			return true;
-		// check for every dir
-		Level temp = (Level) level.clone();
-		temp.affiche();
-		temp.selected_x = x;
-		temp.selected_y = y;
-		temp.setFull(y,x);
-		if (possibleDir(temp, x, y, "DOWN") && searchPath(temp, x, y + 1))
+		}
+		// on clone le niveau
+		if (possibleDir(level, x, y, "DOWN") && searchPath(level.clone(), x, y + 1))
 			return true;
+		if (possibleDir(level, x, y, "UP") && searchPath(level.clone(), x, y - 1))
+			return true;
+		if (possibleDir(level, x, y, "RIGHT") && searchPath(level.clone(), x + 1, y))
+			return true;
+		if (possibleDir(level, x, y, "LEFT") && searchPath(level.clone(), x - 1, y))
+			return true;
+		//down
+		Level tempDown = level.clone();
 		for(int i = 0 ; i < 3 ; i++) {
-			if(temp.isInTab(y+1,x) &&!temp.isFull(y+1,x)) {
-				temp.rotate(y+1,x);
-				temp.affiche();
-				if (possibleDir(temp, x, y, "DOWN") && searchPath(temp, x, y+1))
+			if(tempDown.isInTab(y+1,x) &&!tempDown.isFull(y+1,x)) {
+				tempDown.rotate(y+1,x);
+				if (possibleDir(tempDown, x, y, "DOWN") && searchPath(tempDown.clone(), x, y+1))
 				return true;
 			}
 		}
-		if (possibleDir(temp, x, y, "UP") && searchPath(temp, x, y - 1))
-			return true;
+		//up
+		Level tempUp = level.clone();
 		for(int i = 0 ; i < 3 ; i++) {
-			if(temp.isInTab(y-1,x) &&!temp.isFull(y-1,x)) {
-				temp.rotate(y-1,x);
-				temp.affiche();
-				if (possibleDir(temp, x, y, "UP") && searchPath(temp, x, y-1))
+			if(tempUp.isInTab(y-1,x) &&!tempUp.isFull(y-1,x)) {
+				tempUp.rotate(y-1,x);
+				if (possibleDir(tempUp, x, y, "UP") && searchPath(tempUp.clone(), x, y-1))
 				return true;
 			}
 		}
-		if (possibleDir(temp, x, y, "RIGHT") && searchPath(temp, x + 1, y)) {
-			return true;
-		}
+		//right
+		Level tempRight = level.clone();
 		for(int i = 0 ; i < 3 ; i++) {
-			if(temp.isInTab(y,x+1) && !temp.isFull(y,x+1)) {
-				temp.rotate(y,x+1);
-				temp.affiche();
-				if (possibleDir(temp, x, y, "RIGHT") && searchPath(temp, x + 1, y))
+			if(tempRight.isInTab(y,x+1) && !tempRight.isFull(y,x+1)) {
+				tempRight.rotate(y,x+1);
+				if (possibleDir(tempRight, x, y, "RIGHT") && searchPath(tempRight.clone(), x + 1, y))
 				return true;
 			}
 		}
-		if (possibleDir(temp, x, y, "LEFT") && searchPath(temp, x - 1, y))
-			return true;
+		//left
+		Level tempLeft = level.clone();
 		for(int i = 0 ; i < 3 ; i++) {
-			if(temp.isInTab(y,x-1) && !temp.isFull(y,x-1)) {
-				temp.rotate(y,x-1);
-				temp.affiche();
-				if (possibleDir(temp, x, y, "LEFT") && searchPath(temp, x - 1, y))
+			if(tempLeft.isInTab(y,x-1) && !tempLeft.isFull(y,x-1)) {
+				tempLeft.rotate(y,x-1);
+				if (possibleDir(tempLeft, x, y, "LEFT") && searchPath(tempLeft.clone(), x - 1, y))
 				return true;
 			}
 		}

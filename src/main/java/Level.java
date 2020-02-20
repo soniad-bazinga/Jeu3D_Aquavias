@@ -2,6 +2,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Scanner;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -445,5 +446,24 @@ public class Level implements Cloneable{
 		cloned.selected_y = selected_y;
 		cloned.counter = counter;
 		return cloned;
+	}
+	
+	void randomizeLevel() {
+		for(int i = 0 ; i < HEIGHT ; i++) {
+			for (int  j = 1; j < WIDTH+1;j++) {
+				if(pieces[i][j]==null) {
+					Random rm = new Random();
+					int x = rm.nextInt(3);
+					Piece p = null;
+					switch(x) {
+					case 0 : p = new PieceT(); break;
+					//case 1 : p = new PieceX(); break;
+					case 1 : p = new PieceL(); break;
+					case 2 : p = new PieceI(); break;
+					}
+					pieces[i][j] = p;
+				}
+			}
+		}
 	}
 }

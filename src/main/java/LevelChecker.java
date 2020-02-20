@@ -2,12 +2,14 @@
 public class LevelChecker {
 
 	Level lvl;
+	public static int TRY_COUNTER = 0;
 
 	public LevelChecker(Level level) {
 		lvl = level;
 	}
 
 	public boolean searchPath() {
+		TRY_COUNTER = 0;
 		return searchPath(lvl.clone(), 0, 0);
 	}
 	
@@ -25,15 +27,16 @@ public class LevelChecker {
 	}
 
 	public boolean searchPath(Level level, int x, int y) {
+		TRY_COUNTER++;
 		level.selected_x = x;
 		level.selected_y = y;
 		level.setFull(y,x);
-		level.affiche();
+		level.afficheChemin();
 		if (level.isEnd(x, y)) {
-			System.out.println("\n//=====//\n");
-			level.update();
-			level.affiche();
-			System.out.println("\n Le niveau est finissable :)");
+			level.printBlocker();
+			level.afficheChemin();
+			System.out.println("\nLe niveau est finissable :)");
+			System.out.println("Solution trouvée en "+TRY_COUNTER+" opération.");
 			return true;
 		}
 		// on clone le niveau

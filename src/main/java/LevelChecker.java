@@ -10,7 +10,12 @@ public class LevelChecker {
 
 	public boolean searchPath() {
 		TRY_COUNTER = 0;
-		return searchPath(lvl.clone(), 0, 0);
+		if( searchPath(lvl.clone(), 0, 0)) {
+			return true;
+		}else {
+			System.out.println("\nNiveau non finissable.");
+			return false;
+		}
 	}
 	
 	public void testClone() {

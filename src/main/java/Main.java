@@ -6,9 +6,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			Level lvl = new Level(1);
+			Level lvl = new Level(0);
 			System.out.println("\nTrouvons un chemin :\n ");
-			lvl.randomizeLevel();
+			lvl.randomizeLevel(3);
 			LevelChecker lvlcheck = new LevelChecker(lvl);
 			lvlcheck.searchPath(); 
 		} catch (Exception e) {

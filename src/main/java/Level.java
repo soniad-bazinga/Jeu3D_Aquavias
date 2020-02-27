@@ -458,7 +458,7 @@ public class Level implements Cloneable {
 	 * 
 	 */
 
-	void randomizeLevel() {
+	void randomizeLevel(int n) {
 		for (int i = 0; i < HEIGHT; i++) {
 			for (int j = 1; j < WIDTH + 1; j++) {
 				if (pieces[i][j] == null) {

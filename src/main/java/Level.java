@@ -1,6 +1,8 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Stack;
@@ -24,7 +26,7 @@ public class Level {
 	int selected_x;
 	int selected_y;
 	int counter=50;
-	
+	int rotation;
 	public Level(int w, int h) {
 
 		/*
@@ -245,7 +247,7 @@ public class Level {
 	}
 
 	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
-		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
+		return (i < HEIGHT && j <= WIDTH  && i >= 0 && j > 0);
 	}
 
 	boolean isVerticalyOk(int i) {
@@ -325,39 +327,34 @@ public class Level {
 	}
 
 	public boolean canGo(int i, int j){
-		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")) {
+		if(i == 0 && j== 1) {
 
-			return isFull(i, j - 1) ;
+			return connected(pieces[i][j], pieces[i][j - 1], "LEFT");
 		}
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")) { // if statements are good, gotta
+
+		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") ) {
+			return isFull(i, j-1);
+		}
+
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") ) {
 			return isFull(i+1, j);
 		}
 
-		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")) {
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")  ) {
 			return isFull(i-1, j);
 		}
 
-		if (isInTab(i, j + 1) ) {
-
+		if( isInTab(i, j + 1)&& connected(pieces[i][j], pieces[i][j + 1], "RIGHT") ){
 			return isFull(i, j+1);
 		}
 
 		return false;
-
-
-
 	}
 
 
 	private void parcours(int i, int j, Stack<Coordinates> pile) {
-		if(theStart(i, j)){
-			if(connected(pieces[i][j], pieces[i][j+1], "RIGHT") && !pieces[i][j+1].isFull()){
-				setFull(i, j+1);
-				pile.push(new Coordinates(i, j+1));
-				parcours(i, j+1, pile);
-			}
-		}
 
+	//if(theStart(i, j))  pile.push(new Coordinates(0,0));
 
 	if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) {
 			setFull(i+1, j);
@@ -369,8 +366,8 @@ public class Level {
 			pile.push(new Coordinates(i-1, j));
 			parcours(i-1,j, pile);
 		}
-		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")&&!pieces[i][j + 1].isFull()) {
-			System.out.println(i+"     "+ j);
+		if ( isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")&&!pieces[i][j + 1].isFull()) {
+
 			setFull(i, j+1);
 			pile.push(new Coordinates(i, j+1));
 			parcours(i,j+1, pile);
@@ -382,84 +379,123 @@ public class Level {
 			parcours(i,j-1, pile);
 		}
 
-
 	}
-	public boolean possible(int x, int y){
-		if(isInTab(x, y)){
-			if(canGo(x, y)){
+
+	private boolean contains(ArrayList<Coordinates> temp, int x, int y){
+		for(Coordinates c: temp){
+			if(c.x== x && c.y== y){
 				return true;
-			}else{
-				int rotation = pieces[x][y].index;
-				do {
+			}
+		}
+
+		return false;
+	}
+
+	public boolean possible(int x, int y, ArrayList<Coordinates> wasHere){
+
+		if(isInTab(x, y)) {
+
+			if(!isFull(x, y) && !contains(wasHere, x, y)) {
+
+				if (canGo(x, y)) {
+					return true;
+				} else {
 
 					pieces[x][y].rotate();
 					affiche();
+					while ( pieces[x][y].rot !=4 && !canGo(x, y)) {
 
-				}while(rotation != pieces[x][y].index && !canGo(x, y));
+						System.out.println(x+" "+y);
+						pieces[x][y].rotate();
+						affiche();
+					}
 
-				return canGo(x, y);
+
+					return canGo(x, y);
+				}
 			}
 		}
 		return false;
 	}
 
+//créer une autre méthode qui intervient à la fin et relis les chemins où l'eau s'échappe, il faudra sauvegarder le chemin qui mène à la victoire avant pour pouvoir
 
-	public boolean recursiveSolve(int x, int y){
-		Stack<Coordinates> pile= new Stack<>();
+	public boolean recursiveSolve(int x, int y) {   //ajouter un tableau wasHere pour les fois où s'est retourné false
+		Stack<Coordinates> pile = new Stack<>();
 		Coordinates temp;
-		int rotation;
+		ArrayList<Coordinates> wasHere= new ArrayList<>();
 
-		if(theEnd(x, y)){
+		System.out.println(x + " " + y);
+		if (theEnd(x, y)) {
 			return true;
 		}
 
-		if(possible(x, y+1)){
+		if (possible(x, y + 1, wasHere)) {
 			voidAll();
-			parcours(0,0,pile);
+			parcours(0, 0, pile);
 			affiche();
-			temp= pile.peek();
-			if(recursiveSolve(temp.x, temp.y)) return true;
+			temp = pile.peek();
+			for (Coordinates j : pile) {
+				System.out.print(j.x + " " + j.y + "\t");
+			}
+
+
+			if (recursiveSolve(temp.x, temp.y)) return true;
 		}
 
-		if(possible(x, y-1)){
+		if (possible(x, y - 1, wasHere)) {
 			voidAll();
-			parcours(0,0,pile);
+			parcours(0, 0, pile);
 			affiche();
-			temp= pile.peek();
-			if(recursiveSolve(temp.x, temp.y)) return true;
+			temp = pile.peek();
+			for (Coordinates j : pile) {
+				System.out.print(j.x + " " + j.y + "\t");
+			}
+
+			if (recursiveSolve(temp.x, temp.y)) return true;
 		}
 
-		if(possible(x+1, y)){
+		if (possible(x + 1, y, wasHere)) {
 			voidAll();
-			parcours(0,0,pile);
+			parcours(0, 0, pile);
 			affiche();
-			temp= pile.peek();
-			if(recursiveSolve(temp.x, temp.y)) return true;
+			temp = pile.peek();
+			for (Coordinates j : pile) {
+				System.out.print(j.x + " " + j.y + "\t");
+			}
+
+			if (recursiveSolve(temp.x, temp.y)) return true;
 		}
 
-		if(possible(x-1, y)){
+		if (possible(x - 1, y, wasHere)) {
 			voidAll();
-			parcours(0,0,pile);
+			parcours(0, 0, pile);
 			affiche();
-			temp= pile.peek();
-			if(recursiveSolve(temp.x, temp.y)) return true;
+			temp = pile.peek();
+			for (Coordinates j : pile) {
+				System.out.print(j.x + " " + j.y + "\t");
+			}
+
+			if (recursiveSolve(temp.x, temp.y)) return true;
 		}
 
 
-		rotation= pieces[x][y].index;
 		pieces[x][y].rotate();
-		if(pieces[x][y].index != rotation){
-			voidAll();
-			parcours(0,0,pile);
-			affiche();
-			temp= pile.peek();
-			return recursiveSolve(temp.x, temp.y);
-		}else{
+		if (pieces[x][y].rot == 4) {
 			pieces[x][y].setFull(false);
+			wasHere.add(new Coordinates(x, y));
 			return false;
+		} else {
+			voidAll();
+			parcours(0, 0, pile);
+			affiche();
+			temp = pile.pop();
+			for (Coordinates j : pile) {
+				System.out.print(j.x + " " + j.y + "\t");
+			}
+			return recursiveSolve(temp.x, temp.y);
+
 		}
-
-
 	}
 
 
@@ -493,7 +529,7 @@ public class Level {
 					type = sc.nextLine();
 				}
 
-				System.out.println("Number of rotations ? ");
+				System.out.println("Number of rotations ? ");           //on peut utiliser un bloc try catch ou une assertion 
 				rotation = sc.nextInt();
 				sc.nextLine();
 				while (rotation < 0) {

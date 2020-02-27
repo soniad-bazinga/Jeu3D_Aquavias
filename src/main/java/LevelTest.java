@@ -1,6 +1,8 @@
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LevelTest {
 
@@ -86,7 +88,7 @@ class LevelTest {
         l.pieces[0][4]= l.getPiece("I", 1);
         l.pieces[1][1]= l.getPiece("L", 0);
         l.pieces[1][2]= l.getPiece("L", 0);
-        l.pieces[1][3]= l.getPiece("T", 3);
+        l.pieces[1][3]= l.getPiece("L", 3);
         l.pieces[1][4]= l.getPiece("L", 3);
         l.pieces[2][1]= l.getPiece("I", 3);
         l.pieces[2][2]= l.getPiece("L", 3);

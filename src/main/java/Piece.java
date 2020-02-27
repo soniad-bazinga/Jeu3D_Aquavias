@@ -1,4 +1,5 @@
 
+
 public abstract class Piece {
 	boolean UP;
 	boolean RIGHT;
@@ -7,7 +8,7 @@ public abstract class Piece {
 	boolean full;
 	char[] symbols;
 	int index;
-	
+	int rot;
 	
 	
 	
@@ -21,6 +22,7 @@ public abstract class Piece {
 		DOWN = tmp2;
 		LEFT = tmp1;
 		index=(index+1)%4;
+		rot= (rot+1)%5;
 	}
 	
 	boolean isFull() {

@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+
 public class Level {
 	Piece[][] pieces;
 
@@ -83,13 +84,10 @@ public class Level {
 
 		while (iterator.hasNext()) {
 			JSONArray x = iterator.next();
-			Iterator<JSONObject> iteratorX = x.iterator();
 
 			/* Ici on passe aux sous tableaux */
 
-			while (iteratorX.hasNext()) {
-				JSONObject p = iteratorX.next();
-
+			for (JSONObject p : (Iterable<JSONObject>) x) {
 				/* On vérifie si le type de la pièce, pour voir si elle est null ou non */
 
 				String type = (String) p.get("TYPE");

@@ -199,7 +199,7 @@ public class Level {
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
-        	counter--;
+        	compteur--;
 		}
 	}
 

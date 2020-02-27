@@ -20,7 +20,9 @@ public class Level {
 	public final int HEIGHT;
 	int selected_x;
 	int selected_y;
-	int counter=50;
+	private char type;
+	int compteur;
+
 	
 	public Level(int w, int h) {
 
@@ -39,6 +41,23 @@ public class Level {
 		 */
 		System.out.println("Level created");
 	}
+	
+	public Level(int w, int h, char t, int compt){
+        t = Character.toLowerCase(t);
+        if (t == 'f' || t == 'c' || t == 'n') type = t;
+        else type = 'n';
+        if(type == 'f' || type == 'n') compteur = 0;
+        compteur = compt;
+        WIDTH = w;
+        HEIGHT = h;
+
+        setTab(w, h);
+        /*
+         * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
+         * d'un niveau
+         */
+    }
+
 
 	@SuppressWarnings("unchecked")
 	public Level(int id) throws Exception {
@@ -145,32 +164,28 @@ public class Level {
 		return pc;
 	}
 
-	void affiche() { /* Affiche l'état du jeu */
-		clearScreen();
-		System.out.println(ANSI_BOLD+"              ["+counter+"]"+ANSI_RESET);
-		for (int i = 0; i < pieces.length; i++) {
-			
-			for (int j = 0; j < pieces[i].length; j++) {
-				
-				if (pieces[i][j] != null) {
-					if (i == selected_y && j == selected_x)
-						System.out.print(ANSI_SELECTED);
-					if (pieces[i][j].isFull())
-						System.out.print(ANSI_BLUE); /* Si la pièce contient de l'eau elle s'affiche en bleu */
-					System.out.print(pieces[i][j].toString());
-					if (pieces[i][j].isFull() || (i == selected_y && j == selected_x))
-						System.out.print(ANSI_RESET); /* Et on arrête le bleu */
-				} else {
-					if (i == selected_y && j == selected_x)
-						System.out.print(ANSI_SELECTED);
-					System.out.print(" ");
-					if (i == selected_y && j == selected_x)
-						System.out.print(ANSI_RESET);
-				}
-			}
-			System.out.println();
-		}
-	}
+	void affiche() { /* print the state of the game */
+    System.out.println("----- AQUAVIAS -----");
+        if (type == 'c' && compteur > 10) System.out.println("---- Coups restants : " + compteur + " ----");
+        else if (type == 'c' && compteur > 1) System.out.println("---- Plus que " + compteur + " coups ! ----");
+        else if (type == 'c' && compteur == 1) System.out.println("----  C'est votre denier coup ! ----");
+        for (Piece[] piece : pieces) {
+            for (Piece value : piece) {
+                if (value != null) {
+                    if (value.isFull())
+                        System.out.print(ANSI_BLUE); /* if piece is full print it in blue */
+                    System.out.print(value.toString());
+                    if (value.isFull())
+                        System.out.print(ANSI_RESET); /* and stop the blue */
+
+                } else {
+                    System.out.print(" ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
 	
 	public static void clearScreen() {  
 	    System.out.print("\033[H\033[2J");  
@@ -189,7 +204,7 @@ public class Level {
 	}
 
 	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
-		while (!hasWon()) {
+		while (!Victory()) {
 			update();
 			affiche();
 			getPiecePos();
@@ -261,9 +276,13 @@ public class Level {
     }
 
 
-	boolean hasWon() {
-		return pieces[HEIGHT - 1][WIDTH + 1].isFull();
-	}
+	boolean Victory() {
+        if(type == 'n') return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
+        if(type == 'f') return (pieces[HEIGHT - 1][WIDTH + 1].isFull()) && !isLeaking();
+        if(type == 'c') return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur > 0);
+        return false;
+    }
+
 
 	void update() {
 		// vide d'abord entièrement l'eau du circuit

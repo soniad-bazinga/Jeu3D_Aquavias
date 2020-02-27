@@ -197,6 +197,69 @@ public class Level {
 			System.out.println();
 		}
 	}
+	
+	boolean isLeaking() {
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[i].length; j++) {
+                if (pieces[i][j] != null) {
+                    if (pieces[i][j].isFull()) { //If the piece contains water
+                        if (pieces[i][j].isDown()) { //If the piece has an exit facing down
+                            //If there is nothing below, it is leaking
+                            if (i == pieces.length - 1) {
+                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                            } else {
+                                if (pieces[i + 1][j] != null) { //If there is a piece below
+                                    if (!connected(pieces[i][j], pieces[i + 1][j], "DOWN")) { //If the two pieces don't connect
+                                        System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                        return true; //It is leaking
+                                    }
+                                }
+                            }
+                            return true; //If the piece is in the last line of the array/level
+                        } else if (pieces[i][j].isLeft() && i != 0 && j != 0) { //If the piece has an exit facing left
+                            if (j == 1) {
+                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                return true; //If it's the first in its line, it's leaking
+                            }
+                            if (pieces[i][j - 1] != null) {
+                                if (!connected(pieces[i][j], pieces[i][j - 1], "LEFT")) { //If the two pieces don't connect
+                                    System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                    return true; //It is leaking
+                                }
+                            }
+                            return true; //If there's nothing left of the piece
+                        } else if (pieces[i][j].isRight()) { //If the piece has an exit facing right
+                            if (j == pieces[i].length - 1 && i != pieces.length - 1) {
+                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                return true; //If it's the last in its line, it's leaking
+                            }
+                            if (pieces[i][j + 1] != null) {
+                                if (!connected(pieces[i][j], pieces[i][j + 1], "RIGHT")) { //If the two pieces don't connect
+                                    System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                    return true; //It is leaking
+                                }
+                            }
+                            return true; //If there's nothing right of the piece
+                        } else if (pieces[i][j].isUp()) { //If the piece has an exit facing up
+                            if (i == 0) {
+                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                return true; //If it's in the first line, it's leaking
+                            }
+                            if (pieces[i - 1][j] != null) {
+                                if (!connected(pieces[i][j], pieces[i - 1][j], "LEFT")) { //If the two pieces don't connect
+                                    System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
+                                    return true; //It is leaking
+                                }
+                            }
+                            return true; //If there's nothing above the piece, then it's leaking
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
 	boolean hasWon() {
 		return pieces[HEIGHT - 1][WIDTH + 1].isFull();

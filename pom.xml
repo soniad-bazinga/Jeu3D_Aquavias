@@ -5,6 +5,13 @@
 	<groupId>fr.fese.aquavias</groupId>
 	<artifactId>aquavias-game</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<build>
+		<resources>
+		<resource>
+			<directory>src/main/resources</directory>
+		</resource>
+	</resources>
+	</build>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
 		<dependency>
@@ -22,9 +29,20 @@
 			<artifactId>javax.mail-api</artifactId>
 			<version>1.6.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+			<version>11</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
+
 </project>

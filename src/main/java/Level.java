@@ -463,7 +463,7 @@ public class Level implements Cloneable {
 			for (int j = 1; j < WIDTH + 1; j++) {
 				if (pieces[i][j] == null) {
 					Random rm = new Random();
-					int x = rm.nextInt(5);
+					int x = rm.nextInt(n);
 					Piece p = null;
 					switch (x) {
 					case 0:
@@ -487,6 +487,7 @@ public class Level implements Cloneable {
 	 */
 
 	void afficheChemin() {
+		clearScreen();
 		System.out.println(ANSI_BOLD + "              [" + counter + "]" + ANSI_RESET);
 		for (int i = 0; i < pieces.length; i++) {
 

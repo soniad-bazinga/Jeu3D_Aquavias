@@ -41,10 +41,9 @@ public class LevelChecker {
 			level.printBlocker();
 			level.afficheChemin();
 			System.out.println("\nLe niveau est finissable :)");
-			System.out.println("Solution trouvée en "+TRY_COUNTER+" opération.");
+			System.out.println("Solution trouvée en "+TRY_COUNTER+" appels de fonctions.");
 			return true;
 		}
-		// on clone le niveau
 		if (possibleDir(level, x, y, "DOWN") && searchPath(level.clone(), x, y + 1))
 			return true;
 		if (possibleDir(level, x, y, "UP") && searchPath(level.clone(), x, y - 1))

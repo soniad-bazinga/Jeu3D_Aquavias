@@ -1,6 +1,6 @@
 # Blender v2.82 (sub 7) OBJ File: 'piece.blend'
 # www.blender.org
-mtllib pieceL.mtl
+mtllib pieceI.mtl
 o Cube_Cube.005
 v -0.187308 -0.250000 0.250000
 v -0.250000 0.250000 0.250000

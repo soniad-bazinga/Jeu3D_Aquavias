@@ -2,12 +2,15 @@ import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import java.net.URL;
@@ -29,6 +32,10 @@ public class PieceOverview extends Application{
     private final DoubleProperty angleX = new SimpleDoubleProperty(0);
     private final DoubleProperty angleY = new SimpleDoubleProperty(0);
 
+    static final double PIECE_SIZE = 5.85;
+
+    Piece3D[][] models = new Piece3D[5][5];
+
     /* Créé un aperçu de piece */
     public PieceOverview(){
         /*switch(s){
@@ -44,10 +51,20 @@ public class PieceOverview extends Application{
 
         /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
-        camera.setTranslateZ(-3.5);
+        camera.setTranslateZ(-60.5);
 
         /* On importe le model de la piece */
-        Group model = importModel(getClass().getResource("piece"+piece+".obj"));
+        Group root = new Group();
+
+        for(int i = 0 ; i < models.length ; i++) {
+            for(int j = 0 ; j < models[i].length ; j++) {
+                models[i][j] = new Piece3D(i,j);
+                models[i][j].importModel(getClass().getResource("piece" + piece + "_simple.obj"));
+                models[i][j].setTranslateX(PIECE_SIZE * i-15);
+                models[i][j].setTranslateZ((PIECE_SIZE * j-15));
+                root.getChildren().add(models[i][j]);
+            }
+        }
 
         /* Ici on definit les interractions possibles */
       /*  stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
@@ -61,8 +78,9 @@ public class PieceOverview extends Application{
             }
         }); */
 
+
+
         /* On créer le groupe racine */
-        Group root = new Group(model);
 
         /* On créer des objets permettants la transformation de la rotation sur les axes X et Y */
         Rotate xRotate, yRotate;
@@ -81,11 +99,6 @@ public class PieceOverview extends Application{
             dragged_Y = event.getSceneY();
             angle_X = angleX.get();
             angle_Y = angleY.get();
-            System.out.println("dragged_X " +dragged_X+"\n"+
-                            "dragged_Y " +dragged_Y+"\n"+
-                            "angle_Y " +angle_X+"\n"+
-                            "angle_Y" +angle_Y+"\n"
-                    );
         });
         /* lorsque l'on déplace la souris, on modifie l'angle de la pièce */
         stage.addEventHandler(MouseEvent.MOUSE_DRAGGED, event ->{
@@ -98,6 +111,16 @@ public class PieceOverview extends Application{
         /* On lui lie la caméra */
         scene.setCamera(camera);
 
+        scene.setOnMousePressed((MouseEvent me) -> {
+            PickResult pr = me.getPickResult();
+            if(pr!=null && pr.getIntersectedNode() != null){
+                System.out.println(pr.getIntersectedTexCoord());
+                double distance=pr.getIntersectedDistance();
+                MeshView mv = (MeshView) pr.getIntersectedNode();
+                mv.getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
+            }
+        });
+
         /* On nome la fenetre, y ajoute la scene et on l'affiche */
         stage.setTitle("Aperçu de pièce");
         stage.setScene(scene);
@@ -106,23 +129,32 @@ public class PieceOverview extends Application{
     }
 
     /* Permet d'importer une pièce via une URL */
-    public Group importModel(URL url){
 
-        /* on créer une groupe vide */
-        Group modelRoot = new Group();
 
-        /* On utilise l'API d'import de modelobj pour javafx */
-        /* on créer un objet vide */
-        ObjModelImporter objModelImporter = new ObjModelImporter();
+    private class Piece3D extends Group{
+        private int i;
+        private int j;
 
-        /* et on utilise la fonction read sur l'url */
-        objModelImporter.read(url);
-
-        /* puis pour chaque meshview dans l'objModel, on l'ajoute a modelRoot (le groupe) */
-        for(MeshView view : objModelImporter.getImport()){
-            modelRoot.getChildren().addAll(view);
+        private Piece3D(int i, int j) {
+            this.i = i;
+            this.j = j;
         }
 
-        return modelRoot;
+        public void importModel(URL url){
+
+            /* on créer une groupe vide */
+
+            /* On utilise l'API d'import de modelobj pour javafx */
+            /* on créer un objet vide */
+            ObjModelImporter objModelImporter = new ObjModelImporter();
+
+            /* et on utilise la fonction read sur l'url */
+            objModelImporter.read(url);
+
+            /* puis pour chaque meshview dans l'objModel, on l'ajoute a modelRoot (le groupe) */
+            for(MeshView view : objModelImporter.getImport()){
+                this.getChildren().addAll(view);
+            }
+        }
     }
 }

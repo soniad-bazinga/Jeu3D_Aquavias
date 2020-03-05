@@ -125,6 +125,8 @@ public class Level {
 			j++;
 		}
 
+		compteur = 50;
+
 		/* Tout s'est bien déroulé */
 
 		System.out.println("Niveau chargé.");
@@ -164,29 +166,35 @@ public class Level {
 		return pc;
 	}
 
-	void affiche() { /* print the state of the game */
-    System.out.println("----- AQUAVIAS -----");
-        if (type == 'c' && compteur > 10) System.out.println("---- Coups restants : " + compteur + " ----");
-        else if (type == 'c' && compteur > 1) System.out.println("---- Plus que " + compteur + " coups ! ----");
-        else if (type == 'c' && compteur == 1) System.out.println("----  C'est votre denier coup ! ----");
-        for (Piece[] piece : pieces) {
-            for (Piece value : piece) {
-                if (value != null) {
-                    if (value.isFull())
-                        System.out.print(ANSI_BLUE); /* if piece is full print it in blue */
-                    System.out.print(value.toString());
-                    if (value.isFull())
-                        System.out.print(ANSI_RESET); /* and stop the blue */
+	void affiche() { /* Affiche l'état du jeu */
+		clearScreen();
+		System.out.println(ANSI_BOLD+"              ["+compteur+"]"+ANSI_RESET);
+		for (int i = 0; i < pieces.length; i++) {
 
-                } else {
-                    System.out.print(" ");
-                }
-            }
-            System.out.println();
-        }
-    }
+			for (int j = 0; j < pieces[i].length; j++) {
 
-	
+				if (pieces[i][j] != null) {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
+					if (pieces[i][j].isFull())
+						System.out.print(ANSI_BLUE); /* Si la pièce contient de l'eau elle s'affiche en bleu */
+					System.out.print(pieces[i][j].toString());
+					if (pieces[i][j].isFull() || (i == selected_y && j == selected_x))
+						System.out.print(ANSI_RESET); /* Et on arrête le bleu */
+				} else {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
+					System.out.print(" ");
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_RESET);
+				}
+			}
+			System.out.println();
+		}
+	}
+
+
+
 	public static void clearScreen() {  
 	    System.out.print("\033[H\033[2J");  
 	    System.out.flush();  

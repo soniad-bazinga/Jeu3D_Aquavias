@@ -6,19 +6,19 @@ import javax.swing.JFrame;
 public class InputsWindow extends JFrame implements KeyListener{
 	Level level;
 
+
 	public InputsWindow(Level level) {
 		new JFrame();
-		setTitle("invisible hehe ;)");
+		setTitle("IW");
 		setVisible(true);
 		addKeyListener(this);
 		this.level = level;
+		level.affiche();
 	}
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		if (level.compteur<=0) {
-			System.out.println();
-			System.out.println("OUPS ! C'est perdu !");
 			return;
 		}
 		int keyCode = arg0.getKeyCode();

@@ -2,15 +2,12 @@ import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import java.net.URL;
@@ -51,7 +48,8 @@ public class PieceOverview extends Application{
 
         /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
-        camera.setTranslateZ(-60.5);
+        camera.setTranslateZ(-90.5);
+        camera.setFarClip(1000);
 
         /* On importe le model de la piece */
         Group root = new Group();
@@ -61,6 +59,7 @@ public class PieceOverview extends Application{
                 models[i][j] = new Piece3D(i,j);
                 models[i][j].importModel(getClass().getResource("piece" + piece + "_simple.obj"));
                 models[i][j].setTranslateX(PIECE_SIZE * i-15);
+                models[i][j].setTranslateY(10);
                 models[i][j].setTranslateZ((PIECE_SIZE * j-15));
                 root.getChildren().add(models[i][j]);
             }
@@ -113,6 +112,7 @@ public class PieceOverview extends Application{
 
         scene.setOnMousePressed((MouseEvent me) -> {
             PickResult pr = me.getPickResult();
+            System.out.println(pr);
             if(pr!=null && pr.getIntersectedNode() != null){
                 System.out.println(pr.getIntersectedTexCoord());
                 double distance=pr.getIntersectedDistance();

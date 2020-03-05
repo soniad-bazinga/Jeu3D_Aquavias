@@ -326,60 +326,9 @@ public class Level {
 		return x== 0 && y==0;
 	}
 
-	public boolean canGo(int i, int j){
-		if(i == 0 && j== 1) {
-
-			return connected(pieces[i][j], pieces[i][j - 1], "LEFT");
-		}
-
-		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") ) {
-			return isFull(i, j-1);
-		}
-
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") ) {
-			return isFull(i+1, j);
-		}
-
-		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")  ) {
-			return isFull(i-1, j);
-		}
-
-		if( isInTab(i, j + 1)&& connected(pieces[i][j], pieces[i][j + 1], "RIGHT") ){
-			return isFull(i, j+1);
-		}
-
-		return false;
-	}
 
 
-	private void parcours(int i, int j, Stack<Coordinates> pile) {
 
-	//if(theStart(i, j))  pile.push(new Coordinates(0,0));
-
-	if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) {
-			setFull(i+1, j);
-			pile.push(new Coordinates(i+1, j));
-			parcours(i+1,j, pile);
-		}
-		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP")&&!pieces[i - 1][j].isFull()) {
-			setFull(i-1, j);
-			pile.push(new Coordinates(i-1, j));
-			parcours(i-1,j, pile);
-		}
-		if ( isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT")&&!pieces[i][j + 1].isFull()) {
-
-			setFull(i, j+1);
-			pile.push(new Coordinates(i, j+1));
-			parcours(i,j+1, pile);
-
-		}
-		if (isInTab(i, j-1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT")&&!pieces[i][j - 1].isFull()) {
-			setFull(i, j-1);
-			pile.push(new Coordinates(i, j-1));
-			parcours(i,j-1, pile);
-		}
-
-	}
 
 	private boolean contains(ArrayList<Coordinates> temp, int x, int y){
 		for(Coordinates c: temp){
@@ -391,112 +340,8 @@ public class Level {
 		return false;
 	}
 
-	public boolean possible(int x, int y, ArrayList<Coordinates> wasHere){
-
-		if(isInTab(x, y)) {
-
-			if(!isFull(x, y) && !contains(wasHere, x, y)) {
-
-				if (canGo(x, y)) {
-					return true;
-				} else {
-
-					pieces[x][y].rotate();
-					affiche();
-					while ( pieces[x][y].rot !=4 && !canGo(x, y)) {
-
-						System.out.println(x+" "+y);
-						pieces[x][y].rotate();
-						affiche();
-					}
 
 
-					return canGo(x, y);
-				}
-			}
-		}
-		return false;
-	}
-
-//créer une autre méthode qui intervient à la fin et relis les chemins où l'eau s'échappe, il faudra sauvegarder le chemin qui mène à la victoire avant pour pouvoir
-
-	public boolean recursiveSolve(int x, int y) {   //ajouter un tableau wasHere pour les fois où s'est retourné false
-		Stack<Coordinates> pile = new Stack<>();
-		Coordinates temp;
-		ArrayList<Coordinates> wasHere= new ArrayList<>();
-
-		System.out.println(x + " " + y);
-		if (theEnd(x, y)) {
-			return true;
-		}
-
-		if (possible(x, y + 1, wasHere)) {
-			voidAll();
-			parcours(0, 0, pile);
-			affiche();
-			temp = pile.peek();
-			for (Coordinates j : pile) {
-				System.out.print(j.x + " " + j.y + "\t");
-			}
-
-
-			if (recursiveSolve(temp.x, temp.y)) return true;
-		}
-
-		if (possible(x, y - 1, wasHere)) {
-			voidAll();
-			parcours(0, 0, pile);
-			affiche();
-			temp = pile.peek();
-			for (Coordinates j : pile) {
-				System.out.print(j.x + " " + j.y + "\t");
-			}
-
-			if (recursiveSolve(temp.x, temp.y)) return true;
-		}
-
-		if (possible(x + 1, y, wasHere)) {
-			voidAll();
-			parcours(0, 0, pile);
-			affiche();
-			temp = pile.peek();
-			for (Coordinates j : pile) {
-				System.out.print(j.x + " " + j.y + "\t");
-			}
-
-			if (recursiveSolve(temp.x, temp.y)) return true;
-		}
-
-		if (possible(x - 1, y, wasHere)) {
-			voidAll();
-			parcours(0, 0, pile);
-			affiche();
-			temp = pile.peek();
-			for (Coordinates j : pile) {
-				System.out.print(j.x + " " + j.y + "\t");
-			}
-
-			if (recursiveSolve(temp.x, temp.y)) return true;
-		}
-
-
-		pieces[x][y].rotate();
-		if (pieces[x][y].rot == 4) {
-			pieces[x][y].setFull(false);
-			wasHere.add(new Coordinates(x, y));
-			return false;
-		} else {
-			voidAll();
-			parcours(0, 0, pile);
-			affiche();
-			temp = pile.pop();
-			for (Coordinates j : pile) {
-				System.out.print(j.x + " " + j.y + "\t");
-			}
-			return recursiveSolve(temp.x, temp.y);
-
-		}
-	}
 
 
 

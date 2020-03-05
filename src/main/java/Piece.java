@@ -31,8 +31,7 @@ public abstract class Piece {
 	}
 	
 	boolean[] getExits() {
-		boolean[] b = {UP,RIGHT,DOWN,LEFT};
-		return b;
+		return new boolean[]{UP,RIGHT,DOWN,LEFT};
 	}
 	
 	abstract String getType();

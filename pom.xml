@@ -6,6 +6,21 @@
 	<artifactId>aquavias-game</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 		<resources>
 		<resource>
 			<directory>src/main/resources</directory>
@@ -13,6 +28,19 @@
 	</resources>
 	</build>
 	<dependencies>
+		<dependency>
+
+			<groupId>jim</groupId>
+
+			<artifactId>jim</artifactId>
+
+			<version>1</version>
+
+			<scope>system</scope>
+
+			<systemPath>${project.basedir}/jimObjModelImporterJFX.jar</systemPath>
+
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>

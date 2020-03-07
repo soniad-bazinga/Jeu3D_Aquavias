@@ -17,6 +17,7 @@ public class Level implements Cloneable {
 	public static final String ANSI_BOLD = "\u001B[1m";
 	public static final String ANSI_SELECTED = "\u001b[48;5;240m";
 	public static final String ANSI_RED = "\u001b[31m";
+	public PieceOverview pieceoverview;
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
@@ -223,8 +224,11 @@ public class Level implements Cloneable {
 	private void voidAll() { // vide l'eau de tout le circuit sauf de la source
 		for (int i = 0; i < HEIGHT; i++) {
 			for (int j = 1; j < WIDTH + 2; j++) {
-				if (pieces[i][j] != null)
+				if (pieces[i][j] != null) {
+					/* Met a jour la vue */
+					if (pieceoverview != null) pieceoverview.setFull(i, j, false);
 					pieces[i][j].setFull(false);
+				}
 			}
 		}
 	}
@@ -234,6 +238,8 @@ public class Level implements Cloneable {
 		// l'actuelle et qu'elles ne sont pas déjà remplies
 		if (i == HEIGHT - 1 && j == WIDTH + 1)
 			return;
+		/* Met a jour la vue */
+		if(pieceoverview != null) pieceoverview.setFull(i,j,true);
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			update(i + 1, j);
@@ -512,4 +518,8 @@ public class Level implements Cloneable {
 			System.out.println();
 		}
 	}
+
+	Piece[][] getPieces(){ return pieces; }
+
+	void setOverviewer(PieceOverview po){ pieceoverview = po ; }
 }

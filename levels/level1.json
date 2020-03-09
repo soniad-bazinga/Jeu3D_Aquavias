@@ -321,5 +321,7 @@
         "FULL": false
       }
     ]
-  ]
+  ],
+  "type": "c",
+  "compteur": 50
 }

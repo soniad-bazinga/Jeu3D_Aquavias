@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.util.Objects;
 import java.util.Scanner;
@@ -62,10 +61,11 @@ public class Menu {
     }
 
     void switchLevel(int dir){
+    	//dir=1 on descend dans le menu, -1 on monte
         if(!selecting_level) return;
-        if(dir == 1 && selected_level<level_number) selected_level++;
+        if(dir == 1 && selected_level<(level_number-1)) selected_level++;
         if(dir == -1 && selected_level > 1) selected_level--;
-        if(!(dir == -1 && selected_level == 1) && !(dir == 1 && selected_level == level_number))
+        if(!(dir == -1 && selected_level == 0) && !(dir == 1 && selected_level == level_number))
         afficheLevels();
     }
 

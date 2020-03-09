@@ -214,21 +214,19 @@ public class Level {
 	}
 
 	boolean isLeaking() {
-		if(!pieces[HEIGHT-1][WIDTH+1].isFull())
-			return true;
 		for (int i=0;i<HEIGHT;i++) {
-			for(int j=0;j<WIDTH;j++) {
+			for(int j=0;j<WIDTH+1;j++) {
 				if (pieces[i][j]!=null && pieces[i][j].isFull()) {
-					if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) {
+					if (isInTab(i + 1, j) && pieces[i][j].DOWN &&!pieces[i + 1][j].isFull()) {
 						return true;			
 					}
-					if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP") && !pieces[i - 1][j].isFull()) {
+					if (isInTab(i - 1, j) && pieces[i][j].UP && !pieces[i - 1][j].isFull()) {
 						return true;
 					}
-					if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT") && !pieces[i][j + 1].isFull()) {
+					if (isInTab(i, j + 1) && pieces[i][j].RIGHT && !pieces[i][j + 1].isFull()) {
 						return true;
 					}
-					if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !pieces[i][j - 1].isFull()) {
+					if (isInTab(i, j - 1) && pieces[i][j].LEFT && !pieces[i][j - 1].isFull()) {
 						return true;
 					}
 				}
@@ -241,6 +239,7 @@ public class Level {
 		if(type=='c' && (compteur<=0 || Victory())) { 
 			if(Victory()) {
 				clearScreen();
+				affiche();
 				System.out.println("\nBravo, la ville est desservie en eau !");
 				System.exit(1);
 			}

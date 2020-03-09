@@ -215,19 +215,31 @@ public class Level {
 
 	boolean isLeaking() {
 		for (int i=0;i<HEIGHT;i++) {
-			for(int j=0;j<WIDTH+1;j++) {
+			for(int j=1;j<WIDTH+1;j++) {
 				if (pieces[i][j]!=null && pieces[i][j].isFull()) {
-					if (isInTab(i + 1, j) && pieces[i][j].DOWN &&!pieces[i + 1][j].isFull()) {
-						return true;			
+					if (pieces[i][j].DOWN && (!isInTab(i + 1, j) || 
+									(isInTab(i + 1, j) && (pieces[i + 1][j]==null || 
+									(pieces[i + 1][j]!=null && !pieces[i + 1][j].UP))))) {
+						if(i+1!=0 || j!=0)
+							return true;			
 					}
-					if (isInTab(i - 1, j) && pieces[i][j].UP && !pieces[i - 1][j].isFull()) {
-						return true;
+					if (pieces[i][j].UP && (!isInTab(i - 1, j) ||
+							(isInTab(i - 1, j) && (pieces[i - 1][j]==null||
+							(pieces[i-1][j]!=null && !pieces[i - 1][j].DOWN))))) {
+						if(i-1!=0 || j!=0)
+							return true;
 					}
-					if (isInTab(i, j + 1) && pieces[i][j].RIGHT && !pieces[i][j + 1].isFull()) {
-						return true;
+					if (pieces[i][j].RIGHT && (!isInTab(i, j + 1) ||
+							(isInTab(i, j + 1) && (pieces[i][j + 1]==null ||
+							(pieces[i][j + 1]!=null && !pieces[i][j + 1].LEFT))))) {
+						if(i!=0 || j+1!=0)
+							return true;
 					}
-					if (isInTab(i, j - 1) && pieces[i][j].LEFT && !pieces[i][j - 1].isFull()) {
-						return true;
+					if (pieces[i][j].LEFT && (!isInTab(i, j - 1) ||
+							(isInTab(i, j - 1) && (pieces[i][j - 1]==null ||
+							(pieces[i][j - 1]!=null && !pieces[i][j - 1].RIGHT))))) {
+						if(i!=0 || j-1!=0)
+							return true;
 					}
 				}
 			}
@@ -308,7 +320,7 @@ public class Level {
 		pieces[i][j].setFull(true);
 	}
 
-	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
+	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans le tableau */
 		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
 	}
 

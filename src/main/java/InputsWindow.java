@@ -6,12 +6,12 @@ import javax.swing.JFrame;
 
 public class InputsWindow extends JFrame implements KeyListener{
 	Level level;
-	Timer seeya;
-	TimerTask seeyatask;
+	Timer seeya; //Objet qui gère le temps
+	TimerTask seeyatask; //Objet qui va gérer l'action à effectuer
 
 
 	public InputsWindow(Level level) {
-		seeyatask = new TimerTask() {
+		seeyatask = new TimerTask() { //Initialisation de l'action à effectuer après un certain temps
 			@Override
 			public void run() {
 				System.out.println("À la prochaine !");
@@ -58,14 +58,14 @@ public class InputsWindow extends JFrame implements KeyListener{
 	        		}catch (Exception e) {
 	        			Level.clearScreen();
 	        			System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
-	        			seeya.schedule(seeyatask, 1000);
+	        			seeya.schedule(seeyatask, 1000); //L'action se fera 1s après la mise sous "sleep" du thread en cours (cette fonction)
 	        			try{
-	        				Thread.sleep(2000);
+	        				Thread.sleep(2500); //Mise sous sleep du thread en cours
 
 						} catch (InterruptedException ex) {
 							ex.printStackTrace();
 						}
-						System.exit(0);
+						System.exit(0); //Le jeu est fini, nous pouvons sortir
 	        		}
         		}else {
         			try {

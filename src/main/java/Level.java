@@ -426,7 +426,7 @@ public class Level {
 
 
 
-
+ //méthode qui permet de créer un niveau 
 	  void createLevel(){
 
 		Scanner sc= new Scanner(System.in);
@@ -437,30 +437,30 @@ public class Level {
 		char c;
 
 
-		System.out.println("** WELCOME TO THE LEVEL CREATION WORKSHOP! **");
-		System.out.println("Choose the size : ");
-		System.out.println("HEIGHT = ");
+		System.out.println("** Bienvenue à l'atelier de création de niveaux! **");
+		System.out.println("Choisis une taille : ");
+		System.out.println("Longueur = ");
 		h= sc.nextInt();
 		sc.nextLine();
-		System.out.print("WIDTH = ");
+		System.out.print("Largeur= ");
 		w= sc.nextInt();
 		sc.nextLine();
 		Level level= new Level(h, w);
-		System.out.println("Yay! You created the board! Now, fill it with the game pieces of your choice: ");
+		System.out.println("Yay! Tu as créé le plateau! Maintenant, remplie le avec les pièces de ton choix: ");
 		for(int i=0; i< h; i++){
 			for(int j=1; j< w-1; j++) {
-				System.out.println("Which type? { I, L, T, X} ");  //instruction back
+				System.out.println("Quel type? { I, L, T, X} ");  //instruction back
 				type = sc.nextLine();
 				while (!type.equals("L") && !type.equals("T") && !type.equals("I") && !type.equals("X")) {
-					System.out.println("Choose again {I, L, T, X}: ");
+					System.out.println("Mauvaise pioche, choisi à nouveau:  {I, L, T, X}: ");
 					type = sc.nextLine();
 				}
 
-				System.out.println("Number of rotations ? ");           //on peut utiliser un bloc try catch ou une assertion 
+				System.out.println("Nombre de rotation? ");           //on peut utiliser un bloc try catch ou une assertion 
 				rotation = sc.nextInt();
 				sc.nextLine();
 				while (rotation < 0) {
-					System.out.println("Choose again: ");
+					System.out.println("Choisi à nouveau: ");
 					rotation = sc.nextInt();
 					sc.nextLine();
 				}
@@ -471,11 +471,11 @@ public class Level {
 		}
 
 
-		System.out.println("Level created with success! Do you want to save it ? Y/N");
+		System.out.println("Level créé avec succès! Veux-tu le sauvegarder ? O/N");
 		c= sc.nextLine().charAt(0);
 		if(c=='Y'){
 			level.saveLevel();
-			System.out.println("Saved, come back soon! ");
+			System.out.println("Sauvegargé, à la prochaine! ");
 		}else{
 			System.out.println();
 		}

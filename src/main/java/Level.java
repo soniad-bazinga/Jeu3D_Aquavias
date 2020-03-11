@@ -452,7 +452,7 @@ public class Level {
 				System.out.println("Quel type? { I, L, T, X} ");  //instruction back
 				type = sc.nextLine();
 				while (!type.equals("L") && !type.equals("T") && !type.equals("I") && !type.equals("X")) {
-					System.out.println("Mauvaise pioche, choisi à nouveau:  {I, L, T, X}: ");
+					System.out.println("Mauvaise pioche, choisis à nouveau:  {I, L, T, X}: ");
 					type = sc.nextLine();
 				}
 
@@ -460,7 +460,7 @@ public class Level {
 				rotation = sc.nextInt();
 				sc.nextLine();
 				while (rotation < 0) {
-					System.out.println("Choisi à nouveau: ");
+					System.out.println("Choisis à nouveau: ");
 					rotation = sc.nextInt();
 					sc.nextLine();
 				}

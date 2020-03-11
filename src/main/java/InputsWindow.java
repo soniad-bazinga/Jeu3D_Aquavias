@@ -1,13 +1,24 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.*;
 
 import javax.swing.JFrame;
 
 public class InputsWindow extends JFrame implements KeyListener{
 	Level level;
+	Timer seeya;
+	TimerTask seeyatask;
 
 
 	public InputsWindow(Level level) {
+		seeyatask = new TimerTask() {
+			@Override
+			public void run() {
+				System.out.println("À la prochaine !");
+
+			}
+		};
+		seeya = new Timer();
 		new JFrame();
 		setTitle("IW");
 		setVisible(true);
@@ -47,6 +58,14 @@ public class InputsWindow extends JFrame implements KeyListener{
 	        		}catch (Exception e) {
 	        			Level.clearScreen();
 	        			System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
+	        			seeya.schedule(seeyatask, 1000);
+	        			try{
+	        				Thread.sleep(2000);
+
+						} catch (InterruptedException ex) {
+							ex.printStackTrace();
+						}
+						System.exit(0);
 	        		}
         		}else {
         			try {

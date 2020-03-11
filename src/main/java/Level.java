@@ -63,7 +63,7 @@ public class Level {
 	@SuppressWarnings("unchecked")
 	public Level(int id) throws Exception {
 
-		System.out.println("Chargement du niveau...\n");
+		System.out.println("\nChargement du niveau...\n");
 		FileReader reader;
 
 		/* on récupère le fichier contenant le lvl */
@@ -214,66 +214,76 @@ public class Level {
 	}
 
 	boolean isLeaking() {
+		return(nbLeak()!=0);
+	}
+	
+	public int nbLeak() {
+		int leak=0;
 		for (int i=0;i<HEIGHT;i++) {
 			for(int j=1;j<WIDTH+1;j++) {
 				if (pieces[i][j]!=null && pieces[i][j].isFull()) {
 					if (pieces[i][j].DOWN && (!isInTab(i + 1, j) || 
 									(isInTab(i + 1, j) && (pieces[i + 1][j]==null || 
 									(pieces[i + 1][j]!=null && !pieces[i + 1][j].UP))))) {
-						if(i+1!=0 || j!=0)
-							return true;			
+						if((i+1!=0 || j!=0) && (i+1!=HEIGHT-1 || j!=WIDTH+1))
+							leak++;			
 					}
 					if (pieces[i][j].UP && (!isInTab(i - 1, j) ||
 							(isInTab(i - 1, j) && (pieces[i - 1][j]==null||
 							(pieces[i-1][j]!=null && !pieces[i - 1][j].DOWN))))) {
-						if(i-1!=0 || j!=0)
-							return true;
+						if((i-1!=0 || j!=0) && (i-1!=HEIGHT-1 || j!=WIDTH+1))
+							leak++;
 					}
 					if (pieces[i][j].RIGHT && (!isInTab(i, j + 1) ||
 							(isInTab(i, j + 1) && (pieces[i][j + 1]==null ||
 							(pieces[i][j + 1]!=null && !pieces[i][j + 1].LEFT))))) {
-						if(i!=0 || j+1!=0)
-							return true;
+						if((i!=0 || j+1!=0) && (i!=HEIGHT-1 || j+1!=WIDTH+1))
+							leak++;
 					}
 					if (pieces[i][j].LEFT && (!isInTab(i, j - 1) ||
 							(isInTab(i, j - 1) && (pieces[i][j - 1]==null ||
 							(pieces[i][j - 1]!=null && !pieces[i][j - 1].RIGHT))))) {
-						if(i!=0 || j-1!=0)
-							return true;
+						if((i!=0 || j-1!=0) && (i!=HEIGHT-1 || j-1!=WIDTH+1))
+							leak++;
 					}
 				}
 			}
 		}
+		return leak;
+	}
+	
+	boolean estFinie(boolean affichage) { 
+		//retourne faux tant que le niveau n'est pas fini, appelle Victory() sinon 
+		//elle affiche le message de victoire ou de defaite si affichage est true
+		if(compteur<=0 || Victory()) {
+			if(affichage) {
+				if(Victory()) {
+					clearScreen();
+					affiche();
+					System.out.println("\nBravo, la ville est desservie en eau !\n\n"
+							+ "Pressez une touche pour passer au niveau suivant !");
+					
+				}
+				else {
+					clearScreen();
+					affiche();
+					System.out.println("\nOups, trop de deplacements, les habitants sont partis ailleurs chercher de l'eau :(\n\n"
+							+ "Pressez une touche pour tenter de resservir la ville !");
+					
+				}
+			}
+			return true;
+		}
 		return false;
 	}
 	
-	boolean estFinie() { //retourne faux tant que le niveau n'est pas fini, appelle Victory() sinon
-		if(type=='c' && (compteur<=0 || Victory())) { 
-			if(Victory()) {
-				clearScreen();
-				affiche();
-				System.out.println("\nBravo, la ville est desservie en eau !");
-				System.exit(1);
-			}
-			else {
-				clearScreen();
-				System.out.println("\nOups, trop de déplacements, les habitants sont partis ailleurs chercher de l'eau :(");
-				System.exit(1);
-			}
-		}
-		else if(type=='n'){
-			return pieces[HEIGHT - 1][WIDTH + 1].isFull();
-		}
-		return false;
+	void newLevel(int id) throws Exception{
+		Level lvl=new Level(id);
+		InputsWindow iw=new InputsWindow(lvl);
 	}
 	
 	boolean Victory() { //retourne si la partie est finie ou non
-        if(type == 'n') return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
-        if(type == 'f') return (pieces[HEIGHT - 1][WIDTH + 1].isFull()) && !isLeaking();
-        if(type == 'c') {
-        	return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur>0 &&!isLeaking());
-        }
-        return false;
+        return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur>0 &&!isLeaking());
     }
 
 
@@ -282,7 +292,7 @@ public class Level {
 		// puis appelle update dès la source
 		voidAll();
 		update(0,0);
-		estFinie();
+		estFinie(true);
 	}
 	
 	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
@@ -486,15 +496,19 @@ public class Level {
 		if (isInTab(y, x)) {
 			selected_x = x;
 			selected_y = y;
-			affiche();
+			if(!estFinie(false))
+				affiche();
 		}
 	}
 
 	void rotatePointer() {
-		if (pieces[selected_y][selected_x] != null) {
-			rotate(selected_y, selected_x);
-			update();
-			affiche();
+		if(!estFinie(false)) {
+			if (pieces[selected_y][selected_x] != null) {
+				rotate(selected_y, selected_x);
+				update();
+			}
+			if(!estFinie(false))
+				affiche();
 		}
 	}
 

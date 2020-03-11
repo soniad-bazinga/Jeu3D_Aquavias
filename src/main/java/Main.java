@@ -12,6 +12,7 @@ public class Main {
 		Menu m1 = new Menu(m);
 		mw = new MenuWindow(m1);
 	}
+	
 	void playLevel(int i){
 		try {
 			mw.dispatchEvent(new WindowEvent(mw, WindowEvent.WINDOW_CLOSING));

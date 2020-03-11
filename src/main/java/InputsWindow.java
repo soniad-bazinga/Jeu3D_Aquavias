@@ -18,8 +18,8 @@ public class InputsWindow extends JFrame implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		if (level.compteur<=0) {
-			return;
+		if (level.compteur<=0 || level.Victory()) {
+			arg0.setKeyCode(KeyEvent.VK_SPACE);
 		}
 		int keyCode = arg0.getKeyCode();
 	    switch( keyCode ) { 
@@ -38,9 +38,29 @@ public class InputsWindow extends JFrame implements KeyListener{
 	        case KeyEvent.VK_ENTER :
 	        	level.rotatePointer();
 	        	break;
+	        case KeyEvent.VK_SPACE :
+	        	if (level.Victory()) {
+	        		try {
+		        		dispose();
+		        		Level.clearScreen();
+	        			level.newLevel(++level.ID);
+	        		}catch (Exception e) {
+	        			Level.clearScreen();
+	        			System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
+	        		}
+        		}else {
+        			try {
+	        			dispose();
+	        			Level.clearScreen();
+	        			level.newLevel(level.ID);
+        			}catch (Exception e) {
+        				System.out.println("wtf ya un souci ...");
+        			}
+        		}
+	        	break;
 	     }	
 	}
-
+	
 	@Override
 	public void keyReleased(KeyEvent arg0) {
 		// TODO Auto-generated method stub

@@ -83,7 +83,6 @@ public class Level {
 		WIDTH = w;
 		HEIGHT = h;
 		compteur = Math.toIntExact((long) obj.get("compteur"));
-		type = ((String) obj.get("type")).charAt(0);
 		setTab(w, h);
 
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */

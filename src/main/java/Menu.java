@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.util.Objects;
 import java.util.Scanner;
@@ -8,7 +7,7 @@ public class Menu {
     final File folder = new File("levels/");
     Scanner player;
     int selected_option  = 0;
-    int selected_level = 1;
+    int selected_level = 0;
     int level_number = 0;
     boolean selecting_level = false;
     boolean closed = false;
@@ -41,7 +40,7 @@ public class Menu {
     }
 
     public void printFolderLevels(final File folder) throws Exception {
-        int i = 1;
+        int i = 0;
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
             if (!fileEntry.getName().equals("id.json")) {
                 if(i == selected_level) System.out.print(ANSI_SELECTED);
@@ -62,10 +61,11 @@ public class Menu {
     }
 
     void switchLevel(int dir){
+    	//dir=1 on descend dans le menu, -1 on monte
         if(!selecting_level) return;
-        if(dir == 1 && selected_level<level_number) selected_level++;
-        if(dir == -1 && selected_level > 1) selected_level--;
-        if(!(dir == -1 && selected_level == 1) && !(dir == 1 && selected_level == level_number))
+        if(dir == 1 && selected_level<(level_number-1)) selected_level++;
+        if(dir == -1 && selected_level > 0) selected_level--;
+        if(!(dir == -1 && selected_level == -1) && !(dir == 1 && selected_level == level_number))
         afficheLevels();
     }
 

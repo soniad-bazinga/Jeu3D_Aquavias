@@ -437,7 +437,7 @@ public class Level {
 		char c;
 
 
-		System.out.println("** Bienvenue à l'atelier de création de niveaux! **");
+		System.out.println("** Bienvenue dans l'atelier de création de niveaux! **");
 		System.out.println("Choisis une taille : ");
 		System.out.println("Longueur = ");
 		h= sc.nextInt();

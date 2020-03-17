@@ -4,7 +4,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 
 public class waterPiece extends Group {
-    waterGrid[][] water;
+    waterTile[][] water;
     static double WATER_SIZE;
     static int col = 0;
     Color[] test = {Color.RED, Color.BLUE, Color.YELLOW};
@@ -29,32 +29,32 @@ public class waterPiece extends Group {
 
         WATER_SIZE = s;
 
-        water = new waterGrid[3][3];
+        water = new waterTile[3][3];
 
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3 ; j++){
-                System.out.println(c);
-                water[i][j] = new waterGrid(3,test[col%3]);
+                water[i][j] = new waterTile((double) WATER_SIZE/3);
+                water[i][j].setTranslateX(WATER_SIZE/3 *(i-1) * 2);
+                water[i][j].setTranslateZ(WATER_SIZE/3 * (j-1)* 2);
+                water[i][j].setVisible(false);
                 this.getChildren().add(water[i][j]);
-                water[i][j].setTranslateX(WATER_SIZE/3 * (i-1) * 2);
-                water[i][j].setTranslateZ(WATER_SIZE/3 * (j-1) * 2);
             }
         }
-        col++;
-        water[1][1].setFull();
+        //getChildren().add(new Box(WATER_SIZE,WATER_SIZE,WATER_SIZE));
+        water[1][1].setVisible(true);
         switch(c){
             case "L" :
-                water[0][1].setFull();
-                water[1][2].setFull();
+                water[0][1].setVisible(true);
+                water[1][2].setVisible(true);
                 break;
             case "I" :
-                water[0][1].setFull();
-                water[2][1].setFull();
+                water[0][1].setVisible(true);
+                water[2][1].setVisible(true);
                 break;
             case "T" :
-                water[1][0].setFull();
-                water[1][2].setFull();
-                water[2][1].setFull();
+                water[1][0].setVisible(true);
+                water[1][2].setVisible(true);
+                water[2][1].setVisible(true);
                 break;
             default:
                 /* piece en X mais j'ai la flemme */
@@ -88,8 +88,8 @@ public class waterPiece extends Group {
         int x_progression,y_progression;
 
 
-        public waterGrid(int w,Color c){
-            getChildren().add(new Box(WATER_SIZE/3,WATER_SIZE/3,WATER_SIZE/3));
+        public waterGrid(double w){
+            this.getChildren().add(new Box(w,w,w));
             /*WATER_GRID_LENGTH = w; //Le nombre de sous divisions d'une waterTile
             WATER_GRID_SIZE = WATER_SIZE/3; //une water grid est divisé en 3 (comme reprensenté en haut)
             WATER_TILE_SIZE = WATER_GRID_SIZE/WATER_GRID_LENGTH; // la taille d'une tile, soit la taille de la gride / le nombre d'elements
@@ -154,18 +154,18 @@ public class waterPiece extends Group {
             }
         }
 
-        public class waterTile extends Box {
-            waterTile(double size,Color c){
-                setVisible(false);
-                setScaleX(size);
-                setScaleY(.5);
-                setScaleZ(size);
-                PhongMaterial material = new PhongMaterial();
-                //material.setDiffuseColor(new Color(.61,.80,.87,.8));
-                material.setDiffuseColor(c);
-                material.setSpecularColor(Color.AQUAMARINE);
-                setMaterial(material);
-            }
+    }
+
+    public class waterTile extends Box {
+        waterTile(double size){
+            setVisible(false);
+            setScaleX(size);
+            setScaleY(.5);
+            setScaleZ(size);
+            PhongMaterial material = new PhongMaterial();
+            material.setDiffuseColor(new Color(.61,.80,.87,.8));
+            material.setSpecularColor(Color.AQUAMARINE);
+            setMaterial(material);
         }
     }
 }

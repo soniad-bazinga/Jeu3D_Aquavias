@@ -91,12 +91,12 @@ public class PieceOverview extends Application{
                 /* si la piece [i][j] est pleine, on lui affiche une waterTile */
                 /* mais avec une visibilité a false */
                 /* comme ça la rotation de la waterTile sera toujours actualisée */
-                waterPieces[i][j] = new waterPiece(pieces[i][j].getType(),(int) PIECE_SIZE);
+                waterPieces[i][j] = new waterPiece(pieces[i][j].getType(), PIECE_SIZE/2);
                 waterPieces[i][j].setTranslateX(PIECE_SIZE * i-15);
                 waterPieces[i][j].setTranslateY(6.5);
                 waterPieces[i][j].setTranslateZ((PIECE_SIZE * j-15));
                 /* debug */
-                models[i][j].setVisible(false);
+                //models[i][j].setVisible(false);
                 if(!pieces[i][j].isFull()) waterPieces[i][j].setVisible(false);
                 /* on les tournes comme il se doit :) */
                 for(int r = 0 ; r < pieces[i][j].getRotation() ; r++){

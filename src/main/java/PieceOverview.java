@@ -19,6 +19,7 @@ import javafx.util.Duration;
 
 import java.awt.event.ActionEvent;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class PieceOverview extends Application{
 
@@ -91,7 +92,7 @@ public class PieceOverview extends Application{
                 /* si la piece [i][j] est pleine, on lui affiche une waterTile */
                 /* mais avec une visibilité a false */
                 /* comme ça la rotation de la waterTile sera toujours actualisée */
-                waterPieces[i][j] = new waterPiece(pieces[i][j].getType(), PIECE_SIZE/2);
+                waterPieces[i][j] = new waterPiece(pieces[i][j].getType(), PIECE_SIZE/2, this, i , j);
                 waterPieces[i][j].setTranslateX(PIECE_SIZE * i-15);
                 waterPieces[i][j].setTranslateY(6.5);
                 waterPieces[i][j].setTranslateZ((PIECE_SIZE * j-15));
@@ -138,19 +139,53 @@ public class PieceOverview extends Application{
         stage.setTitle("Aperçu de pièce");
         stage.setScene(scene);
         stage.show();
+        start_water();
     }
 
     void rotate(int x,int y){
         /* on rotate le jeu, les pièces, et les pièces d'eau */
-        level.rotate(x,y);
+        level.new_rotate(x,y);
         models[x][y].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
         waterPieces[x][y].rotate();
-        /* on désactive l'eau */
-        waterPieces[x][y].setVisible(false);
         /* on update */
-        level.update();
+        level.new_update();
         level.affiche();
     }
+
+    ArrayList<waterPiece> pile = new ArrayList<waterPiece>();
+
+    void start_water(){
+        waterPieces[0][0].flow(2,1);
+    }
+
+    void addPile(waterPiece p){
+        pile.add(0,p);
+    }
+
+    /*
+        droite : 0;1
+        gauche : 2;1
+        bas : 1; 0
+        haut 1; 2
+     */
+
+    /* sur la même base qu'update */
+    void flow(int i,int j){
+        System.out.println(i+" "+j);
+        if (level.isInTab(i + 1, j) && level.connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !waterPieces[i + 1][j].isFull()){
+            waterPieces[i+1][j].flow(1,2);
+        }
+        if (level.isInTab(i - 1, j) && level.connected(pieces[i][j], pieces[i - 1][j], "UP") && !waterPieces[i - 1][j].isFull()){
+            waterPieces[i-1][j].flow(1,0);
+        }
+        if (level.isInTab(i, j + 1) && level.connected(pieces[i][j], pieces[i][j + 1], "RIGHT") && !waterPieces[i][j + 1].isFull()){
+            waterPieces[i][j+1].flow(2,1);
+        }
+        if (level.isInTab(i, j-1) && level.connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !waterPieces[i][j - 1].isFull()){
+            waterPieces[i][j-1].flow(0,1);
+        }
+    }
+
 
     void setFull(int i, int j, boolean b){
         /* on l'active ou désactive */

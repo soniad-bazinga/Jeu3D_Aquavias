@@ -1,6 +1,7 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
@@ -196,6 +197,34 @@ public class Level implements Cloneable {
 		}
 	}
 
+	/* pour pallier au voidAll() :) */
+	void new_rotate(int i, int j){
+		/* si la piece n'est pas en dehors du plateau */
+		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
+			pieces[i][j].setFull(false);
+			pieces[i][j].rotate();
+			counter--;
+			/* puis on vide toutes les pieces ajoutés avant dans la pile */
+			while(!pile.isEmpty() && (pile.get(0).getI() != i || pile.get(0).getJ() != j)){
+				/* Mettre a jour la vue */
+				if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				pieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
+				pile.remove(0);
+			}
+			/* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
+			if(!pile.isEmpty()) {
+				if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				pile.remove(0);
+			}
+			/* puis on appelle l'udpate */
+			if(!pile.isEmpty()) {
+				new_update(pile.get(0).getI(),pile.get(0).getJ());
+			}else{
+				new_update();
+			}
+		}
+	}
+
 	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
 		while (!hasWon()) {
 			update();
@@ -215,6 +244,11 @@ public class Level implements Cloneable {
 		// puis appelle update dès la source
 		voidAll();
 		update(0, 0);
+	}
+
+	void new_update(){
+		//voidAll();
+		new_update(0, 0);
 	}
 
 	boolean isEnd(int x, int y) {
@@ -256,6 +290,35 @@ public class Level implements Cloneable {
 		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !pieces[i][j - 1].isFull()) {
 			setFull(i, j - 1);
 			update(i, j - 1);
+		}
+	}
+
+	ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
+
+	void new_update(int i, int j){
+		if(i!=0 || j!=0)pile.add(0, new Coordonnes(i,j)); // on ajoute au debut de la pile
+		// vérifie que les pièces limitrophes existent, qu'elles sont connectées à
+		// l'actuelle et qu'elles ne sont pas déjà remplies
+		if (i == HEIGHT - 1 && j == WIDTH + 1)
+			return;
+		/* Met a jour la vue */
+		if(pieceoverview != null) pieceoverview.setFull(i,j,true);
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
+			setFull(i + 1, j);
+			new_update(i + 1, j);
+		}
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP") && !pieces[i - 1][j].isFull()) {
+			setFull(i - 1, j);
+			new_update(i - 1, j);
+		}
+		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT") && !pieces[i][j + 1].isFull()) {
+			setFull(i, j + 1);
+			new_update(i, j + 1);
+
+		}
+		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !pieces[i][j - 1].isFull()) {
+			setFull(i, j - 1);
+			new_update(i, j - 1);
 		}
 	}
 
@@ -522,4 +585,19 @@ public class Level implements Cloneable {
 	Piece[][] getPieces(){ return pieces; }
 
 	void setOverviewer(PieceOverview po){ pieceoverview = po ; }
+
+	private class Coordonnes{
+		int i;
+		int j;
+
+		public Coordonnes(int i, int j){
+			this.i = i;
+			this.j = j;
+		}
+
+		int getI(){ return i;}
+		int getJ(){ return j;}
+
+		Piece getPiece(){ return pieces[i][j]; }
+	}
 }

@@ -1,12 +1,17 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Stack;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 
 public class Level {
 	Piece[][] pieces;
@@ -102,13 +107,10 @@ public class Level {
 
 		while (iterator.hasNext()) {
 			JSONArray x = iterator.next();
-			Iterator<JSONObject> iteratorX = x.iterator();
 
 			/* Ici on passe aux sous tableaux */
 
-			while (iteratorX.hasNext()) {
-				JSONObject p = iteratorX.next();
-
+			for (JSONObject p : (Iterable<JSONObject>) x) {
 				/* On vérifie si le type de la pièce, pour voir si elle est null ou non */
 
 				String type = (String) p.get("TYPE");
@@ -400,6 +402,91 @@ public class Level {
 			System.out.print("=");
 		System.out.println("#" + ANSI_RESET + "\n");
 	}
+
+	boolean theEnd(int x, int y){
+		return x== HEIGHT-1 && y== WIDTH+1;
+	}
+
+	boolean theStart(int x, int y){
+		return x== 0 && y==0;
+	}
+
+
+
+
+
+	private boolean contains(ArrayList<Coordinates> temp, int x, int y){
+		for(Coordinates c: temp){
+			if(c.x== x && c.y== y){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+
+
+
+ //méthode qui permet de créer un niveau 
+	  void createLevel(){
+
+		Scanner sc= new Scanner(System.in);
+		int h, w;
+		String type;
+		int rotation;
+
+		char c;
+
+
+		System.out.println("** Bienvenue dans l'atelier de création de niveaux! **");
+		System.out.println("Choisis une taille : ");
+		System.out.println("Longueur = ");
+		h= sc.nextInt();
+		sc.nextLine();
+		System.out.print("Largeur= ");
+		w= sc.nextInt();
+		sc.nextLine();
+		Level level= new Level(h, w);
+		System.out.println("Yay! Tu as créé le plateau! Maintenant, remplie le avec les pièces de ton choix: ");
+		for(int i=0; i< h; i++){
+			for(int j=1; j< w-1; j++) {
+				System.out.println("Quel type? { I, L, T, X} ");  //instruction back
+				type = sc.nextLine();
+				while (!type.equals("L") && !type.equals("T") && !type.equals("I") && !type.equals("X")) {
+					System.out.println("Mauvaise pioche, choisis à nouveau:  {I, L, T, X}: ");
+					type = sc.nextLine();
+				}
+
+				System.out.println("Nombre de rotation? ");           //on peut utiliser un bloc try catch ou une assertion 
+				rotation = sc.nextInt();
+				sc.nextLine();
+				while (rotation < 0) {
+					System.out.println("Choisis à nouveau: ");
+					rotation = sc.nextInt();
+					sc.nextLine();
+				}
+				level.pieces[i][j] = level.getPiece(type, rotation);
+
+				level.affiche();
+			}
+		}
+
+
+		System.out.println("Level créé avec succès! Veux-tu le sauvegarder ? O/N");
+		c= sc.nextLine().charAt(0);
+		if(c=='Y'){
+			level.saveLevel();
+			System.out.println("Sauvegargé, à la prochaine! ");
+		}else{
+			System.out.println();
+		}
+
+
+
+	}
+
 
 	@SuppressWarnings("unchecked")
 	void saveLevel() { /* pour sauvegarder le niveau */

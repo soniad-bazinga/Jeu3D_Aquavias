@@ -7,10 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="aquavias-game" />
+        <module name="aquavias" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="aquavias-game" target="8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

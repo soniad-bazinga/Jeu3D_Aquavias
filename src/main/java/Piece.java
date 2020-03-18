@@ -7,8 +7,7 @@ public abstract class Piece {
 	boolean full;
 	char[] symbols;
 	int index;
-	
-	
+
 	
 	
 	/* Fais tourner la pièce de 90° */

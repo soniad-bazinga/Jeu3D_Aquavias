@@ -25,7 +25,8 @@ public class Level {
 	public final int HEIGHT;
 	int selected_x;
 	int selected_y;
-	private char type;
+	private char type; 
+	//c pour le compteur, f pour fuite, n pour 'normal' c'est à dire sans restriction
 	int compteur;
 
 	
@@ -67,7 +68,7 @@ public class Level {
 	@SuppressWarnings("unchecked")
 	public Level(int id) throws Exception {
 
-		System.out.println("Chargement du niveau...\n");
+		System.out.println("\nChargement du niveau...\n");
 		FileReader reader;
 
 		/* on récupère le fichier contenant le lvl */
@@ -86,6 +87,7 @@ public class Level {
 		ID = Math.toIntExact((long) obj.get("ID"));
 		WIDTH = w;
 		HEIGHT = h;
+		compteur = Math.toIntExact((long) obj.get("compteur"));
 		setTab(w, h);
 
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
@@ -166,38 +168,45 @@ public class Level {
 		return pc;
 	}
 
-	void affiche() { /* print the state of the game */
-    System.out.println("----- AQUAVIAS -----");
-        if (type == 'c' && compteur > 10) System.out.println("---- Coups restants : " + compteur + " ----");
-        else if (type == 'c' && compteur > 1) System.out.println("---- Plus que " + compteur + " coups ! ----");
-        else if (type == 'c' && compteur == 1) System.out.println("----  C'est votre denier coup ! ----");
-        for (Piece[] piece : pieces) {
-            for (Piece value : piece) {
-                if (value != null) {
-                    if (value.isFull())
-                        System.out.print(ANSI_BLUE); /* if piece is full print it in blue */
-                    System.out.print(value.toString());
-                    if (value.isFull())
-                        System.out.print(ANSI_RESET); /* and stop the blue */
+	void affiche() { /* Affiche l'état du jeu */
+		clearScreen();
+		System.out.println(ANSI_BOLD+"              ["+compteur+"]"+ANSI_RESET);
+		for (int i = 0; i < pieces.length; i++) {
 
-                } else {
-                    System.out.print(" ");
-                }
-            }
-            System.out.println();
-        }
-    }
+			for (int j = 0; j < pieces[i].length; j++) {
 
-	
-	public static void clearScreen() {  
-	    System.out.print("\033[H\033[2J");  
-	    System.out.flush();  
+				if (pieces[i][j] != null) {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
+					if (pieces[i][j].isFull())
+						System.out.print(ANSI_BLUE); /* Si la pièce contient de l'eau elle s'affiche en bleu */
+					System.out.print(pieces[i][j].toString());
+					if (pieces[i][j].isFull() || (i == selected_y && j == selected_x))
+						System.out.print(ANSI_RESET); /* Et on arrête le bleu */
+				} else {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
+					System.out.print(" ");
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_RESET);
+				}
+			}
+			System.out.println();
+		}
+	}
+
+
+
+	public static void clearScreen() {
+		System.out.print("\033[H\033[2J");  
+		System.out.flush();
 	}  
 
 	void rotate(int i, int j) { /*
 								 * Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle
 								 * contient avant
 								 */
+		if(i==0 && j==0 || i==HEIGHT-1 && j==WIDTH+1) return;
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
@@ -205,84 +214,77 @@ public class Level {
 		}
 	}
 
-	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
-		while (!Victory()) {
-			update();
-			affiche();
-			getPiecePos();
-			rotate(selected_y, selected_x);
-			System.out.println();
-		}
+	boolean isLeaking() {
+		return(nbLeak()!=0);
 	}
 	
-	boolean isLeaking() {
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[i].length; j++) {
-                if (pieces[i][j] != null) {
-                    if (pieces[i][j].isFull()) { //If the piece contains water
-                        if (pieces[i][j].isDown()) { //If the piece has an exit facing down
-                            //If there is nothing below, it is leaking
-                            if (i == pieces.length - 1) {
-                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                            } else {
-                                if (pieces[i + 1][j] != null) { //If there is a piece below
-                                    if (!connected(pieces[i][j], pieces[i + 1][j], "DOWN")) { //If the two pieces don't connect
-                                        System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                        return true; //It is leaking
-                                    }
-                                }
-                            }
-                            return true; //If the piece is in the last line of the array/level
-                        } else if (pieces[i][j].isLeft() && i != 0 && j != 0) { //If the piece has an exit facing left
-                            if (j == 1) {
-                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                return true; //If it's the first in its line, it's leaking
-                            }
-                            if (pieces[i][j - 1] != null) {
-                                if (!connected(pieces[i][j], pieces[i][j - 1], "LEFT")) { //If the two pieces don't connect
-                                    System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                    return true; //It is leaking
-                                }
-                            }
-                            return true; //If there's nothing left of the piece
-                        } else if (pieces[i][j].isRight()) { //If the piece has an exit facing right
-                            if (j == pieces[i].length - 1 && i != pieces.length - 1) {
-                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                return true; //If it's the last in its line, it's leaking
-                            }
-                            if (pieces[i][j + 1] != null) {
-                                if (!connected(pieces[i][j], pieces[i][j + 1], "RIGHT")) { //If the two pieces don't connect
-                                    System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                    return true; //It is leaking
-                                }
-                            }
-                            return true; //If there's nothing right of the piece
-                        } else if (pieces[i][j].isUp()) { //If the piece has an exit facing up
-                            if (i == 0) {
-                                System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                return true; //If it's in the first line, it's leaking
-                            }
-                            if (pieces[i - 1][j] != null) {
-                                if (!connected(pieces[i][j], pieces[i - 1][j], "LEFT")) { //If the two pieces don't connect
-                                    System.out.println("La pièce aux coordonnées (" + i + ", " + j + ") fuit.");
-                                    return true; //It is leaking
-                                }
-                            }
-                            return true; //If there's nothing above the piece, then it's leaking
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-
-	boolean Victory() {
-        if(type == 'n') return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
-        if(type == 'f') return (pieces[HEIGHT - 1][WIDTH + 1].isFull()) && !isLeaking();
-        if(type == 'c') return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur > 0);
-        return false;
+	public int nbLeak() {
+		int leak=0;
+		for (int i=0;i<HEIGHT;i++) {
+			for(int j=1;j<WIDTH+1;j++) {
+				if (pieces[i][j]!=null && pieces[i][j].isFull()) {
+					if (pieces[i][j].DOWN && (!isInTab(i + 1, j) || 
+									(isInTab(i + 1, j) && (pieces[i + 1][j]==null || 
+									(pieces[i + 1][j]!=null && !pieces[i + 1][j].UP))))) {
+						if((i+1!=0 || j!=0) && (i+1!=HEIGHT-1 || j!=WIDTH+1))
+							leak++;			
+					}
+					if (pieces[i][j].UP && (!isInTab(i - 1, j) ||
+							(isInTab(i - 1, j) && (pieces[i - 1][j]==null||
+							(pieces[i-1][j]!=null && !pieces[i - 1][j].DOWN))))) {
+						if((i-1!=0 || j!=0) && (i-1!=HEIGHT-1 || j!=WIDTH+1))
+							leak++;
+					}
+					if (pieces[i][j].RIGHT && (!isInTab(i, j + 1) ||
+							(isInTab(i, j + 1) && (pieces[i][j + 1]==null ||
+							(pieces[i][j + 1]!=null && !pieces[i][j + 1].LEFT))))) {
+						if((i!=0 || j+1!=0) && (i!=HEIGHT-1 || j+1!=WIDTH+1))
+							leak++;
+					}
+					if (pieces[i][j].LEFT && (!isInTab(i, j - 1) ||
+							(isInTab(i, j - 1) && (pieces[i][j - 1]==null ||
+							(pieces[i][j - 1]!=null && !pieces[i][j - 1].RIGHT))))) {
+						if((i!=0 || j-1!=0) && (i!=HEIGHT-1 || j-1!=WIDTH+1))
+							leak++;
+					}
+				}
+			}
+		}
+		return leak;
+	}
+	
+	boolean estFinie(boolean affichage) { 
+		//retourne faux tant que le niveau n'est pas fini, appelle Victory() sinon 
+		//elle affiche le message de victoire ou de defaite si affichage est true
+		if(compteur<=0 || Victory()) {
+			if(affichage) {
+				if(Victory()) {
+					clearScreen();
+					affiche();
+					System.out.println("\nBravo, la ville est desservie en eau !\n\n"
+							+ "Pressez une touche pour passer au niveau suivant !");
+					
+				}
+				else {
+					clearScreen();
+					affiche();
+					System.out.println("\nOups, trop de deplacements, les habitants sont partis ailleurs chercher de l'eau :(\n\n"
+							+ "Pressez une touche pour tenter de resservir la ville !");
+					
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	void newLevel(int id) throws Exception{
+		Level lvl=new Level(id);
+		InputsWindow iw=new InputsWindow(lvl);
+	}
+	
+	boolean Victory() { //retourne si la partie est finie ou non
+        return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur>0 &&!isLeaking());
     }
 
 
@@ -291,6 +293,7 @@ public class Level {
 		// puis appelle update dès la source
 		voidAll();
 		update(0,0);
+		estFinie(true);
 	}
 	
 	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
@@ -328,8 +331,8 @@ public class Level {
 		pieces[i][j].setFull(true);
 	}
 
-	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
-		return (i < HEIGHT && j <= WIDTH  && i >= 0 && j > 0);
+	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans le tableau */
+		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
 	}
 
 	boolean isVerticalyOk(int i) {
@@ -579,15 +582,21 @@ public class Level {
 		if (isInTab(y, x)) {
 			selected_x = x;
 			selected_y = y;
-			affiche();
+			if(!estFinie(false))
+				affiche();
 		}
 	}
 
 	void rotatePointer() {
-		if (pieces[selected_y][selected_x] != null) {
-			rotate(selected_y, selected_x);
-			update();
-			affiche();
+		if(!estFinie(false)) {
+			if (pieces[selected_y][selected_x] != null) {
+				rotate(selected_y, selected_x);
+				update();
+			}
+			if(!estFinie(false))
+				affiche();
 		}
 	}
+
+	
 }

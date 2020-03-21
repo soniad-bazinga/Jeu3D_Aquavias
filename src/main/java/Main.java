@@ -16,6 +16,7 @@ public class Main {
 		try {
 			mw.dispatchEvent(new WindowEvent(mw, WindowEvent.WINDOW_CLOSING));
 			Level lvl = new Level(i);
+
 			InputsWindow iw = new InputsWindow((lvl));
 		}catch(Exception e){
 

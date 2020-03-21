@@ -10,5 +10,8 @@
         <module name="aquavias" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="aquavias" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

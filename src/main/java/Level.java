@@ -415,20 +415,6 @@ public class Level {
 
 
 
-	private boolean contains(ArrayList<Coordinates> temp, int x, int y){
-		for(Coordinates c: temp){
-			if(c.x== x && c.y== y){
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-
-
-
-
  //méthode qui permet de créer un niveau 
 	  void createLevel(){
 

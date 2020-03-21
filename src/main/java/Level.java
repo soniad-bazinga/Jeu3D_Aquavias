@@ -403,19 +403,8 @@ public class Level {
 		System.out.println("#" + ANSI_RESET + "\n");
 	}
 
-	boolean theEnd(int x, int y){
-		return x== HEIGHT-1 && y== WIDTH+1;
-	}
 
-	boolean theStart(int x, int y){
-		return x== 0 && y==0;
-	}
-
-
-
-
-
- //méthode qui permet de créer un niveau 
+	//méthode qui permet de créer un niveau
 	  void createLevel(){
 
 		Scanner sc= new Scanner(System.in);
@@ -462,7 +451,7 @@ public class Level {
 
 		System.out.println("Level créé avec succès! Veux-tu le sauvegarder ? O/N");
 		c= sc.nextLine().charAt(0);
-		if(c=='Y'){
+		if(c=='O'){
 			level.saveLevel();
 			System.out.println("Sauvegargé, à la prochaine! ");
 		}else{

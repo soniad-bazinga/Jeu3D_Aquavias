@@ -31,8 +31,16 @@ public class InputsWindow extends JFrame implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		if (level.compteur<=0 || level.Victory()) {
-			arg0.setKeyCode(KeyEvent.VK_SPACE);
+		if (level.type == 'c'){
+			if (level.compteur <= 0 || level.Victory()) {
+				arg0.setKeyCode(KeyEvent.VK_SPACE);
+			}
+		} else if (level.type == 'f'){
+			if (level.gametime >= level.compteur || level.Victory()){
+				arg0.setKeyCode(KeyEvent.VK_SPACE);
+			}
+		} else {
+			if (level.Victory()) arg0.setKeyCode(KeyEvent.VK_SPACE);
 		}
 		int keyCode = arg0.getKeyCode();
 	    switch( keyCode ) { 
@@ -57,7 +65,7 @@ public class InputsWindow extends JFrame implements KeyListener{
 		        		dispose();
 		        		Level.clearScreen();
 	        			level.newLevel(++level.ID);
-	        		}catch (Exception e) {
+	        		} catch (Exception e) {
 	        			Level.clearScreen();
 	        			System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
 	        			seeya.schedule(seeyatask, 1000); //L'action se fera 1s après la mise sous "sleep" du thread en cours (cette fonction)
@@ -69,7 +77,7 @@ public class InputsWindow extends JFrame implements KeyListener{
 						}
 						System.exit(0); //Le jeu est fini, nous pouvons sortir
 	        		}
-        		}else {
+        		} else {
         			try {
 	        			dispose();
 	        			Level.clearScreen();

@@ -2,6 +2,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -25,9 +27,12 @@ public class Level {
 	public final int HEIGHT;
 	int selected_x;
 	int selected_y;
-	private char type; 
+	char type;
 	//c pour le compteur, f pour fuite, n pour 'normal' c'est à dire sans restriction
 	int compteur;
+	Instant start = Instant.now(); //Commence le décompte dès le début du niveau
+	Instant end; //Se mettra à jour à chaque action de la part des utilisateurs
+	int gametime;
 
 	
 	public Level(int w, int h) {
@@ -89,6 +94,10 @@ public class Level {
 		HEIGHT = h;
 		compteur = Math.toIntExact((long) obj.get("compteur"));
 		setTab(w, h);
+		String t = obj.get("type").toString();
+		type = t.charAt(0);
+
+
 
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
 
@@ -170,7 +179,14 @@ public class Level {
 
 	void affiche() { /* Affiche l'état du jeu */
 		clearScreen();
-		System.out.println(ANSI_BOLD+"              ["+compteur+"]"+ANSI_RESET);
+		if(type == 'c') System.out.println(ANSI_BOLD+"              ["+compteur+"]"+ANSI_RESET);
+		if (type =='f'){
+			gametime = howLongSinceStart(); //La variable mesure la différence entre l'instant de début et l'instant présent
+			if(gametime<=compteur-10)
+				System.out.println(ANSI_BOLD+"              [" + (compteur-gametime) + " secondes restantes !]"+ANSI_RESET);
+			else
+				System.out.println(ANSI_BOLD+"              [Vite, plus que " + (compteur-gametime) + " secondes !!]"+ANSI_RESET);
+		}
 		for (int i = 0; i < pieces.length; i++) {
 
 			for (int j = 0; j < pieces[i].length; j++) {
@@ -210,7 +226,7 @@ public class Level {
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
-        	compteur--;
+        	if(type == 'c') compteur--;
 		}
 	}
 
@@ -256,26 +272,54 @@ public class Level {
 	boolean estFinie(boolean affichage) { 
 		//retourne faux tant que le niveau n'est pas fini, appelle Victory() sinon 
 		//elle affiche le message de victoire ou de defaite si affichage est true
-		if(compteur<=0 || Victory()) {
-			if(affichage) {
-				if(Victory()) {
+		if (type == 'c'){
+			if(compteur<=0 || Victory()) {
+				if(affichage) {
+					if(Victory()) {
 					clearScreen();
 					affiche();
 					System.out.println("\nBravo, la ville est desservie en eau !\n\n"
 							+ "Pressez une touche pour passer au niveau suivant !");
-					
+					} else {
+						clearScreen();
+						affiche();
+						System.out.println("\nOups, trop de deplacements, les habitants sont partis ailleurs chercher de l'eau :(\n\n"
+								+ "Pressez une touche pour retenter d'aider la ville !");
+					}
 				}
-				else {
+				return true;
+			}
+			return false;
+		} else if (type == 'f'){
+			if (gametime >= compteur || Victory()){
+				if(affichage){
+					if (Victory()) {
+						clearScreen();
+						affiche();
+						System.out.println("\nBravo, la ville est desservie en eau !\n\n" +
+								"Pressez une touche pour passer au niveau suivant !");
+					} else {
+							clearScreen();
+							affiche();
+							System.out.println("\nAh c'est malin, il n'y a plus d'eau pour alimenter la ville !\n\n"
+									+ "Pressez une touche pour retenter de l'aider!");
+					}
+				}
+				return true;
+			}
+			return false;
+		} else {
+			if(Victory()) {
+				if (affichage) {
 					clearScreen();
 					affiche();
-					System.out.println("\nOups, trop de deplacements, les habitants sont partis ailleurs chercher de l'eau :(\n\n"
-							+ "Pressez une touche pour tenter de resservir la ville !");
-					
+					System.out.println("Bravo, la ville est desservie en eau !\n\n" +
+							"Pressez une touche pour passer au niveau suivant !");
 				}
+				return true;
 			}
-			return true;
+			return false;
 		}
-		return false;
 	}
 	
 	void newLevel(int id) throws Exception{
@@ -284,7 +328,12 @@ public class Level {
 	}
 	
 	boolean Victory() { //retourne si la partie est finie ou non
-        return (pieces[HEIGHT - 1][WIDTH + 1].isFull() && compteur>0 &&!isLeaking());
+		if(type == 'c' && compteur > 0 && !isLeaking())
+        	return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
+		else if (type == 'f' && gametime < compteur && !isLeaking())
+			return pieces[HEIGHT - 1][WIDTH + 1].isFull();
+		else
+			return pieces[HEIGHT - 1][WIDTH + 1].isFull() && !isLeaking();
     }
 
 
@@ -327,6 +376,12 @@ public class Level {
 		}
 	}
 
+	int howLongSinceStart(){
+		end = Instant.now();
+		Duration timePassed = Duration.between(start, end);
+		return (int)timePassed.toMillis()/1000;
+	}
+
 	void setFull(int i, int j) { /* Pour remplir la pièce de coordonnées i et j */
 		pieces[i][j].setFull(true);
 	}
@@ -364,7 +419,7 @@ public class Level {
 		return false;
 	}
 
-	void getPiecePos() {
+	/*void getPiecePos() {
 		System.out.println("\nPlease select X position.");
 		int scannerX = getInputInt();
 		while (!isHorizontalyOk(scannerX)) {
@@ -401,7 +456,7 @@ public class Level {
 		for (int i = 0; i < WIDTH; i++)
 			System.out.print("=");
 		System.out.println("#" + ANSI_RESET + "\n");
-	}
+	}*/
 
 
 	//méthode qui permet de créer un niveau
@@ -557,18 +612,18 @@ public class Level {
 		if (isInTab(y, x)) {
 			selected_x = x;
 			selected_y = y;
-			if(!estFinie(false))
+			if(!estFinie(true))
 				affiche();
 		}
 	}
 
 	void rotatePointer() {
-		if(!estFinie(false)) {
+		if(!estFinie(true)) {
 			if (pieces[selected_y][selected_x] != null) {
 				rotate(selected_y, selected_x);
 				update();
 			}
-			if(!estFinie(false))
+			if(!estFinie(true))
 				affiche();
 		}
 	}

@@ -182,10 +182,8 @@ public class Level {
 		if(type == 'c') System.out.println(ANSI_BOLD+"              ["+compteur+"]"+ANSI_RESET);
 		if (type =='f'){
 			gametime = howLongSinceStart(); //La variable mesure la différence entre l'instant de début et l'instant présent
-			if(gametime<=compteur-10)
-				System.out.println(ANSI_BOLD+"              [" + (compteur-gametime) + " secondes restantes !]"+ANSI_RESET);
-			else
-				System.out.println(ANSI_BOLD+"              [Vite, plus que " + (compteur-gametime) + " secondes !!]"+ANSI_RESET);
+			if(gametime<=compteur-10) System.out.println(ANSI_BOLD+"              [" + (compteur-gametime) + " secondes restantes !]"+ANSI_RESET);
+			else if(gametime >= compteur-10) System.out.println(ANSI_BOLD+"              [Vite, plus que " + (compteur-gametime) + " secondes !!]"+ANSI_RESET);
 		}
 		for (int i = 0; i < pieces.length; i++) {
 
@@ -473,7 +471,7 @@ public class Level {
 		System.out.println("** Bienvenue dans l'atelier de création de niveaux! **");
 		System.out.println("Choisis une taille : ");
 		System.out.println("Longueur = ");
-		h= sc.nextInt();
+		h = sc.nextInt();
 		sc.nextLine();
 		System.out.print("Largeur= ");
 		w= sc.nextInt();
@@ -505,7 +503,7 @@ public class Level {
 
 
 		System.out.println("Level créé avec succès! Veux-tu le sauvegarder ? O/N");
-		c= sc.nextLine().charAt(0);
+		c = sc.nextLine().charAt(0);
 		if(c=='O'){
 			level.saveLevel();
 			System.out.println("Sauvegargé, à la prochaine! ");
@@ -612,20 +610,22 @@ public class Level {
 		if (isInTab(y, x)) {
 			selected_x = x;
 			selected_y = y;
-			if(!estFinie(true))
+			if(!estFinie(false))
 				affiche();
 		}
+		estFinie(true);
 	}
 
 	void rotatePointer() {
-		if(!estFinie(true)) {
+		if(!estFinie(false)) {
 			if (pieces[selected_y][selected_x] != null) {
 				rotate(selected_y, selected_x);
 				update();
 			}
-			if(!estFinie(true))
+			if(!estFinie(false))
 				affiche();
 		}
+		estFinie(true);
 	}
 
 	

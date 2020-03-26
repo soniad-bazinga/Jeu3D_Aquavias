@@ -31,8 +31,16 @@ public class InputsWindow extends JFrame implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		if (level.compteur<=0 || level.Victory()) {
-			arg0.setKeyCode(KeyEvent.VK_SPACE);
+		if (level.type == 'c'){
+			if (level.estFinie(true)) {
+				arg0.setKeyCode(KeyEvent.VK_SPACE);
+			}
+		} else if (level.type == 'f'){
+			if (level.estFinie(true)){
+				arg0.setKeyCode(KeyEvent.VK_SPACE);
+			}
+		} else {
+			if (level.Victory()) arg0.setKeyCode(KeyEvent.VK_SPACE);
 		}
 		int keyCode = arg0.getKeyCode();
 	    switch( keyCode ) { 
@@ -52,33 +60,63 @@ public class InputsWindow extends JFrame implements KeyListener{
 	        	level.rotatePointer();
 	        	break;
 	        case KeyEvent.VK_SPACE :
-	        	if (level.Victory()) {
-	        		try {
-		        		dispose();
-		        		Level.clearScreen();
-	        			level.newLevel(++level.ID);
-	        		}catch (Exception e) {
-	        			Level.clearScreen();
-	        			System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
-	        			seeya.schedule(seeyatask, 1000); //L'action se fera 1s après la mise sous "sleep" du thread en cours (cette fonction)
-	        			try{
-	        				Thread.sleep(2500); //Mise sous sleep du thread en cours
+	        	if(level.type == 'c') {
+					if (level.Victory()) {
+						try {
+							dispose();
+							Level.clearScreen();
+							level.newLevel(++level.ID);
+						} catch (Exception e) {
+							Level.clearScreen();
+							System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
+							seeya.schedule(seeyatask, 1000); //L'action se fera 1s après la mise sous "sleep" du thread en cours (cette fonction)
+							try {
+								Thread.sleep(2500); //Mise sous sleep du thread en cours
 
-						} catch (InterruptedException ex) {
-							ex.printStackTrace();
+							} catch (InterruptedException ex) {
+								ex.printStackTrace();
+							}
+							System.exit(0); //Le jeu est fini, nous pouvons sortir
 						}
-						System.exit(0); //Le jeu est fini, nous pouvons sortir
-	        		}
-        		}else {
-        			try {
-	        			dispose();
-	        			Level.clearScreen();
-	        			level.newLevel(level.ID);
-        			}catch (Exception e) {
-        				System.out.println("wtf ya un souci ...");
-        			}
-        		}
-	        	break;
+					} else {
+						try {
+							dispose();
+							Level.clearScreen();
+							level.newLevel(level.ID);
+						} catch (Exception e) {
+							System.out.println("wtf ya un souci ...");
+						}
+					}
+					break;
+				} else if (level.type == 'f'){
+					if (level.Victory()) {
+						try {
+							dispose();
+							Level.clearScreen();
+							level.newLevel(++level.ID);
+						} catch (Exception e) {
+							Level.clearScreen();
+							System.out.println("Vous avez fini d'irriguer les villes ! Quelle maitrise de l'eau !\nSeriez-vous Poseidon ??");
+							seeya.schedule(seeyatask, 1000); //L'action se fera 1s après la mise sous "sleep" du thread en cours (cette fonction)
+							try {
+								Thread.sleep(2500); //Mise sous sleep du thread en cours
+
+							} catch (InterruptedException ex) {
+								ex.printStackTrace();
+							}
+							System.exit(0); //Le jeu est fini, nous pouvons sortir
+						}
+					} else {
+						try {
+							dispose();
+							Level.clearScreen();
+							level.newLevel(level.ID);
+						} catch (Exception e) {
+							System.out.println("wtf ya un souci ...");
+						}
+					}
+					break;
+				}
 	     }	
 	}
 	

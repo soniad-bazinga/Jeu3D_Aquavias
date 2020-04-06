@@ -10,8 +10,10 @@ public class waterPiece extends Group {
     PieceOverview overview;
     waterGrid[][] water;
     static double WATER_SIZE;
-    static int col = 0;
+    static double WAIT_TIME = .3f;
     int x,y;
+    boolean flowing = true;
+
 
     public waterPiece(String c, double s, PieceOverview p, int x, int y){
         this.x = x; this. y = y;
@@ -98,7 +100,8 @@ public class waterPiece extends Group {
         /* we first set the tiles i j full */
         water[i][j].setFull(true);
         /* we then wait using a timeline and call on every other parts */
-        Timeline wait = new Timeline(new KeyFrame(Duration.seconds(1), event ->{
+        Timeline wait = new Timeline(new KeyFrame(Duration.seconds(WAIT_TIME), event ->{
+            if(!flowing) return;
             if(inTab(i+1,j) && water[i+1][j].canPass() && !water[i+1][j].isFull()) flow(i+1,j);
             if(inTab(i-1,j) && water[i-1][j].canPass() && !water[i-1][j].isFull()) flow(i-1,j);
             if(inTab(i,j+1) && water[i][j+1].canPass() && !water[i][j+1].isFull()) flow(i,j+1);
@@ -108,9 +111,9 @@ public class waterPiece extends Group {
         wait.setCycleCount(1);
         /* and play it */
         wait.play();
-        if(isFull() && !overview.pileContains(x,y)){
+        if(isFull()){
             /* if the tile is complete, we then  call it on the neighbor tiles */
-            Timeline wait_recall = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            Timeline wait_recall = new Timeline(new KeyFrame(Duration.seconds(WAIT_TIME), event -> {
                 overview.flow(x, y);
             }));
             wait_recall.setCycleCount(1);

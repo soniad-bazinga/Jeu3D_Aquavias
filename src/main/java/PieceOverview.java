@@ -143,6 +143,7 @@ public class PieceOverview extends Application{
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
     void rotate(int x,int y){
+        if(x == 0 && y == 0) return;
         for(Coordonnes c : pile){
             System.out.println(c.getI()+" "+c.getJ());
         }
@@ -154,18 +155,20 @@ public class PieceOverview extends Application{
         if(pileContains(x,y)) {
             while (!pile.isEmpty() && (pile.get(0).getI() != x || pile.get(0).getJ() != y)) {
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
+                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
                 pile.remove(0);
             }
             /* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
             if (!pile.isEmpty()) {
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
+                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
                 pile.remove(0);
             }
-            if (!pile.isEmpty()) {
-                flow(pile.get(0).getI(), pile.get(0).getJ());
-            } else {
-                flow(0, 0);
-            }
+        }
+        if (!pile.isEmpty()) {
+            flow(pile.get(0).getI(), pile.get(0).getJ());
+        } else {
+            flow(0, 0);
         }
         /* on update */
         level.new_update();
@@ -174,8 +177,6 @@ public class PieceOverview extends Application{
 
 
     void start_water(){
-        /* on ajoute à la pile, comme dans level */
-        //pile.add(0,new Coordonnes(0,0));
         /* on lance la fonction a la case 0 */
         waterPieces[0][0].flow(1,0);
     }
@@ -190,18 +191,26 @@ public class PieceOverview extends Application{
 
     /* sur la même base qu'update */
     void flow(int i,int j){
+        System.out.print(i+" ; "+j);
         /* On ajoute chaque nouvel piece */
-        pile.add(0,new Coordonnes(i,j));
         if (level.isInTab(i + 1, j) && level.connected(level.pieces[i][j], level.pieces[i + 1][j], "DOWN") && !waterPieces[i + 1][j].isFull()){
+            pile.add(0,new Coordonnes(i+1,j));
+            waterPieces[i+1][j].flowing  = true;
             waterPieces[i+1][j].flow(0,1);
         }
         if (level.isInTab(i - 1, j) && level.connected(level.pieces[i][j], level.pieces[i - 1][j], "UP") && !waterPieces[i - 1][j].isFull()){
+            pile.add(0,new Coordonnes(i-1,j));
+            waterPieces[i-1][j].flowing = true;
             waterPieces[i-1][j].flow(2,1);
         }
         if (level.isInTab(i, j + 1) && level.connected(level.pieces[i][j], level.pieces[i][j + 1], "RIGHT") && !waterPieces[i][j + 1].isFull()){
+            pile.add(0,new Coordonnes(i,j+1));
+            waterPieces[i][j+1].flowing = true;
             waterPieces[i][j+1].flow(1,0);
         }
         if (level.isInTab(i, j-1) && level.connected(level.pieces[i][j], level.pieces[i][j - 1], "LEFT") && !waterPieces[i][j - 1].isFull()){
+            pile.add(0,new Coordonnes(i,j-1));
+            waterPieces[i][j-1].flowing = true;
             waterPieces[i][j-1].flow(1,2);
         }
     }
@@ -217,27 +226,6 @@ public class PieceOverview extends Application{
     void setFull(int i, int j, boolean b){
         /* on l'active ou désactive */
         waterPieces[i][j].setFull(b);
-    }
-
-    void updating(){
-        Timeline test = new Timeline(new KeyFrame(Duration.seconds(.1), event ->{
-            System.out.println("yo");
-        }));
-        test.setCycleCount(5);
-        test.play();
-    }
-
-    private Slider prepareSlider(){
-        Slider slider = new Slider();
-        slider.setMax(1000);
-        slider.setMin(-1000);
-        slider.setPrefWidth(300d);
-        slider.setLayoutX(-150);
-        slider.setLayoutY(200);
-        slider.setShowTickLabels(true);
-        slider.setTranslateZ(5);
-        slider.setStyle("-fx-base: black");
-        return slider;
     }
 
     /* Permet d'importer une pièce via une URL */

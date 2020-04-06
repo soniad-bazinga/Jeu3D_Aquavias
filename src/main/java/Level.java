@@ -207,13 +207,13 @@ public class Level implements Cloneable {
 			/* puis on vide toutes les pieces ajoutés avant dans la pile */
 			while(!pile.isEmpty() && (pile.get(0).getI() != i || pile.get(0).getJ() != j)){
 				/* Mettre a jour la vue */
-				if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				//if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
 				pieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
 				pile.remove(0);
 			}
 			/* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
 			if(!pile.isEmpty()) {
-				if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				//if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
 				pile.remove(0);
 			}
 			/* puis on appelle l'udpate */
@@ -302,7 +302,7 @@ public class Level implements Cloneable {
 		if (i == HEIGHT - 1 && j == WIDTH + 1)
 			return;
 		/* Met a jour la vue */
-		if(pieceoverview != null) pieceoverview.setFull(i,j,true);
+		//if(pieceoverview != null) pieceoverview.setFull(i,j,true);
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			new_update(i + 1, j);

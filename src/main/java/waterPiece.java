@@ -45,7 +45,6 @@ public class waterPiece extends Group {
                 this.getChildren().add(water[i][j]);
             }
         }
-        //getChildren().add(new Box(WATER_SIZE,WATER_SIZE,WATER_SIZE));
         water[1][1].setPass(true);
         switch(c){
             case "L" :
@@ -76,13 +75,13 @@ public class waterPiece extends Group {
                   DOWN
          */
 
-        boolean tmp1 = water[0][1].isFull();
-        boolean tmp2 = water[1][2].isFull();
-        water[0][1].setFull(water[1][0].isFull());
-        water[1][2].setFull(tmp1);
-        tmp1 = water[2][1].isFull();
-        water[2][1].setFull(tmp2);
-        water[1][0].setFull(tmp1);
+        boolean tmp1 = water[0][1].canPass();
+        boolean tmp2 = water[1][2].canPass();
+        water[0][1].setPass(water[1][0].canPass());
+        water[1][2].setPass(tmp1);
+        tmp1 = water[2][1].canPass();
+        water[2][1].setPass(tmp2);
+        water[1][0].setPass(tmp1);
     }
 
     boolean isFull(){
@@ -96,20 +95,39 @@ public class waterPiece extends Group {
 
 
     void flow(int i, int j){
+        /* we first set the tiles i j full */
         water[i][j].setFull(true);
-        Timeline test = new Timeline(new KeyFrame(Duration.seconds(1), event ->{
+        /* we then wait using a timeline and call on every other parts */
+        Timeline wait = new Timeline(new KeyFrame(Duration.seconds(1), event ->{
             if(inTab(i+1,j) && water[i+1][j].canPass() && !water[i+1][j].isFull()) flow(i+1,j);
             if(inTab(i-1,j) && water[i-1][j].canPass() && !water[i-1][j].isFull()) flow(i-1,j);
             if(inTab(i,j+1) && water[i][j+1].canPass() && !water[i][j+1].isFull()) flow(i,j+1);
             if(inTab(i,j-1) && water[i][j-1].canPass() && !water[i][j-1].isFull()) flow(i,j-1);
         }));
-        test.setCycleCount(1);
-        test.play();
-        if(isFull()) overview.flow(x,y);
+        /* we call it only one cycle (one time) */
+        wait.setCycleCount(1);
+        /* and play it */
+        wait.play();
+        if(isFull() && !overview.pileContains(x,y)){
+            /* if the tile is complete, we then  call it on the neighbor tiles */
+            Timeline wait_recall = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+                overview.flow(x, y);
+            }));
+            wait_recall.setCycleCount(1);
+            wait_recall.play();
+        }
     }
 
     boolean inTab(int i, int j){
         return(i>=0 && i<3 && j>=0 && j<3);
+    }
+
+    void setFull(boolean b){
+        for(int i = 0 ; i < 3 ; i++){
+            for(int j = 0; j < 3 ; j++){
+                water[i][j].setFull(b);
+            }
+        }
     }
 
     public class waterGrid extends Group{
@@ -120,7 +138,6 @@ public class waterPiece extends Group {
         int x_progression,y_progression;
         boolean full;
         boolean pass;
-
 
         public waterGrid(int w){
             full = false;

@@ -34,7 +34,6 @@ public class PieceOverview extends Application{
 
     /* ses nouveaux attributs pour afficher le level */
     static Level level;
-    static Piece[][] pieces;
 
     /* une matrice de piece3D (des groupes de mesh) */
     static Piece3D[][] models;
@@ -46,7 +45,6 @@ public class PieceOverview extends Application{
     public PieceOverview(Level level){
        super();
        this.level = level;
-       this.pieces = level.getPieces();
        launch();
     }
 
@@ -75,13 +73,13 @@ public class PieceOverview extends Application{
         Group root = new Group();
 
         /* On initialise nos deux tableaus */
-        waterPieces = new waterPiece[pieces.length][pieces[0].length];
-        models = new Piece3D[pieces.length][pieces[0].length];
+        waterPieces = new waterPiece[level.pieces.length][level.pieces[0].length];
+        models = new Piece3D[level.pieces.length][level.pieces[0].length];
 
         /* On recopie à l'identique le niveau en 3d */
         for(int i = 0 ; i < models.length ; i++) {
             for(int j = 0 ; j < models[i].length ; j++) {
-                if(pieces[i][j] == null) continue;
+                if(level.pieces[i][j] == null) continue;
                 models[i][j] = new Piece3D();
                 /* # A CHANGER QUAND ON AURA TOUT LES MODES # */
                 models[i][j].importModel(getClass().getResource("piece" + piece + "_simple.obj"));
@@ -92,16 +90,16 @@ public class PieceOverview extends Application{
                 /* si la piece [i][j] est pleine, on lui affiche une waterTile */
                 /* mais avec une visibilité a false */
                 /* comme ça la rotation de la waterTile sera toujours actualisée */
-                waterPieces[i][j] = new waterPiece(pieces[i][j].getType(), PIECE_SIZE/2, this, i , j);
+                waterPieces[i][j] = new waterPiece(level.pieces[i][j].getType(), PIECE_SIZE/2, this, i , j);
                 waterPieces[i][j].setTranslateX(PIECE_SIZE * i-15);
                 waterPieces[i][j].setTranslateY(6.5);
                 waterPieces[i][j].setTranslateZ((PIECE_SIZE * j-15));
                 /* debug */
                 //models[i][j].setVisible(false);
-                if(!pieces[i][j].isFull()) waterPieces[i][j].setVisible(false);
+                if(!level.pieces[i][j].isFull()) waterPieces[i][j].setVisible(false);
                 /* on les tournes comme il se doit :) */
-                for(int r = 0 ; r < pieces[i][j].getRotation() ; r++){
-                    waterPieces[i][j].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
+                for(int r = 0 ; r < level.pieces[i][j].getRotation() ; r++){
+                    waterPieces[i][j].rotate();
                     models[i][j].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
                 }
                 /* puis on les ajoutes a root */
@@ -142,54 +140,83 @@ public class PieceOverview extends Application{
         start_water();
     }
 
+    ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
+
     void rotate(int x,int y){
+        for(Coordonnes c : pile){
+            System.out.println(c.getI()+" "+c.getJ());
+        }
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         level.new_rotate(x,y);
         models[x][y].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
         waterPieces[x][y].rotate();
+        waterPieces[x][y].setFull(false);
+        if(pileContains(x,y)) {
+            while (!pile.isEmpty() && (pile.get(0).getI() != x || pile.get(0).getJ() != y)) {
+                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
+                pile.remove(0);
+            }
+            /* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
+            if (!pile.isEmpty()) {
+                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
+                pile.remove(0);
+            }
+            if (!pile.isEmpty()) {
+                flow(pile.get(0).getI(), pile.get(0).getJ());
+            } else {
+                flow(0, 0);
+            }
+        }
         /* on update */
         level.new_update();
         level.affiche();
     }
 
-    ArrayList<waterPiece> pile = new ArrayList<waterPiece>();
 
     void start_water(){
-        waterPieces[0][0].flow(2,1);
-    }
-
-    void addPile(waterPiece p){
-        pile.add(0,p);
+        /* on ajoute à la pile, comme dans level */
+        //pile.add(0,new Coordonnes(0,0));
+        /* on lance la fonction a la case 0 */
+        waterPieces[0][0].flow(1,0);
     }
 
     /*
-        droite : 0;1
-        gauche : 2;1
-        bas : 1; 0
-        haut 1; 2
+        droite : [1;0]
+        gauche : [1;2]
+        bas : [0;1]
+        haut : [2;1]
+
      */
 
     /* sur la même base qu'update */
     void flow(int i,int j){
-        System.out.println(i+" "+j);
-        if (level.isInTab(i + 1, j) && level.connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !waterPieces[i + 1][j].isFull()){
-            waterPieces[i+1][j].flow(1,2);
+        /* On ajoute chaque nouvel piece */
+        pile.add(0,new Coordonnes(i,j));
+        if (level.isInTab(i + 1, j) && level.connected(level.pieces[i][j], level.pieces[i + 1][j], "DOWN") && !waterPieces[i + 1][j].isFull()){
+            waterPieces[i+1][j].flow(0,1);
         }
-        if (level.isInTab(i - 1, j) && level.connected(pieces[i][j], pieces[i - 1][j], "UP") && !waterPieces[i - 1][j].isFull()){
-            waterPieces[i-1][j].flow(1,0);
+        if (level.isInTab(i - 1, j) && level.connected(level.pieces[i][j], level.pieces[i - 1][j], "UP") && !waterPieces[i - 1][j].isFull()){
+            waterPieces[i-1][j].flow(2,1);
         }
-        if (level.isInTab(i, j + 1) && level.connected(pieces[i][j], pieces[i][j + 1], "RIGHT") && !waterPieces[i][j + 1].isFull()){
-            waterPieces[i][j+1].flow(2,1);
+        if (level.isInTab(i, j + 1) && level.connected(level.pieces[i][j], level.pieces[i][j + 1], "RIGHT") && !waterPieces[i][j + 1].isFull()){
+            waterPieces[i][j+1].flow(1,0);
         }
-        if (level.isInTab(i, j-1) && level.connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !waterPieces[i][j - 1].isFull()){
-            waterPieces[i][j-1].flow(0,1);
+        if (level.isInTab(i, j-1) && level.connected(level.pieces[i][j], level.pieces[i][j - 1], "LEFT") && !waterPieces[i][j - 1].isFull()){
+            waterPieces[i][j-1].flow(1,2);
         }
+    }
+
+    boolean pileContains(int x, int y){
+        for(Coordonnes c : pile){
+            if(x == c.getI() && y == c.getJ()) return true;
+        }
+        return false;
     }
 
 
     void setFull(int i, int j, boolean b){
         /* on l'active ou désactive */
-        waterPieces[i][j].setVisible(b);
+        waterPieces[i][j].setFull(b);
     }
 
     void updating(){
@@ -233,5 +260,20 @@ public class PieceOverview extends Application{
                 this.getChildren().addAll(view);
             }
         }
+    }
+
+    private class Coordonnes{
+        int i;
+        int j;
+
+        public Coordonnes(int i, int j){
+            this.i = i;
+            this.j = j;
+        }
+
+        int getI(){ return i;}
+        int getJ(){ return j;}
+
+        waterPiece getPiece(){ return waterPieces[i][j]; }
     }
 }

@@ -12,6 +12,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -30,7 +31,7 @@ public class PieceOverview extends Application{
      /* utiliser le mode "piece"+piece+".obj" a afficher ! :) */
     static String piece = "I";
 
-    static final double PIECE_SIZE = 5.85;
+    static final double PIECE_SIZE = 4;
 
     /* ses nouveaux attributs pour afficher le level */
     static Level level;
@@ -61,11 +62,28 @@ public class PieceOverview extends Application{
 
         /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
-        camera.setTranslateZ(-70);
+
+        /*camera.setTranslateZ(-(level.HEIGHT * PIECE_SIZE) * 1.3);
+        System.out.println(level.HEIGHT * PIECE_SIZE);
+        System.out.println(level.WIDTH * PIECE_SIZE);
+        camera.setTranslateY(-((level.WIDTH * PIECE_SIZE + level.HEIGHT * PIECE_SIZE )));
+        camera.setTranslateX(level.WIDTH* PIECE_SIZE * 1.5);*
+         */
+        camera.setTranslateX(level.HEIGHT * PIECE_SIZE + (level.HEIGHT * 1.5 * PIECE_SIZE));
+        camera.setTranslateZ(-level.WIDTH/2 * PIECE_SIZE);
+        camera.setTranslateY(-50);
+        camera.getTransforms().add(new Rotate(-35, Rotate.X_AXIS));
+        camera.getTransforms().add(new Rotate(-35, Rotate.Z_AXIS));
+        camera.getTransforms().add(new Rotate(-45, Rotate.Y_AXIS));
+
+        //camera.getTransforms().add(new Rotate(-45,Rotate.Y_AXIS));
+        //camera.getTransforms().add(new Rotate(-45,Rotate.X_AXIS));
+
+        /*camera.setTranslateZ(-70);
         camera.setTranslateY(-100);
         camera.setTranslateX(70);
         camera.getTransforms().add(new Rotate(-45,Rotate.Y_AXIS));
-        camera.getTransforms().add(new Rotate(-45,Rotate.X_AXIS));
+        camera.getTransforms().add(new Rotate(-45,Rotate.X_AXIS));*/
 
         camera.setFarClip(1000);
 
@@ -82,21 +100,21 @@ public class PieceOverview extends Application{
                 if(level.pieces[i][j] == null) continue;
                 models[i][j] = new Piece3D();
                 /* # A CHANGER QUAND ON AURA TOUT LES MODES # */
-                models[i][j].importModel(getClass().getResource("piece" + piece + "_simple.obj"));
+                models[i][j].importModel("pieces3D/pieceI.obj");
                 /* on place la pièce */
-                models[i][j].setTranslateX(PIECE_SIZE * i-15);
-                models[i][j].setTranslateY(10);
-                models[i][j].setTranslateZ((PIECE_SIZE * j-15));
+                models[i][j].setTranslateX(PIECE_SIZE * i);
+                models[i][j].setTranslateY(0);
+                models[i][j].setTranslateZ((PIECE_SIZE * j));
                 /* si la piece [i][j] est pleine, on lui affiche une waterTile */
                 /* mais avec une visibilité a false */
                 /* comme ça la rotation de la waterTile sera toujours actualisée */
                 waterPieces[i][j] = new waterPiece(level.pieces[i][j].getType(), PIECE_SIZE/2, this, i , j);
-                waterPieces[i][j].setTranslateX(PIECE_SIZE * i-15);
-                waterPieces[i][j].setTranslateY(6.5);
-                waterPieces[i][j].setTranslateZ((PIECE_SIZE * j-15));
+                waterPieces[i][j].setTranslateX(PIECE_SIZE * i);
+                waterPieces[i][j].setTranslateY(-1.2);
+                waterPieces[i][j].setTranslateZ((PIECE_SIZE * j));
                 /* debug */
                 //models[i][j].setVisible(false);
-                if(!level.pieces[i][j].isFull()) waterPieces[i][j].setVisible(false);
+                if(!level.pieces[i][j].isFull()) waterPieces[i][j].setFull(false);
                 /* on les tournes comme il se doit :) */
                 for(int r = 0 ; r < level.pieces[i][j].getRotation() ; r++){
                     waterPieces[i][j].rotate();
@@ -126,8 +144,13 @@ public class PieceOverview extends Application{
                     mv = (waterPiece.waterGrid) pr.getIntersectedNode();
                 }
                 /* puis on récupère ses coordonnées sur l'axe x et y */
-                int x_coord = (int) Math.abs(Math.round(mv.localToScene(mv.getBoundsInLocal()).getMinX()/PIECE_SIZE)+models.length-2);
-                int y_coord = (int) Math.abs(Math.round(mv.localToScene(mv.getBoundsInLocal()).getMinZ()/PIECE_SIZE)+models.length-2);
+                /*
+                    (On récupère les coordonnées dans le plan, auxquels on ajoute la taille de la piece / 2 (la moitiée
+                    de pièce qui "dépasse" au début, et qu'on divise par la taille de la pièce pour obtenir
+                    leurs coordonnées sur le tableau level
+                 */
+                int x_coord = (int) Math.round((mv.localToScene(mv.getBoundsInLocal()).getMinX()+PIECE_SIZE/2)/PIECE_SIZE);
+                int y_coord = (int) Math.round((mv.localToScene(mv.getBoundsInLocal()).getMinZ()+PIECE_SIZE/2)/PIECE_SIZE);
                 /* on rotate le tout */
                 rotate(x_coord,y_coord);
             }
@@ -191,7 +214,7 @@ public class PieceOverview extends Application{
 
     /* sur la même base qu'update */
     void flow(int i,int j){
-        System.out.print(i+" ; "+j);
+        //System.out.print(i+" ; "+j);
         /* On ajoute chaque nouvel piece */
         if (level.isInTab(i + 1, j) && level.connected(level.pieces[i][j], level.pieces[i + 1][j], "DOWN") && !waterPieces[i + 1][j].isFull()){
             pile.add(0,new Coordonnes(i+1,j));
@@ -232,7 +255,7 @@ public class PieceOverview extends Application{
 
     private class Piece3D extends Group{
 
-        public void importModel(URL url){
+        public void importModel(String url){
 
             /* on créer une groupe vide */
 

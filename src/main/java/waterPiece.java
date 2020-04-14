@@ -37,6 +37,8 @@ public class waterPiece extends Group {
 
         WATER_SIZE = s;
 
+        setVisible(true);
+
         water = new waterGrid[3][3];
 
         for(int i = 0; i < 3; i++){
@@ -44,6 +46,7 @@ public class waterPiece extends Group {
                 water[i][j] = new waterGrid(3);
                 water[i][j].setTranslateX(WATER_SIZE/3 *(i-1) * 2);
                 water[i][j].setTranslateZ(WATER_SIZE/3 * (j-1)* 2);
+                water[i][j].setVisible(true);
                 this.getChildren().add(water[i][j]);
             }
         }
@@ -114,7 +117,7 @@ public class waterPiece extends Group {
         if(isFull()){
             /* if the tile is complete, we then  call it on the neighbor tiles */
             Timeline wait_recall = new Timeline(new KeyFrame(Duration.seconds(WAIT_TIME), event -> {
-                overview.flow(x, y);
+                if(isFull()) overview.flow(x, y);
             }));
             wait_recall.setCycleCount(1);
             wait_recall.play();

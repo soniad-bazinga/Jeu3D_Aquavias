@@ -31,7 +31,7 @@ public class PieceOverview extends Application{
      /* utiliser le mode "piece"+piece+".obj" a afficher ! :) */
     static String piece = "I";
 
-    static final double PIECE_SIZE = 4;
+    static final double PIECE_SIZE = 2;
 
     /* ses nouveaux attributs pour afficher le level */
     static Level level;
@@ -100,7 +100,7 @@ public class PieceOverview extends Application{
                 if(level.pieces[i][j] == null) continue;
                 models[i][j] = new Piece3D();
                 /* # A CHANGER QUAND ON AURA TOUT LES MODES # */
-                models[i][j].importModel("pieces3D/pieceI.obj");
+                models[i][j].importModel("model_test/piece"+level.pieces[i][j].getType()+".obj");
                 /* on place la pièce */
                 models[i][j].setTranslateX(PIECE_SIZE * i);
                 models[i][j].setTranslateY(0);
@@ -116,6 +116,10 @@ public class PieceOverview extends Application{
                 //models[i][j].setVisible(false);
                 if(!level.pieces[i][j].isFull()) waterPieces[i][j].setFull(false);
                 /* on les tournes comme il se doit :) */
+                if(level.pieces[i][j].getType() == "L"){
+                    /* erreur lors de la création du model, A MODIFIER */
+                    for(int r = 0 ; r < 3 ; r++)  models[i][j].getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
+                }
                 for(int r = 0 ; r < level.pieces[i][j].getRotation() ; r++){
                     waterPieces[i][j].rotate();
                     models[i][j].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));

@@ -100,6 +100,7 @@ public class waterPiece extends Group {
 
 
     void flow(int i, int j){
+        /* on utilise pas encore le système de water tile, a modifer dans le futur */
         /* we first set the tiles i j full */
         water[i][j].setFull(true);
         /* we then wait using a timeline and call on every other parts */

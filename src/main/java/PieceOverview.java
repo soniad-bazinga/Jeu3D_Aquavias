@@ -171,14 +171,10 @@ public class PieceOverview extends Application{
 
     void rotate(int x,int y){
         if(x == 0 && y == 0) return;
-        for(Coordonnes c : pile){
-            System.out.println(c.getI()+" "+c.getJ());
-        }
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         level.new_rotate(x,y);
         models[x][y].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
         waterPieces[x][y].rotate();
-        waterPieces[x][y].setFull(false);
         if(pileContains(x,y)) {
             while (!pile.isEmpty() && (pile.get(0).getI() != x || pile.get(0).getJ() != y)) {
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);

@@ -79,6 +79,8 @@ public class waterPiece extends Group {
              [2;0][2;1][2;2]
                   DOWN
          */
+        for(int i = 0; i < 3; i++)
+            for(int j = 0; j < 3; j++) water[i][j].setFull(false);
 
         boolean tmp1 = water[0][1].canPass();
         boolean tmp2 = water[1][2].canPass();
@@ -105,7 +107,7 @@ public class waterPiece extends Group {
         water[i][j].setFull(true);
         /* we then wait using a timeline and call on every other parts */
         Timeline wait = new Timeline(new KeyFrame(Duration.seconds(WAIT_TIME), event ->{
-            if(!flowing) return;
+            if(!flowing || !water[i][j].isFull()) return;
             if(inTab(i+1,j) && water[i+1][j].canPass() && !water[i+1][j].isFull()) flow(i+1,j);
             if(inTab(i-1,j) && water[i-1][j].canPass() && !water[i-1][j].isFull()) flow(i-1,j);
             if(inTab(i,j+1) && water[i][j+1].canPass() && !water[i][j+1].isFull()) flow(i,j+1);

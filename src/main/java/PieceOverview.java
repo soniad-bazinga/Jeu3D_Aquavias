@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.awt.event.ActionEvent;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -45,8 +46,7 @@ public class PieceOverview extends Application{
     /* Créé un aperçu de piece */
     public PieceOverview(Level level){
        super();
-       this.level = level;
-       launch();
+       PieceOverview.level = level;
     }
 
     public PieceOverview(){
@@ -56,7 +56,9 @@ public class PieceOverview extends Application{
 
 
     @Override
-    public void start(Stage stage){
+    public void start(Stage stage) {
+
+        lastPlayed(level); //Sauvegarde le niveau que l'on charge en tant que "dernier niveau joué"
 
         level.setOverviewer(this);
 
@@ -70,7 +72,7 @@ public class PieceOverview extends Application{
         camera.setTranslateX(level.WIDTH* PIECE_SIZE * 1.5);*
          */
         camera.setTranslateX(level.HEIGHT * PIECE_SIZE + (level.HEIGHT * 1.5 * PIECE_SIZE));
-        camera.setTranslateZ(-level.WIDTH/2 * PIECE_SIZE);
+        camera.setTranslateZ(-level.WIDTH/2.0 * PIECE_SIZE);
         camera.setTranslateY(-50);
         camera.getTransforms().add(new Rotate(-35, Rotate.X_AXIS));
         camera.getTransforms().add(new Rotate(-35, Rotate.Z_AXIS));
@@ -163,7 +165,7 @@ public class PieceOverview extends Application{
         start_water();
     }
 
-    ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
+    ArrayList<Coordonnes> pile = new ArrayList<>();
 
     void rotate(int x,int y){
         if(x == 0 && y == 0) return;
@@ -287,4 +289,24 @@ public class PieceOverview extends Application{
 
         waterPiece getPiece(){ return waterPieces[i][j]; }
     }
+
+    void lastPlayed(Level lvl) { //Copie le niveau chargé (donc le dernier niveau joué) dans le fichier level-1.json qui sert à reprendre une partie
+        File source = new File("/Users/lskr/IdeaProjects/Aquavias/aquavias/levels/level" + lvl.ID + ".json");
+        File dest = new File("/Users/lskr/IdeaProjects/Aquavias/aquavias/levels/level-1.json");
+
+        try (FileInputStream fis = new FileInputStream(source);
+             FileOutputStream fos = new FileOutputStream(dest)) {
+
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = fis.read(buffer)) > 0) {
+
+                fos.write(buffer, 0, length);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

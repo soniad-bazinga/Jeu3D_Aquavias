@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -25,18 +24,33 @@ public class MenuApplication extends Application {
 
         private static final int WIDTH = 1280;
         private static final int HEIGHT = 720;
-        //Level enCours;
+        Level enCours;
+        PieceOverview po;
+        Stage stage2 = new Stage();
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
                 new Pair<String, Runnable>("Nouvelle Partie", () -> {
-                    /*try{
+                    stage2.close();
+                    try{
                         enCours = new Level(1);
+                        po = new PieceOverview(enCours);
+                        po.start(stage2);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
-                    }*/
+                    }
                 }),
-                new Pair<String, Runnable>("Continuer", () -> {System.out.println("Continuer la partie");}),
+                new Pair<String, Runnable>("Continuer", () -> {
+                    stage2.close();
+                    try{
+                        enCours = new Level(-1);
+                        po = new PieceOverview(enCours);
+                        po.start(stage2);
+                    } catch (Exception e){
+                        System.out.println("Niveau manquant");
+                    }
+                }),
                 new Pair<String, Runnable>("Choix du Niveau", () -> {System.out.println("Choisir le niveau");}),
+                new Pair<String, Runnable>("Réglages", () -> {System.out.println("Modifier les réglages du jeu");}),
                 new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
 
@@ -73,7 +87,7 @@ public class MenuApplication extends Application {
 
         private void addTitle() {
             MenuTitle title = new MenuTitle("Aquavias");
-            title.setTranslateX(WIDTH / 2.0 - title.getTitleWidth() / 2);
+            title.setTranslateX(WIDTH / 2.0 - title.getTitleWidth()/2);
             title.setTranslateY(HEIGHT / 3.0);
 
             root.getChildren().add(title);

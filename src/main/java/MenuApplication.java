@@ -4,13 +4,11 @@ import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -27,19 +25,25 @@ public class MenuApplication extends Application {
 
         private static final int WIDTH = 1280;
         private static final int HEIGHT = 720;
+        //Level enCours;
 
-        private List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Nouvelle Partie", () -> {}),
-                new Pair<String, Runnable>("Continuer", () -> {}),
-                new Pair<String, Runnable>("Choix du Niveau", () -> {}),
+    public List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Nouvelle Partie", () -> {
+                    /*try{
+                        enCours = new Level(1);
+                    } catch (Exception e){
+                        System.out.println("Niveau manquant");
+                    }*/
+                }),
+                new Pair<String, Runnable>("Continuer", () -> {System.out.println("Continuer la partie");}),
+                new Pair<String, Runnable>("Choix du Niveau", () -> {System.out.println("Choisir le niveau");}),
                 new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
 
-        private Pane root = new Pane();
-        private VBox menuBox = new VBox(-5);
-        private Line line;
+        public Pane root = new Pane();
+        public VBox menuBox = new VBox(-5);
 
-    public MenuApplication() throws Exception {
+    public MenuApplication(){
     }
 
     private Parent createContent() throws MalformedURLException {
@@ -69,14 +73,14 @@ public class MenuApplication extends Application {
 
         private void addTitle() {
             MenuTitle title = new MenuTitle("Aquavias");
-            title.setTranslateX(WIDTH / 2 - title.getTitleWidth() / 2);
-            title.setTranslateY(HEIGHT / 3);
+            title.setTranslateX(WIDTH / 2.0 - title.getTitleWidth() / 2);
+            title.setTranslateY(HEIGHT / 3.0);
 
             root.getChildren().add(title);
         }
 
         private void startAnimation() {
-            ScaleTransition st = new ScaleTransition(Duration.seconds(1), line);
+            ScaleTransition st = new ScaleTransition(Duration.seconds(1));
             st.setToY(1);
             st.setOnFinished(e -> {
 
@@ -88,22 +92,6 @@ public class MenuApplication extends Application {
                     tt.setOnFinished(e2 -> n.setClip(null));
                     tt.play();
                 }
-            });
-            TranslateTransition transition = new TranslateTransition();
-            transition.setDuration(Duration.seconds(1));
-            transition.setToY(-100);
-
-            ScaleTransition transition1 = new ScaleTransition(Duration.seconds(1));
-            transition1.setToY(2);
-            transition1.setToX(2);
-
-            ParallelTransition parallelTransition = new ParallelTransition(transition, transition1);
-
-            parallelTransition.setOnFinished(e ->{
-                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), root.getChildren().get(2));
-                fadeIn.setFromValue(0.0);
-                fadeIn.setToValue(1.0);
-                fadeIn.play();
             });
             st.play();
         }
@@ -135,7 +123,7 @@ public class MenuApplication extends Application {
             primaryStage.show();
         }
 
-        public static void main(String[] args) {
-            launch(args);
-        }
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

@@ -18,7 +18,7 @@ public class Level implements Cloneable {
 	public static final String ANSI_BOLD = "\u001B[1m";
 	public static final String ANSI_SELECTED = "\u001b[48;5;240m";
 	public static final String ANSI_RED = "\u001b[31m";
-	public PieceOverview pieceoverview;
+	public View View;
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
@@ -207,13 +207,13 @@ public class Level implements Cloneable {
 			/* puis on vide toutes les pieces ajoutés avant dans la pile */
 			while(!pile.isEmpty() && (pile.get(0).getI() != i || pile.get(0).getJ() != j)){
 				/* Mettre a jour la vue */
-				//if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				//if(View!=null) View.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
 				pieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
 				pile.remove(0);
 			}
 			/* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
 			if(!pile.isEmpty()) {
-				//if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				//if(View!=null) View.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
 				pile.remove(0);
 			}
 			/* puis on appelle l'udpate */
@@ -260,7 +260,7 @@ public class Level implements Cloneable {
 			for (int j = 1; j < WIDTH + 2; j++) {
 				if (pieces[i][j] != null) {
 					/* Met a jour la vue */
-					if (pieceoverview != null) pieceoverview.setFull(i, j, false);
+					if (View != null) View.setFull(i, j, false);
 					pieces[i][j].setFull(false);
 				}
 			}
@@ -273,7 +273,7 @@ public class Level implements Cloneable {
 		if (i == HEIGHT - 1 && j == WIDTH + 1)
 			return;
 		/* Met a jour la vue */
-		if(pieceoverview != null) pieceoverview.setFull(i,j,true);
+		if(View != null) View.setFull(i,j,true);
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			update(i + 1, j);
@@ -302,7 +302,7 @@ public class Level implements Cloneable {
 		if (i == HEIGHT - 1 && j == WIDTH + 1)
 			return;
 		/* Met a jour la vue */
-		//if(pieceoverview != null) pieceoverview.setFull(i,j,true);
+		//if(View != null) View.setFull(i,j,true);
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			new_update(i + 1, j);
@@ -584,7 +584,7 @@ public class Level implements Cloneable {
 
 	Piece[][] getPieces(){ return pieces; }
 
-	void setOverviewer(PieceOverview po){ pieceoverview = po ; }
+	void setOverviewer(View po){ View = po ; }
 
 	private class Coordonnes{
 		int i;

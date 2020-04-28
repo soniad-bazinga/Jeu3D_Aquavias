@@ -9,6 +9,6 @@ public class Main {
 		Level level = new Level(1);
 		level.new_update();
 		level.affiche();
-		PieceOverview po = new PieceOverview(level);
+		View v = new View(level);
 	}
 }

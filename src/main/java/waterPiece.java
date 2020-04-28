@@ -6,18 +6,18 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.util.Duration;
 
-public class waterPiece extends Group {
-    PieceOverview overview;
+public abstract class waterPiece extends Group {
+    View view;
     waterGrid[][] water;
-    static double WATER_SIZE;
-    static double WAIT_TIME = .3f;
+    static double waterSize;
+    static double waitTime = .3f;
     int x,y;
     boolean flowing = true;
 
 
-    public waterPiece(String c, double s, PieceOverview p, int x, int y){
+    public waterPiece(double size, View p, int x, int y){
         this.x = x; this. y = y;
-        overview = p;
+        view = p;
         /*
         water est un tableau de 3*3
         dont les cases representant les coins
@@ -35,7 +35,7 @@ public class waterPiece extends Group {
 
         */
 
-        WATER_SIZE = s;
+        waterSize = size;
 
         setVisible(true);
 
@@ -44,31 +44,13 @@ public class waterPiece extends Group {
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3 ; j++){
                 water[i][j] = new waterGrid(3);
-                water[i][j].setTranslateX(WATER_SIZE/3 *(i-1) * 2);
-                water[i][j].setTranslateZ(WATER_SIZE/3 * (j-1)* 2);
+                water[i][j].setTranslateX(waterSize/3 *(i-1) * 2);
+                water[i][j].setTranslateZ(waterSize/3 * (j-1)* 2);
                 water[i][j].setVisible(true);
                 this.getChildren().add(water[i][j]);
             }
         }
         water[1][1].setPass(true);
-        switch(c){
-            case "L" :
-                water[0][1].setPass(true);
-                water[1][2].setPass(true);
-                break;
-            case "I" :
-                water[0][1].setPass(true);
-                water[2][1].setPass(true);
-                break;
-            case "T" :
-                water[1][0].setPass(true);
-                water[1][2].setPass(true);
-                water[2][1].setPass(true);
-                break;
-            default:
-                /* piece en X mais j'ai la flemme */
-                break;
-        }
     }
 
     void rotate(){
@@ -102,11 +84,13 @@ public class waterPiece extends Group {
 
 
     void flow(int i, int j){
+        /* si la pièce n'est pas pleine dans le modèle on arrête tout */
+        if(!view.isLevelFull(x,y)) return;
         /* on utilise pas encore le système de water tile, a modifer dans le futur */
         /* we first set the tiles i j full */
         water[i][j].setFull(true);
         /* we then wait using a timeline and call on every other parts */
-        Timeline wait = new Timeline(new KeyFrame(Duration.seconds(WAIT_TIME), event ->{
+        Timeline wait = new Timeline(new KeyFrame(Duration.seconds(waitTime), event ->{
             if(!flowing || !water[i][j].isFull()) return;
             if(inTab(i+1,j) && water[i+1][j].canPass() && !water[i+1][j].isFull()) flow(i+1,j);
             if(inTab(i-1,j) && water[i-1][j].canPass() && !water[i-1][j].isFull()) flow(i-1,j);
@@ -119,8 +103,8 @@ public class waterPiece extends Group {
         wait.play();
         if(isFull()){
             /* if the tile is complete, we then  call it on the neighbor tiles */
-            Timeline wait_recall = new Timeline(new KeyFrame(Duration.seconds(WAIT_TIME), event -> {
-                if(isFull()) overview.flow(x, y);
+            Timeline wait_recall = new Timeline(new KeyFrame(Duration.seconds(waitTime), event -> {
+                if(isFull()) view.flow(x, y);
             }));
             wait_recall.setCycleCount(1);
             wait_recall.play();
@@ -140,30 +124,30 @@ public class waterPiece extends Group {
     }
 
     public class waterGrid extends Group{
-        double WATER_GRID_SIZE;
-        int WATER_GRID_LENGTH;
-        double WATER_TILE_SIZE;
+        double waterGridSize;
+        int waterGridLength;
+        double waterTileSize;
         waterTile[][] tiles;
-        int x_progression,y_progression;
+        int xProgression,yProgression;
         boolean full;
         boolean pass;
 
         public waterGrid(int w){
             full = false;
-            WATER_GRID_LENGTH = w; //Le nombre de sous divisions d'une waterTile
-            WATER_GRID_SIZE = WATER_SIZE/3; //une water grid est divisé en 3 (comme reprensenté en haut)
-            WATER_TILE_SIZE = WATER_GRID_SIZE/WATER_GRID_LENGTH; // la taille d'une tile, soit la taille de la gride / le nombre d'elements
-            /*System.out.println("WATER_GRID_LENGTH : "+WATER_GRID_LENGTH+
-                    "\nWATER_GRID_SIZE :"+WATER_GRID_SIZE+
-                    "\nWATER_TILE_SIZE :"+WATER_TILE_SIZE); */
-            x_progression = 0;
-            y_progression = 0;
-            tiles = new waterTile[WATER_GRID_LENGTH][WATER_GRID_LENGTH];
-            for(int i = 0; i < WATER_GRID_LENGTH ; i++){
-                for(int j = 0 ; j < WATER_GRID_LENGTH ; j++){
-                    tiles[i][j] = new waterTile(WATER_TILE_SIZE);
-                    tiles[i][j].setTranslateX(WATER_TILE_SIZE*(i-1)*2);
-                    tiles[i][j].setTranslateZ(WATER_TILE_SIZE*(j-1)*2);
+            waterGridLength = w; //Le nombre de sous divisions d'une waterTile
+            waterGridSize = waterSize/3; //une water grid est divisé en 3 (comme reprensenté en haut)
+            waterTileSize = waterGridSize/waterGridLength; // la taille d'une tile, soit la taille de la gride / le nombre d'elements
+            /*System.out.println("waterGridLength : "+waterGridLength+
+                    "\nwaterGridSize :"+waterGridSize+
+                    "\nwaterTileSize :"+waterTileSize); */
+            xProgression = 0;
+            yProgression = 0;
+            tiles = new waterTile[waterGridLength][waterGridLength];
+            for(int i = 0; i < waterGridLength ; i++){
+                for(int j = 0 ; j < waterGridLength ; j++){
+                    tiles[i][j] = new waterTile(waterTileSize);
+                    tiles[i][j].setTranslateX(waterTileSize*(i-1)*2);
+                    tiles[i][j].setTranslateZ(waterTileSize*(j-1)*2);
                     getChildren().add(tiles[i][j]);
 
                 }
@@ -174,10 +158,10 @@ public class waterPiece extends Group {
         boolean canPass(){ return pass; }
 
         void reset(){
-            x_progression = 0;
-            y_progression = 0;
-            for(int i = 0; i < WATER_GRID_LENGTH; i++){
-                for(int j = 0 ; j < WATER_GRID_LENGTH; j++){
+            xProgression = 0;
+            yProgression = 0;
+            for(int i = 0; i < waterGridLength; i++){
+                for(int j = 0 ; j < waterGridLength; j++){
                     tiles[i][j].setVisible(false);
                 }
             }
@@ -185,10 +169,10 @@ public class waterPiece extends Group {
 
         void setFull(boolean b){
             full = b;
-            x_progression = WATER_GRID_LENGTH;
-            y_progression = WATER_GRID_LENGTH;
-            for(int i = 0; i < WATER_GRID_LENGTH; i++){
-                for(int j = 0 ; j < WATER_GRID_LENGTH; j++){
+            xProgression = waterGridLength;
+            yProgression = waterGridLength;
+            for(int i = 0; i < waterGridLength; i++){
+                for(int j = 0 ; j < waterGridLength; j++){
                     tiles[i][j].setVisible(b);
                 }
             }
@@ -196,28 +180,28 @@ public class waterPiece extends Group {
 
         boolean isFull(){ return full; }
 
-        void flow_x(boolean forward){
+        void flowX(boolean forward){
             /* On créer un semblant d'ecoulement de l'eau :
                 On déplace l'eau par collonne
              */
-            if(x_progression > 0 && x_progression < WATER_GRID_SIZE){
-                for(int i = 0; i < WATER_GRID_SIZE ; i++){
+            if(xProgression > 0 && xProgression < waterGridSize){
+                for(int i = 0; i < waterGridSize ; i++){
                     if(forward) {
-                        tiles[x_progression + 1][i].setVisible(true);
+                        tiles[xProgression + 1][i].setVisible(true);
                     }else{
-                        tiles[x_progression][i].setVisible(false);
+                        tiles[xProgression][i].setVisible(false);
                     }
                 }
             }
         }
 
-        void flow_y(boolean forward){
-            if(y_progression > 0 && y_progression < WATER_GRID_SIZE){
-                for(int i = 0; i < WATER_GRID_SIZE ; i++){
+        void flowY(boolean forward){
+            if(yProgression > 0 && yProgression < waterGridSize){
+                for(int i = 0; i < waterGridSize ; i++){
                     if(forward) {
-                        tiles[i][y_progression+1].setVisible(true);
+                        tiles[i][yProgression+1].setVisible(true);
                     }else{
-                        tiles[i][y_progression].setVisible(false);
+                        tiles[i][yProgression].setVisible(false);
                     }
                 }
             }
@@ -236,5 +220,8 @@ public class waterPiece extends Group {
             material.setSpecularColor(Color.AQUAMARINE);
             setMaterial(material);
         }
+
+        int getX(){ return x;}
+        int getY(){ return y;}
     }
 }

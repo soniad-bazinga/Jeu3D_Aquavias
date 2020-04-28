@@ -29,17 +29,17 @@ public class MenuTitle extends Pane{
             part2.setFont(Font.font("Roboto", 60));
             part2.setEffect(new DropShadow(30, Color.BLACK));
 
-            part1.setText(part1.getText() + " " + part2.getText());
+            part1.setText(part1.getText() + " " + part2.getText());  //Puis on assemble les "text" en une seule entité modifiable
             text = part1;
 
-            getChildren().addAll(text);
+            getChildren().addAll(text); //Finalement on ajoute le text au Pane
         }
 
         public double getTitleWidth() {
             return text.getLayoutBounds().getWidth();
-        }
+        } //Permet de récupérer la taille en longueur du titre
 
         public double getTitleHeight() {
-            return text.getLayoutBounds().getHeight()/2;
-        }
+            return text.getLayoutBounds().getHeight();
+        } //Permet de récupérer la taille en hauteur du titre
 }

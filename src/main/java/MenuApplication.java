@@ -27,7 +27,7 @@ public class MenuApplication extends Application {
         private static final int HEIGHT = 720;
         //Level enCours;
 
-    public List<Pair<String, Runnable>> menuData = Arrays.asList(
+    public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
                 new Pair<String, Runnable>("Nouvelle Partie", () -> {
                     /*try{
                         enCours = new Level(1);
@@ -40,22 +40,22 @@ public class MenuApplication extends Application {
                 new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
 
-        public Pane root = new Pane();
-        public VBox menuBox = new VBox(-5);
+        public Pane root = new Pane(); //Panneau sur lequel on va superposer tous les éléments
+        public VBox menuBox = new VBox(-5); //Boite invisible qui contient les items du menu
 
     public MenuApplication(){
     }
 
     private Parent createContent() throws MalformedURLException {
-            addBackground();
-            addTitle();
+            addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu
+            addTitle();//Fonction qui ajoute le titre créé par MenuTitle.java
 
-            double lineX = WIDTH / 2.0 - 100.0;
-            double lineY = HEIGHT / 3.0 + 50.0;
+            double lineX = WIDTH / 2.0 - 100.0; //Ajoute le menu au centre
+            double lineY = HEIGHT / 3.0 + 50.0; //Ajoute le menu au centre
 
-            addMenu(lineX + 5, lineY + 5);
+            addMenu(lineX + 5, lineY + 5); //Crée tous les items du menu et les ajoute au Pane parent (root)
 
-            startAnimation();
+            startAnimation(); //Crée les animations du menu
 
             return root;
         }

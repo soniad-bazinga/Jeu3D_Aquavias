@@ -1,25 +1,14 @@
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.animation.RotateTransition;
 import javafx.application.Application;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.event.EventHandler;
 import javafx.scene.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.event.ActionEvent;
-import java.net.URL;
 import java.util.ArrayList;
 
 public class View extends Application{
@@ -205,7 +194,14 @@ public class View extends Application{
         level.new_rotate(x,y);
         /* puis dans la vue */
         /* sur les modèles */
-        models[x][y].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
+      //  models[x][y].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
+        RotateTransition rt= new RotateTransition(Duration.millis(200), models[x][y]);
+        rt.setAxis(Rotate.Y_AXIS);
+        rt.setByAngle(90);
+        rt.setCycleCount(1);
+        rt.setAutoReverse(true);
+        rt.play();
+
         /* puis les pieces d'eau */
         waterPieces[x][y].rotate();
         /*

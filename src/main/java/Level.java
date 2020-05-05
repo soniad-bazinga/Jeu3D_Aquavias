@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -14,19 +15,24 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+public class Level implements Cloneable {
 
-public class Level {
 	Piece[][] pieces;
 
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001b[36m";
 	public static final String ANSI_BOLD = "\u001B[1m";
 	public static final String ANSI_SELECTED = "\u001b[48;5;240m";
+	public static final String ANSI_RED = "\u001b[31m";
+	public View View;
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
+	public int END_X;
+	public int END_Y;
 	int selected_x;
 	int selected_y;
+
 	char type;
 	//c pour le compteur, f pour fuite, n pour 'normal' c'est à dire sans restriction
 	int compteur;
@@ -34,7 +40,9 @@ public class Level {
 	Instant end; //Se mettra à jour à chaque action de la part des utilisateurs
 	int gametime;
 
-	
+
+	int counter = 50;
+
 	public Level(int w, int h) {
 
 		/*
@@ -43,6 +51,8 @@ public class Level {
 
 		WIDTH = w;
 		HEIGHT = h;
+		END_X = WIDTH + 1;
+		END_Y = HEIGHT - 1;
 
 		setTab(w, h);
 
@@ -50,7 +60,6 @@ public class Level {
 		 * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
 		 * d'un niveau
 		 */
-		System.out.println("Level created");
 	}
 	
 	public Level(int w, int h, char t, int compt){
@@ -93,6 +102,8 @@ public class Level {
 		WIDTH = w;
 		HEIGHT = h;
 		compteur = Math.toIntExact((long) obj.get("compteur"));
+		END_X = WIDTH + 1;
+		END_Y = HEIGHT - 1;
 		setTab(w, h);
 		String t = obj.get("type").toString();
 		type = t.charAt(0);
@@ -210,21 +221,49 @@ public class Level {
 	}
 
 
-
 	public static void clearScreen() {
-		System.out.print("\033[H\033[2J");  
+		System.out.print("\033[H\033[2J");
 		System.out.flush();
-	}  
+	}
 
 	void rotate(int i, int j) { /*
-								 * Fait tourner la pièces de coordonnées "i" et "j" mais reset l'eau qu'elle
-								 * contient avant
+								 * i = y, j = x Fait tourner la pièces de coordonnées "i" et "j" mais reset
+								 * l'eau qu'elle contient avant
 								 */
 		if(i==0 && j==0 || i==HEIGHT-1 && j==WIDTH+1) return;
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
         	if(type == 'c') compteur--;
+			counter--;
+		}
+	}
+
+	/* pour pallier au voidAll() :) */
+	void new_rotate(int i, int j){
+		/* si la piece n'est pas en dehors du plateau */
+		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
+			pieces[i][j].setFull(false);
+			pieces[i][j].rotate();
+			counter--;
+			/* puis on vide toutes les pieces ajoutés avant dans la pile */
+			while(!pile.isEmpty() && (pile.get(0).getI() != i || pile.get(0).getJ() != j)){
+				/* Mettre a jour la vue */
+				//if(View!=null) View.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				pieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
+				pile.remove(0);
+			}
+			/* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
+			if(!pile.isEmpty()) {
+				//if(View!=null) View.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				pile.remove(0);
+			}
+			/* puis on appelle l'udpate */
+			if(!pile.isEmpty()) {
+				new_update(pile.get(0).getI(),pile.get(0).getJ());
+			}else{
+				new_update();
+			}
 		}
 	}
 
@@ -342,22 +381,38 @@ public class Level {
 		update(0,0);
 		estFinie(true);
 	}
-	
-	private void voidAll() {	//vide l'eau de tout le circuit sauf de la source
-		for (int i=0;i<HEIGHT;i++) {
-			for(int j=1;j<WIDTH+2;j++) {
-				if(pieces[i][j]!=null)
+
+	void new_update(){
+		//voidAll();
+		new_update(0, 0);
+	}
+
+	boolean isEnd(int x, int y) {
+		return x == END_X && y == END_Y;
+	}
+
+	private void voidAll() { // vide l'eau de tout le circuit sauf de la source
+		for (int i = 0; i < HEIGHT; i++) {
+			for (int j = 1; j < WIDTH + 2; j++) {
+				if (pieces[i][j] != null) {
+					/* Met a jour la vue */
+					if (View != null) View.setFull(i, j, false);
 					pieces[i][j].setFull(false);
+				}
 			}
 		}
 	}
 
 	void update(int i, int j) {
-		//vérifie que les pièces limitrophes existent, qu'elles sont connectées à l'actuelle et qu'elles ne sont pas déjà remplies
-		if(i==HEIGHT-1 && j==WIDTH+1) return;
-		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN")&&!pieces[i + 1][j].isFull()) { 
-			setFull(i+1, j);
-			update(i+1,j);
+		// vérifie que les pièces limitrophes existent, qu'elles sont connectées à
+		// l'actuelle et qu'elles ne sont pas déjà remplies
+		if (i == HEIGHT - 1 && j == WIDTH + 1)
+			return;
+		/* Met a jour la vue */
+		if(View != null) View.setFull(i,j,true);
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
+			setFull(i + 1, j);
+			update(i + 1, j);
 		}
 		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP") && !pieces[i - 1][j].isFull()) {
 			setFull(i - 1, j);
@@ -374,10 +429,39 @@ public class Level {
 		}
 	}
 
-	int howLongSinceStart(){
+	int howLongSinceStart() {
 		end = Instant.now();
 		Duration timePassed = Duration.between(start, end);
-		return (int)timePassed.toMillis()/1000;
+		return (int) timePassed.toMillis() / 1000;
+	}
+
+	ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
+
+	void new_update(int i, int j){
+		if(i!=0 || j!=0)pile.add(0, new Coordonnes(i,j)); // on ajoute au debut de la pile
+		// vérifie que les pièces limitrophes existent, qu'elles sont connectées à
+		// l'actuelle et qu'elles ne sont pas déjà remplies
+		if (i == HEIGHT - 1 && j == WIDTH + 1)
+			return;
+		/* Met a jour la vue */
+		//if(View != null) View.setFull(i,j,true);
+		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
+			setFull(i + 1, j);
+			new_update(i + 1, j);
+		}
+		if (isInTab(i - 1, j) && connected(pieces[i][j], pieces[i - 1][j], "UP") && !pieces[i - 1][j].isFull()) {
+			setFull(i - 1, j);
+			new_update(i - 1, j);
+		}
+		if (isInTab(i, j + 1) && connected(pieces[i][j], pieces[i][j + 1], "RIGHT") && !pieces[i][j + 1].isFull()) {
+			setFull(i, j + 1);
+			new_update(i, j + 1);
+
+		}
+		if (isInTab(i, j - 1) && connected(pieces[i][j], pieces[i][j - 1], "LEFT") && !pieces[i][j - 1].isFull()) {
+			setFull(i, j - 1);
+			new_update(i, j - 1);
+		}
 	}
 
 	void setFull(int i, int j) { /* Pour remplir la pièce de coordonnées i et j */
@@ -387,6 +471,7 @@ public class Level {
 	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans le tableau */
 		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
 	}
+	// i = y j = x
 
 	boolean isVerticalyOk(int i) {
 		return (i < HEIGHT && i >= 0);
@@ -397,7 +482,7 @@ public class Level {
 	}
 
 	boolean isFull(int i, int j) { /* Vérifie que le pièce de coordonnées i et j est pleine */
-		return pieces[i][j].isFull();
+		return pieces[i][j] != null && pieces[i][j].isFull(); // i = y, j = x
 	}
 
 	boolean connected(Piece p1, Piece p2,
@@ -586,7 +671,7 @@ public class Level {
 			System.out.println("Niveau sauvegardé.");
 			file.close();
 		} catch (IOException | ParseException e) {
-			System.out.println(e+"Impossible de sauvegarder le niveau.");
+			System.out.println(e + "Impossible de sauvegarder le niveau.");
 		}
 	}
 
@@ -628,5 +713,99 @@ public class Level {
 		estFinie(true);
 	}
 
-	
+	/* utilisée pour cloner un niveau */
+
+	public Level clone() {
+		Level cloned = new Level(WIDTH, HEIGHT);
+		for (int i = 0; i < HEIGHT; i++) {
+			for (int j = 0; j < WIDTH + 2; j++) {
+				if (pieces[i][j] != null)
+					cloned.pieces[i][j] = pieces[i][j].clone();
+			}
+		}
+		cloned.selected_x = selected_x;
+		cloned.selected_y = selected_y;
+		cloned.counter = counter;
+		return cloned;
+	}
+
+	/*
+	 * rajoute des pièces aléatoirement essentiellement utilisée pour tester les
+	 * fonctions de pathfinding (le plus important c'est l'essentielle)
+	 * 
+	 */
+
+	void randomizeLevel(int n) {
+		for (int i = 0; i < HEIGHT; i++) {
+			for (int j = 1; j < WIDTH + 1; j++) {
+				if (pieces[i][j] == null) {
+					Random rm = new Random();
+					int x = rm.nextInt(n);
+					Piece p = null;
+					switch (x) {
+					case 0:
+						p = new PieceT();
+						break;
+					case 1:
+						p = new PieceL();
+						break;
+					case 2:
+						p = new PieceI();
+						break;
+					}
+					pieces[i][j] = p;
+				}
+			}
+		}
+	}
+
+	/*
+	 * Affiche l'état du jeu pour le level checker. Unique différence? c'est rouge.
+	 */
+
+	void afficheChemin() {
+		clearScreen();
+		System.out.println(ANSI_BOLD + "              [" + counter + "]" + ANSI_RESET);
+		for (int i = 0; i < pieces.length; i++) {
+
+			for (int j = 0; j < pieces[i].length; j++) {
+
+				if (pieces[i][j] != null) {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
+					if (pieces[i][j].isFull())
+						System.out.print(ANSI_RED); /* Si la pièce contient de l'eau elle s'affiche en rouge */
+					System.out.print(pieces[i][j].toString());
+					if (pieces[i][j].isFull() || (i == selected_y && j == selected_x))
+						System.out.print(ANSI_RESET); /* Et on arrête le bleu */
+				} else {
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_SELECTED);
+					System.out.print(" ");
+					if (i == selected_y && j == selected_x)
+						System.out.print(ANSI_RESET);
+				}
+			}
+			System.out.println();
+		}
+	}
+
+	Piece[][] getPieces(){ return pieces; }
+
+	void setOverviewer(View po){ View = po ; }
+
+	private class Coordonnes{
+		int i;
+		int j;
+
+		public Coordonnes(int i, int j){
+			this.i = i;
+			this.j = j;
+		}
+
+		int getI(){ return i;}
+		int getJ(){ return j;}
+
+		Piece getPiece(){ return pieces[i][j]; }
+	}
 }

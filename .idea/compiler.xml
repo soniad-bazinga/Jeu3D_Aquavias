@@ -11,7 +11,11 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+<<<<<<< HEAD
       <module name="aquavias" target="1.8" />
+=======
+      <module name="aquavias-game" target="1.8" />
+>>>>>>> 3D_view_eugene
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,5 +1,7 @@
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.*;
 import javafx.scene.input.MouseEvent;
@@ -21,6 +23,8 @@ public class View extends Application{
     static String piece = "I";
 
     static final double PIECE_SIZE = 2;
+
+    static int rotateTime = 200;
 
     /* ses nouveaux attributs pour afficher le level */
     static Level level;
@@ -187,15 +191,19 @@ public class View extends Application{
     }
 
     void rotate(int x,int y){
+        /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
+        if(models[x][y].getRotate() % 90 != 0) return;
+
         /* Si c'est la première piece, on ne peut pas la tourner */
         if(x == 0 && y == 0) return;
+
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
         level.new_rotate(x,y);
+
         /* puis dans la vue */
         /* sur les modèles */
-      //  models[x][y].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
-        RotateTransition rt= new RotateTransition(Duration.millis(200), models[x][y]);
+        RotateTransition rt= new RotateTransition(Duration.millis(rotateTime), models[x][y]);
         rt.setAxis(Rotate.Y_AXIS);
         rt.setByAngle(90);
         rt.setCycleCount(1);
@@ -226,10 +234,19 @@ public class View extends Application{
             Si la pile n'est pas vide, on part de la pièce au sommet de la pile
             Sinon on repart de la première piece
          */
+        /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
         if (!pile.isEmpty()) {
-            flow(pile.get(0).getI(), pile.get(0).getJ());
+            Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+                flow(pile.get(0).getI(), pile.get(0).getJ());
+            }));
+            wait.setCycleCount(1);
+            wait.play();
         } else {
-            flow(0, 0);
+            Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+                flow(0, 0);
+            }));
+            wait.setCycleCount(1);
+            wait.play();
         }
         /* on update dans le modèle */
         level.new_update();

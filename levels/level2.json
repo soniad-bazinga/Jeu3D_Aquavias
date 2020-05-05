@@ -1,0 +1,10 @@
+{"WIDTH":5,"ID":2,"HEIGHT":8,"Pieces":[[{"ROTATION":1,"TYPE":"I","FULL":true},{"ROTATION":1,"TYPE":"I","FULL":true},{"ROTATION":1,"TYPE":"L","FULL":false},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"L","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"L","FULL":false},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"L","FULL":false},{"ROTATION":1,"TYPE":"L","FULL":false},{"ROTATION":1,"TYPE":"T","FULL":false},{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"I","FULL":false},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"I","FULL":false},{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"L","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"L","FULL":false},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"I","FULL":false},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"I","FULL":false},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"I","FULL":false},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"}],
+[{"TYPE":"NONE"},{"ROTATION":1,"TYPE":"L","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false},{"ROTATION":1,"TYPE":"I","FULL":false}]],,
+  "type": "c",
+  "compteur": 50}

@@ -38,7 +38,6 @@ public class LevelChecker {
 		level.setFull(y,x);
 		level.afficheChemin();
 		if (level.isEnd(x, y)) {
-			level.printBlocker();
 			level.afficheChemin();
 			System.out.println("\nLe niveau est finissable :)");
 			System.out.println("Solution trouvée en "+TRY_COUNTER+" appels de fonctions.");

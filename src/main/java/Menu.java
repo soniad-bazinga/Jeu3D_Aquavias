@@ -120,7 +120,7 @@ public class Menu {
         }else{
             try {
                 closed = true;
-                main.playLevel(selected_level);
+                //main.playLevel(selected_level);
             }catch(Exception e){
                 System.out.println("Il y a... dû avoir une erreur?");
                 System.exit(0);

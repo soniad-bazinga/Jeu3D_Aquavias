@@ -17,7 +17,6 @@ import org.json.simple.parser.ParseException;
 
 public class Level implements Cloneable {
 
-}
 	Piece[][] pieces;
 
 	public static final String ANSI_RESET = "\u001B[0m";
@@ -29,8 +28,8 @@ public class Level implements Cloneable {
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
-	public final int END_X;
-	public final int END_Y;
+	public int END_X;
+	public int END_Y;
 	int selected_x;
 	int selected_y;
 

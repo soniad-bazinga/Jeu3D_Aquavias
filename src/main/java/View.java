@@ -129,13 +129,26 @@ public class View extends Application{
     }
 
     void initalizeCamera(Camera camera){
-        /* Encore à modifier, il ne s'adapte pas bien à tout types de niveaux */
-        camera.setTranslateX(level.HEIGHT * PIECE_SIZE + (level.HEIGHT * 1.5 * PIECE_SIZE));
-        camera.setTranslateZ(-level.WIDTH/2 * PIECE_SIZE);
-        camera.setTranslateY(-50);
-        camera.getTransforms().add(new Rotate(-35, Rotate.X_AXIS));
+    	/* Encore à modifier, il ne s'adapte pas bien à tout types de niveaux */
+    	//On place l'origine x à la moitié de la largeur (qui est en fait la hauteur) du niveau
+    	//On ajoute 1 car l'origine est initialisé à 0
+    	
+    	camera.setTranslateX(PIECE_SIZE*level.HEIGHT/2);
+        camera.setTranslateY(-PIECE_SIZE/2);
+        //camera.setTranslateZ(-(level.HEIGHT * PIECE_SIZE *2));
+    	camera.setTranslateZ(-(level.HEIGHT+level.WIDTH+2)*2/2);
+        
+    	
+        camera.getTransforms().add(new Rotate(-55, Rotate.X_AXIS));
+        camera.getTransforms().add(new Rotate(-35, Rotate.Y_AXIS));
         camera.getTransforms().add(new Rotate(-35, Rotate.Z_AXIS));
-        camera.getTransforms().add(new Rotate(-45, Rotate.Y_AXIS));
+        
+        /*
+        camera.setLayoutX(-rotation-level.WIDTH);
+        camera.setLayoutY(rotation+level.HEIGHT/2);*/
+        camera.setLayoutX((level.HEIGHT+level.WIDTH)*38/18.9);
+        camera.setLayoutY((level.HEIGHT+level.WIDTH)*-43/18.9);
+
     }
 
     void initalizeBoards(Group root){

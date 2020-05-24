@@ -1,41 +1,30 @@
-import javafx.beans.binding.Bindings;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 
-import java.awt.*;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class LevelItems extends Pane {
 
-    public ImageView img;
-    private final Effect shadow = new DropShadow(2, Color.LIGHTCYAN);
-    private final Effect blur = new BoxBlur(1, 1, 3);
-
     public LevelItems(String URL){
-        Polygon lvl = new Polygon(
-                0, 0,
-                300, 0,
-                300, 300,
-                0, 300,
-                0, 300
-        );
-        img = new ImageView(new Image(new File("img/" + URL + ".jpg").toURI().toString()));
-        img.effectProperty().bind(
-                Bindings.when(hoverProperty()).
-                        then(shadow).
-                        otherwise(blur)
-        );
-        lvl.setStroke(Color.LIGHTGREEN);
+        Image image = new Image (new File("img/levels/level" + URL + ".jpg").toURI().toString());
 
-        getChildren().addAll(lvl, img);
+        ImagePattern i = new ImagePattern(image);
+
+        Rectangle boop = new Rectangle(200, 100);
+        boop.setFill(i);
+
+        boop.setVisible(true);
+
+
+        getChildren().setAll(boop);
     }
 
     public void setOnAction(Runnable action) {

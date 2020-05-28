@@ -1,16 +1,22 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Stack;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Level implements Cloneable {
+
 	Piece[][] pieces;
 
 	public static final String ANSI_RESET = "\u001B[0m";
@@ -18,14 +24,23 @@ public class Level implements Cloneable {
 	public static final String ANSI_BOLD = "\u001B[1m";
 	public static final String ANSI_SELECTED = "\u001b[48;5;240m";
 	public static final String ANSI_RED = "\u001b[31m";
-	public PieceOverview pieceoverview;
+	public View View;
 	public int ID;
 	public final int WIDTH;
 	public final int HEIGHT;
-	public final int END_X;
-	public final int END_Y;
+	public int END_X;
+	public int END_Y;
 	int selected_x;
 	int selected_y;
+
+	char type;
+	//c pour le compteur, f pour fuite, n pour 'normal' c'est à dire sans restriction
+	int compteur;
+	Instant start = Instant.now(); //Commence le décompte dès le début du niveau
+	Instant end; //Se mettra à jour à chaque action de la part des utilisateurs
+	int gametime;
+
+
 	int counter = 50;
 
 	public Level(int w, int h) {
@@ -46,11 +61,28 @@ public class Level implements Cloneable {
 		 * d'un niveau
 		 */
 	}
+	
+	public Level(int w, int h, char t, int compt){
+        t = Character.toLowerCase(t);
+        if (t == 'f' || t == 'c' || t == 'n') type = t;
+        else type = 'n';
+        if(type == 'f' || type == 'n') compteur = 0;
+        compteur = compt;
+        WIDTH = w;
+        HEIGHT = h;
+
+        setTab(w, h);
+        /*
+         * On ne créer pas d'ID ici, l'id est créé seulement au moment de la sauvegarde
+         * d'un niveau
+         */
+    }
+
 
 	@SuppressWarnings("unchecked")
 	public Level(int id) throws Exception {
 
-		System.out.println("Chargement du niveau...\n");
+		System.out.println("\nChargement du niveau...\n");
 		FileReader reader;
 
 		/* on récupère le fichier contenant le lvl */
@@ -69,9 +101,14 @@ public class Level implements Cloneable {
 		ID = Math.toIntExact((long) obj.get("ID"));
 		WIDTH = w;
 		HEIGHT = h;
+		compteur = Math.toIntExact((long) obj.get("compteur"));
 		END_X = WIDTH + 1;
 		END_Y = HEIGHT - 1;
 		setTab(w, h);
+		String t = obj.get("type").toString();
+		type = t.charAt(0);
+
+
 
 		/* on récupère l'array Y (vertical) contenant les array X (horizontaux) */
 
@@ -90,13 +127,10 @@ public class Level implements Cloneable {
 
 		while (iterator.hasNext()) {
 			JSONArray x = iterator.next();
-			Iterator<JSONObject> iteratorX = x.iterator();
 
 			/* Ici on passe aux sous tableaux */
 
-			while (iteratorX.hasNext()) {
-				JSONObject p = iteratorX.next();
-
+			for (JSONObject p : (Iterable<JSONObject>) x) {
 				/* On vérifie si le type de la pièce, pour voir si elle est null ou non */
 
 				String type = (String) p.get("TYPE");
@@ -156,7 +190,12 @@ public class Level implements Cloneable {
 
 	void affiche() { /* Affiche l'état du jeu */
 		clearScreen();
-		System.out.println(ANSI_BOLD + "              [" + counter + "]" + ANSI_RESET);
+		if(type == 'c') System.out.println(ANSI_BOLD+"              ["+compteur+"]"+ANSI_RESET);
+		if (type =='f'){
+			gametime = howLongSinceStart(); //La variable mesure la différence entre l'instant de début et l'instant présent
+			if(gametime<=compteur-10) System.out.println(ANSI_BOLD+"              [" + (compteur-gametime) + " secondes restantes !]"+ANSI_RESET);
+			else if(gametime >= compteur-10) System.out.println(ANSI_BOLD+"              [Vite, plus que " + (compteur-gametime) + " secondes !!]"+ANSI_RESET);
+		}
 		for (int i = 0; i < pieces.length; i++) {
 
 			for (int j = 0; j < pieces[i].length; j++) {
@@ -181,6 +220,7 @@ public class Level implements Cloneable {
 		}
 	}
 
+
 	public static void clearScreen() {
 		System.out.print("\033[H\033[2J");
 		System.out.flush();
@@ -190,9 +230,11 @@ public class Level implements Cloneable {
 								 * i = y, j = x Fait tourner la pièces de coordonnées "i" et "j" mais reset
 								 * l'eau qu'elle contient avant
 								 */
+		if(i==0 && j==0 || i==HEIGHT-1 && j==WIDTH+1) return;
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
+        	if(type == 'c') compteur--;
 			counter--;
 		}
 	}
@@ -207,13 +249,13 @@ public class Level implements Cloneable {
 			/* puis on vide toutes les pieces ajoutés avant dans la pile */
 			while(!pile.isEmpty() && (pile.get(0).getI() != i || pile.get(0).getJ() != j)){
 				/* Mettre a jour la vue */
-				//if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				//if(View!=null) View.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
 				pieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
 				pile.remove(0);
 			}
 			/* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
 			if(!pile.isEmpty()) {
-				//if(pieceoverview!=null) pieceoverview.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
+				//if(View!=null) View.setFull(pile.get(0).getI(),pile.get(0).getJ(),false);
 				pile.remove(0);
 			}
 			/* puis on appelle l'udpate */
@@ -225,25 +267,119 @@ public class Level implements Cloneable {
 		}
 	}
 
-	void play() { /* Méthod basique pour jouer (very primitive, such basic) */
-		while (!hasWon()) {
-			update();
-			affiche();
-			getPiecePos();
-			rotate(selected_y, selected_x);
-			System.out.println();
+	boolean isLeaking() {
+		return(nbLeak()!=0);
+	}
+	
+	public int nbLeak() {
+		int leak=0;
+		for (int i=0;i<HEIGHT;i++) {
+			for(int j=1;j<WIDTH+1;j++) {
+				if (pieces[i][j]!=null && pieces[i][j].isFull()) {
+					if (pieces[i][j].DOWN && (!isInTab(i + 1, j) || 
+									(isInTab(i + 1, j) && (pieces[i + 1][j]==null || 
+									(pieces[i + 1][j]!=null && !pieces[i + 1][j].UP))))) {
+						if((i+1!=0 || j!=0) && (i+1!=HEIGHT-1 || j!=WIDTH+1))
+							leak++;			
+					}
+					if (pieces[i][j].UP && (!isInTab(i - 1, j) ||
+							(isInTab(i - 1, j) && (pieces[i - 1][j]==null||
+							(pieces[i-1][j]!=null && !pieces[i - 1][j].DOWN))))) {
+						if((i-1!=0 || j!=0) && (i-1!=HEIGHT-1 || j!=WIDTH+1))
+							leak++;
+					}
+					if (pieces[i][j].RIGHT && (!isInTab(i, j + 1) ||
+							(isInTab(i, j + 1) && (pieces[i][j + 1]==null ||
+							(pieces[i][j + 1]!=null && !pieces[i][j + 1].LEFT))))) {
+						if((i!=0 || j+1!=0) && (i!=HEIGHT-1 || j+1!=WIDTH+1))
+							leak++;
+					}
+					if (pieces[i][j].LEFT && (!isInTab(i, j - 1) ||
+							(isInTab(i, j - 1) && (pieces[i][j - 1]==null ||
+							(pieces[i][j - 1]!=null && !pieces[i][j - 1].RIGHT))))) {
+						if((i!=0 || j-1!=0) && (i!=HEIGHT-1 || j-1!=WIDTH+1))
+							leak++;
+					}
+				}
+			}
+		}
+		return leak;
+	}
+	
+	boolean estFinie(boolean affichage) { 
+		//retourne faux tant que le niveau n'est pas fini, appelle Victory() sinon 
+		//elle affiche le message de victoire ou de defaite si affichage est true
+		if (type == 'c'){
+			if(compteur<=0 || Victory()) {
+				if(affichage) {
+					if(Victory()) {
+					clearScreen();
+					affiche();
+					System.out.println("\nBravo, la ville est desservie en eau !\n\n"
+							+ "Pressez une touche pour passer au niveau suivant !");
+					} else {
+						clearScreen();
+						affiche();
+						System.out.println("\nOups, trop de deplacements, les habitants sont partis ailleurs chercher de l'eau :(\n\n"
+								+ "Pressez une touche pour retenter d'aider la ville !");
+					}
+				}
+				return true;
+			}
+			return false;
+		} else if (type == 'f'){
+			if (gametime >= compteur || Victory()){
+				if(affichage){
+					if (Victory()) {
+						clearScreen();
+						affiche();
+						System.out.println("\nBravo, la ville est desservie en eau !\n\n" +
+								"Pressez une touche pour passer au niveau suivant !");
+					} else {
+							clearScreen();
+							affiche();
+							System.out.println("\nAh c'est malin, il n'y a plus d'eau pour alimenter la ville !\n\n"
+									+ "Pressez une touche pour retenter de l'aider!");
+					}
+				}
+				return true;
+			}
+			return false;
+		} else {
+			if(Victory()) {
+				if (affichage) {
+					clearScreen();
+					affiche();
+					System.out.println("Bravo, la ville est desservie en eau !\n\n" +
+							"Pressez une touche pour passer au niveau suivant !");
+				}
+				return true;
+			}
+			return false;
 		}
 	}
-
-	boolean hasWon() {
-		return pieces[HEIGHT - 1][WIDTH + 1].isFull();
+	
+	void newLevel(int id) throws Exception{
+		Level lvl=new Level(id);
+		InputsWindow iw=new InputsWindow(lvl);
 	}
+	
+	boolean Victory() { //retourne si la partie est finie ou non
+		if(type == 'c' && compteur > 0 && !isLeaking())
+        	return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
+		else if (type == 'f' && gametime < compteur && !isLeaking())
+			return pieces[HEIGHT - 1][WIDTH + 1].isFull();
+		else
+			return pieces[HEIGHT - 1][WIDTH + 1].isFull() && !isLeaking();
+    }
+
 
 	void update() {
 		// vide d'abord entièrement l'eau du circuit
 		// puis appelle update dès la source
 		voidAll();
-		update(0, 0);
+		update(0,0);
+		estFinie(true);
 	}
 
 	void new_update(){
@@ -260,7 +396,7 @@ public class Level implements Cloneable {
 			for (int j = 1; j < WIDTH + 2; j++) {
 				if (pieces[i][j] != null) {
 					/* Met a jour la vue */
-					if (pieceoverview != null) pieceoverview.setFull(i, j, false);
+					if (View != null) View.setFull(i, j, false);
 					pieces[i][j].setFull(false);
 				}
 			}
@@ -273,7 +409,7 @@ public class Level implements Cloneable {
 		if (i == HEIGHT - 1 && j == WIDTH + 1)
 			return;
 		/* Met a jour la vue */
-		if(pieceoverview != null) pieceoverview.setFull(i,j,true);
+		if(View != null) View.setFull(i,j,true);
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			update(i + 1, j);
@@ -293,6 +429,12 @@ public class Level implements Cloneable {
 		}
 	}
 
+	int howLongSinceStart() {
+		end = Instant.now();
+		Duration timePassed = Duration.between(start, end);
+		return (int) timePassed.toMillis() / 1000;
+	}
+
 	ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
 	void new_update(int i, int j){
@@ -302,7 +444,7 @@ public class Level implements Cloneable {
 		if (i == HEIGHT - 1 && j == WIDTH + 1)
 			return;
 		/* Met a jour la vue */
-		//if(pieceoverview != null) pieceoverview.setFull(i,j,true);
+		//if(View != null) View.setFull(i,j,true);
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			new_update(i + 1, j);
@@ -326,7 +468,7 @@ public class Level implements Cloneable {
 		pieces[i][j].setFull(true);
 	}
 
-	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans el tableau */
+	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans le tableau */
 		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
 	}
 	// i = y j = x
@@ -360,7 +502,7 @@ public class Level implements Cloneable {
 		return false;
 	}
 
-	void getPiecePos() {
+	/*void getPiecePos() {
 		System.out.println("\nPlease select X position.");
 		int scannerX = getInputInt();
 		while (!isHorizontalyOk(scannerX)) {
@@ -397,7 +539,67 @@ public class Level implements Cloneable {
 		for (int i = 0; i < WIDTH; i++)
 			System.out.print("=");
 		System.out.println("#" + ANSI_RESET + "\n");
+	}*/
+
+
+	//méthode qui permet de créer un niveau
+	  void createLevel(){
+
+		Scanner sc= new Scanner(System.in);
+		int h, w;
+		String type;
+		int rotation;
+
+		char c;
+
+
+		System.out.println("** Bienvenue dans l'atelier de création de niveaux! **");
+		System.out.println("Choisis une taille : ");
+		System.out.println("Longueur = ");
+		h = sc.nextInt();
+		sc.nextLine();
+		System.out.print("Largeur= ");
+		w= sc.nextInt();
+		sc.nextLine();
+		Level level= new Level(h, w);
+		System.out.println("Yay! Tu as créé le plateau! Maintenant, remplie le avec les pièces de ton choix: ");
+		for(int i=0; i< h; i++){
+			for(int j=1; j< w-1; j++) {
+				System.out.println("Quel type? { I, L, T, X} ");  //instruction back
+				type = sc.nextLine();
+				while (!type.equals("L") && !type.equals("T") && !type.equals("I") && !type.equals("X")) {
+					System.out.println("Mauvaise pioche, choisis à nouveau:  {I, L, T, X}: ");
+					type = sc.nextLine();
+				}
+
+				System.out.println("Nombre de rotation? ");           //on peut utiliser un bloc try catch ou une assertion 
+				rotation = sc.nextInt();
+				sc.nextLine();
+				while (rotation < 0) {
+					System.out.println("Choisis à nouveau: ");
+					rotation = sc.nextInt();
+					sc.nextLine();
+				}
+				level.pieces[i][j] = level.getPiece(type, rotation);
+
+				level.affiche();
+			}
+		}
+
+
+		System.out.println("Level créé avec succès! Veux-tu le sauvegarder ? O/N");
+		c = sc.nextLine().charAt(0);
+		if(c=='O'){
+			level.saveLevel();
+			System.out.println("Sauvegargé, à la prochaine! ");
+		}else{
+			System.out.println();
+		}
+
+
+
 	}
+
 
 	@SuppressWarnings("unchecked")
 	void saveLevel() { /* pour sauvegarder le niveau */
@@ -493,16 +695,22 @@ public class Level implements Cloneable {
 		if (isInTab(y, x)) {
 			selected_x = x;
 			selected_y = y;
-			affiche();
+			if(!estFinie(false))
+				affiche();
 		}
+		estFinie(true);
 	}
 
 	void rotatePointer() {
-		if (pieces[selected_y][selected_x] != null) {
-			rotate(selected_y, selected_x);
-			update();
-			affiche();
+		if(!estFinie(false)) {
+			if (pieces[selected_y][selected_x] != null) {
+				rotate(selected_y, selected_x);
+				update();
+			}
+			if(!estFinie(false))
+				affiche();
 		}
+		estFinie(true);
 	}
 
 	/* utilisée pour cloner un niveau */
@@ -584,7 +792,7 @@ public class Level implements Cloneable {
 
 	Piece[][] getPieces(){ return pieces; }
 
-	void setOverviewer(PieceOverview po){ pieceoverview = po ; }
+	void setOverviewer(View po){ View = po ; }
 
 	private class Coordonnes{
 		int i;

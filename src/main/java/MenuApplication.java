@@ -31,7 +31,7 @@ public class MenuApplication extends Application {
         private static final int WIDTH = 1280;
         private static final int HEIGHT = 720;
         Level enCours;
-        PieceOverview po;
+        View v;
         //Stage stage2 = new Stage();
         File levelsFolder = new File("levels");
         String [] lvls = levelsFolder.list();
@@ -43,7 +43,7 @@ public class MenuApplication extends Application {
                     //stage2.close();
                     try{
                         enCours = new Level(1);
-                        po = new PieceOverview(enCours);
+                        v = new View(enCours);
                         //po.start(stage2);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
@@ -54,7 +54,7 @@ public class MenuApplication extends Application {
                 //stage2.close();
                 try{
                     enCours = new Level(-1);
-                    po = new PieceOverview(enCours);
+                    v = new View(enCours);
                     //po.start(stage2);
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
@@ -64,8 +64,6 @@ public class MenuApplication extends Application {
             new Pair<String, Runnable>("Réglages", () -> {System.out.println("Modifier les réglages du jeu");}),
             new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
-
-    public Button retour = new Button();
 
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
 
@@ -97,17 +95,6 @@ public class MenuApplication extends Application {
 
         return root;
     }
-        private void setButton(){
-            retour.setTranslateX(-50.0);
-            retour.setTranslateY(HEIGHT + 50.0);
-            retour.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    reverseLevelAnimation();
-                }
-            });
-            root.getChildren().add(retour);
-        }
 
         private void addBackground() throws MalformedURLException {
             File img = new File("img/hello.jpeg");
@@ -170,9 +157,6 @@ public class MenuApplication extends Application {
                 TranslateTransition tt = new TranslateTransition((Duration.seconds(1.5)), menuBox);
                 TranslateTransition tt2 = new TranslateTransition((Duration.seconds(1)), titleBox);
                 TranslateTransition tt3 = new TranslateTransition((Duration.seconds(1)), LevelBox);
-                TranslateTransition tt4 = new TranslateTransition((Duration.seconds(1)), retour);
-                tt4.setToY(HEIGHT - 50.0);
-                tt4.setToX(WIDTH - 50.0);
                 tt3.setToX(WIDTH/2.0 - 100.0);
                 tt3.setToY(-HEIGHT + 200.0);
                 tt2.setToY(HEIGHT / 3.0);
@@ -182,7 +166,6 @@ public class MenuApplication extends Application {
                 tt.play();
                 tt2.play();
                 tt3.play();
-                tt4.play();
             });
             st.play();
         }
@@ -219,7 +202,7 @@ public class MenuApplication extends Application {
                         //stage2.close();
                         try {
                             enCours = new Level(Integer.parseInt(lvls[finalI]));
-                            po = new PieceOverview(enCours);
+                            v = new View(enCours);
                             //po.start(stage2);
                         } catch (Exception ex) {
                             System.out.println("Niveau manquant");

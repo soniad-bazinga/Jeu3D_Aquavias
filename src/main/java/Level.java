@@ -35,10 +35,13 @@ public class Level implements Cloneable {
 
 	char type;
 	//c pour le compteur, f pour fuite, n pour 'normal' c'est à dire sans restriction
-	int compteur = 50;
+	int compteur;
 	Instant start = Instant.now(); //Commence le décompte dès le début du niveau
 	Instant end; //Se mettra à jour à chaque action de la part des utilisateurs
 	int gametime;
+
+
+	int counter = 50;
 
 	public Level(int w, int h) {
 
@@ -232,7 +235,7 @@ public class Level implements Cloneable {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
         	if(type == 'c') compteur--;
-			compteur--;
+			counter--;
 		}
 	}
 
@@ -242,7 +245,7 @@ public class Level implements Cloneable {
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
 			pieces[i][j].rotate();
-			compteur--;
+			counter--;
 			/* puis on vide toutes les pieces ajoutés avant dans la pile */
 			while(!pile.isEmpty() && (pile.get(0).getI() != i || pile.get(0).getJ() != j)){
 				/* Mettre a jour la vue */
@@ -722,7 +725,7 @@ public class Level implements Cloneable {
 		}
 		cloned.selected_x = selected_x;
 		cloned.selected_y = selected_y;
-		cloned.compteur = compteur;
+		cloned.counter = counter;
 		return cloned;
 	}
 
@@ -762,7 +765,7 @@ public class Level implements Cloneable {
 
 	void afficheChemin() {
 		clearScreen();
-		System.out.println(ANSI_BOLD + "              [" + compteur + "]" + ANSI_RESET);
+		System.out.println(ANSI_BOLD + "              [" + counter + "]" + ANSI_RESET);
 		for (int i = 0; i < pieces.length; i++) {
 
 			for (int j = 0; j < pieces[i].length; j++) {
@@ -804,9 +807,5 @@ public class Level implements Cloneable {
 		int getJ(){ return j;}
 
 		Piece getPiece(){ return pieces[i][j]; }
-	}
-
-	String compteurToString(){
-		return "["+Integer.toString(compteur)+"]";
 	}
 }

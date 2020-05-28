@@ -14,6 +14,7 @@ public abstract class waterPiece extends Group {
     int x,y;
     boolean flowing = true;
 
+
     public waterPiece(double size, View p, int x, int y){
         this.x = x; this. y = y;
         view = p;

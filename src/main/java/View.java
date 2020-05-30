@@ -4,9 +4,17 @@ import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.*;
+import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -32,6 +40,8 @@ public class View extends Application{
     /* une matrice de piece3D (des groupes de mesh) */
     static Piece3D[][] models;
 
+    static Text compteur;
+
     /* une matrice de carrés bleus representant l'eau */
     waterPiece[][] waterPieces;
 
@@ -56,6 +66,16 @@ public class View extends Application{
 
         level.setOverviewer(this);
 
+        AnchorPane globalRoot = new AnchorPane();
+
+        StackPane stack = new StackPane();
+
+        initalizeCounter(stack);
+
+        globalRoot.getChildren().add(stack);
+
+        Scene scene = new Scene(globalRoot, 1280,720,true);
+
         /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
 
@@ -66,7 +86,7 @@ public class View extends Application{
         camera.setFarClip(1000);
 
         /* On importe le model de la piece */
-        Group root = new Group();
+        Group root3D = new Group();
 
         /* On initialise nos deux tableaus */
         /* waterPieces représente les carrés d'eau */
@@ -75,17 +95,19 @@ public class View extends Application{
         models = new Piece3D[level.pieces.length][level.pieces[0].length];
 
         /*On appelle l'initalisateur de ces tableaux */
-        initalizeBoards(root);
+        initalizeBoards(root3D);
 
         /* La scene, avec root, la taille et le depthbuffered activée */
         /* le depthbuffer permet de ne pas avoir toutes les faces de pièces visible en même temps */
-        Scene scene = new Scene(root,WIDTH,HEIGHT,true, SceneAntialiasing.BALANCED);
+        SubScene subScene = new SubScene(root3D, 1280, 720, true, SceneAntialiasing.BALANCED);
 
         /* On lui lie la caméra */
-        scene.setCamera(camera);
+        subScene.setCamera(camera);
+
+        globalRoot.getChildren().add(subScene);
 
         /* On gère maintenant les cliques de souris */
-        scene.setOnMousePressed((MouseEvent me) -> {
+        subScene.setOnMousePressed((MouseEvent me) -> {
 
             /* on récupère le résultat du click */
             PickResult pr = me.getPickResult();
@@ -203,7 +225,28 @@ public class View extends Application{
         }
     }
 
+    void initalizeCounter(StackPane stack){
+        Text compteur = new Text(level.compteurToString());
+
+        compteur.setFill(new Color(0,0,0,.6));
+
+        this.compteur = compteur;
+
+        Rectangle r = new Rectangle();
+
+        r.setEffect(new DropShadow());
+
+        stack.getChildren().addAll(r, compteur);
+
+        r.setWidth(150);
+        r.setHeight(50);
+
+        r.setFill(new Color(0,0,0,.05));
+    }
+
     void rotate(int x,int y){
+        if(level.compteur <= 0) return;
+
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;
 
@@ -262,6 +305,9 @@ public class View extends Application{
             wait.play();
         }
         /* on update dans le modèle */
+
+        compteur.setText(level.compteurToString());
+
         level.new_update();
         level.affiche();
     }
@@ -282,6 +328,7 @@ public class View extends Application{
 
     /* sur la même base qu'update */
     void flow(int i,int j){
+        if(!isWaterPieceFull(i,j)) return;
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)
@@ -321,6 +368,10 @@ public class View extends Application{
 
     boolean isLevelFull(int x, int y){
         return level.isFull(x,y);
+    }
+
+    boolean isWaterPieceFull(int x, int y){
+        return waterPieces[x][y].isFull();
     }
 
     /* Rempli/Vide la pièce de coordoonées i;j */

@@ -9,17 +9,10 @@ public class MenuTitle extends Pane{
         private Text part2;
         private Text text;
 
-        public MenuTitle(String name) {
+        public MenuTitle() {
             /*On crée des Strings pour séparer les deux parties et espacer les caractères*/
-            String one = "";
-            String two = "";
-            int i;
-            for (i = 0; i < 3; i++) {
-                one += " " + name.charAt(i);
-            }
-            for (int j = i; j < name.length(); j++) {
-                two += name.charAt(j) + " ";
-            }
+            String one = "A q u a";
+            String two = "v i a s";
             /*Une fois qu'elles sont séparées, on ajoute les couleurs correspondantes*/
             part1 = new Text(one);
             part2 = new Text(two);

@@ -1,12 +1,7 @@
-/target/
-<<<<<<< HEAD
-.idea/
-=======
 /bin/
+target/
 model_blend/
 model_test/
 pieces3D/
 .idea/
 
-
->>>>>>> develop

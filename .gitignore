@@ -1,4 +1,5 @@
 /bin/
+target/
 model_blend/
 model_test/
 pieces3D/

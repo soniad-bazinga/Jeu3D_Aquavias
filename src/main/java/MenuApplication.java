@@ -39,6 +39,7 @@ public class MenuApplication extends Application {
     File levelsFolder = new File("levels");
     String [] lvls = levelsFolder.list();
     AnimationTimer at;
+    Stage window;
 
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
@@ -47,7 +48,7 @@ public class MenuApplication extends Application {
                     //stage2.close();
                     try{
                         enCours = new Level(1);
-                        v = new View(enCours);
+                        window.setScene(new View(enCours));
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
                     }
@@ -57,7 +58,7 @@ public class MenuApplication extends Application {
                 //stage2.close();
                 try{
                     enCours = new Level(-1);
-                    v = new View(enCours);
+                    window.setScene(new View(enCours));
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
                 }
@@ -226,7 +227,7 @@ public class MenuApplication extends Application {
                 list.add(new Pair<>(lvls[i], () -> {
                     try {
                         enCours = new Level(Integer.parseInt(lvls[finalI]));
-                        v = new View(enCours);
+                        window.setScene(new View(enCours));
                         //po.start(stage2);
                     } catch (Exception ex) {
                         System.out.println("Niveau manquant");
@@ -263,6 +264,7 @@ public class MenuApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws MalformedURLException {
             Scene scene = new Scene(createContent());
+            window = primaryStage;
             primaryStage.setTitle("Aquavias");
             primaryStage.setScene(scene);
             primaryStage.show();

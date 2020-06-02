@@ -1,12 +1,12 @@
 import javafx.application.Application;
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,9 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -32,13 +30,13 @@ import java.util.List;
 
 public class MenuApplication extends Application {
 
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
-    Level enCours;
-    View v;
-    File levelsFolder = new File("levels");
-    String [] lvls = levelsFolder.list();
-    AnimationTimer at;
+        private static final int WIDTH = 1280;
+        private static final int HEIGHT = 720;
+        Level enCours;
+        View v;
+        //Stage stage2 = new Stage();
+        File levelsFolder = new File("levels");
+        String [] lvls = levelsFolder.list();
 
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
@@ -48,6 +46,7 @@ public class MenuApplication extends Application {
                     try{
                         enCours = new Level(1);
                         v = new View(enCours);
+                        //po.start(stage2);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
                     }
@@ -58,6 +57,7 @@ public class MenuApplication extends Application {
                 try{
                     enCours = new Level(-1);
                     v = new View(enCours);
+                    //po.start(stage2);
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
                 }
@@ -67,8 +67,8 @@ public class MenuApplication extends Application {
             new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
 
-    public ImageView retour = new ImageView(new Image (new File("img/retour.png").toURI().toString()));
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
+
     public Pane root = new Pane(); //Panneau sur lequel on va superposer tous les éléments
     public boolean lvlSelect = false;
     public VBox menuBox = new VBox(); //Boite invisible qui contient les items du menu
@@ -85,17 +85,15 @@ public class MenuApplication extends Application {
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
 
-        addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu principal
+        //setButton();
 
-        retour.setTranslateX((WIDTH/5.0));
-        retour.setTranslateY(HEIGHT/1.1);
+        addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu principal
 
         addTitle();//Fonction qui ajoute le titre créé par MenuTitle.java
 
         addMenu(lineX + 5, lineY + 5); //Crée tous les items du menu et les ajoute au Pane parent (root)
         addLevelSelect(WIDTH * 2.0, HEIGHT/4.0, 3);
         startAnimation(); //Crée les animations du menu
-
 
         return root;
     }
@@ -111,14 +109,14 @@ public class MenuApplication extends Application {
     }
 
     private void addTitle() {
-        MenuTitle title = new MenuTitle();
+        MenuTitle title = new MenuTitle("Aquavias");
         title.setTranslateX(WIDTH / 2.0 - title.getTitleWidth()/2);
         title.setTranslateY(HEIGHT / 3.0);
         titleBox.getChildren().add(title);
         root.getChildren().add(titleBox);
     }
 
-    private void startAnimation() { //Cette fonction permet aux cases du menu de lancer une petite animation au début
+    private void startAnimation() {
         ScaleTransition st = new ScaleTransition(Duration.seconds(1));
         st.setToY(1);
         st.setOnFinished(e -> {
@@ -134,10 +132,8 @@ public class MenuApplication extends Application {
         st.play();
     }
 
-    private void menuLevelAnimation(){ //Cette fonction permet l'animation du menu lorsqu'on se dirige vers l'écran de séléction
+    private void menuLevelAnimation(){
         lvlSelect = true;
-        root.getChildren().add(retour);
-        labelAnimation();
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
         st.setOnFinished(e -> {
@@ -158,7 +154,7 @@ public class MenuApplication extends Application {
         st.play();
     }
 
-    private void reverseLevelAnimation(){ //Cette fonction permet une animation retour depuis l'écran de séléction
+    private void reverseLevelAnimation(){
         lvlSelect = false;
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
@@ -179,25 +175,9 @@ public class MenuApplication extends Application {
             tt3.play();
         });
         st.play();
-        if(at != null) at.stop();
-        root.getChildren().remove(retour);
     }
 
-    public void labelAnimation(){ //Cette fonction permet l'animation du texte lorsque l'écran est celui de séléction
-        System.out.println("Label Animation");
-        if (at == null) at = new AnimationTimer() {
-                @Override
-                public void handle(long l) {
-                    if (retour.getOpacity() - 0.01 > 0.1) {
-                        retour.setOpacity(retour.getOpacity() - 0.01);
-                    } else
-                        retour.setOpacity(retour.getOpacity() + 1.0);
-                }
-            };
-        at.start();
-    }
-
-    private void addMenu(double x, double y) { //Cette fonction permet d'ajouter au grand Pane le menu ainsi que tous les éléments nécessaires
+    private void addMenu(double x, double y) {
         menuBox.setTranslateX(x);
         menuBox.setTranslateY(y);
         menuData.forEach(data -> {
@@ -216,7 +196,7 @@ public class MenuApplication extends Application {
         root.getChildren().add(menuBox);
     }
 
-    public void addLevelToList(List<Pair<String, Runnable>> list){ //Cette fonction permet d'ajouter à une liste de niveaux tous les niveaux présents dans le dossier "levels"
+    public void addLevelToList(List<Pair<String, Runnable>> list){
         for(int i = 0; i < lvls.length; i++){
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);
@@ -236,7 +216,7 @@ public class MenuApplication extends Application {
         }
     }
 
-    private void addLevelSelect(double x, double y, int taillemax) { //Cette fonction va créer une boite dans laquelle se trouveront plusieurs cases qui représentent les niveaux du dossier "levels"
+    private void addLevelSelect(double x, double y, int taillemax) {
         final int[] col = {0}; //Attribut colonne pour la création de la liste de niveaux visuelle
         final int[] ligne = {0};//Pareil mais pour les lignes
         LevelBox.setTranslateX(x);

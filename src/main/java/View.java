@@ -76,7 +76,7 @@ public class View extends Application{
 
         Scene scene = new Scene(globalRoot, 1280,720,true);
 
-        /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
+        /* On crée une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
 
         /* on appelle l'initalisateur de caméra */

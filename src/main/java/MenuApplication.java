@@ -30,6 +30,7 @@ import java.util.List;
 
 public class MenuApplication extends Application {
 
+<<<<<<< HEAD
         private static final int WIDTH = 1280;
         private static final int HEIGHT = 720;
         Level enCours;
@@ -37,6 +38,16 @@ public class MenuApplication extends Application {
         //Stage stage2 = new Stage();
         File levelsFolder = new File("levels");
         String [] lvls = levelsFolder.list();
+=======
+    private static final int WIDTH = 1280;
+    private static final int HEIGHT = 720;
+    Level enCours;
+    View v;
+    File levelsFolder = new File("levels");
+    String [] lvls = levelsFolder.list();
+    AnimationTimer at;
+    Stage window;
+>>>>>>> 7ec141183905d441fc9af0af68b9d2cd3cb3875d
 
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
@@ -45,8 +56,12 @@ public class MenuApplication extends Application {
                     //stage2.close();
                     try{
                         enCours = new Level(1);
+<<<<<<< HEAD
                         v = new View(enCours);
                         //po.start(stage2);
+=======
+                        window.setScene(new View(enCours));
+>>>>>>> 7ec141183905d441fc9af0af68b9d2cd3cb3875d
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
                     }
@@ -56,8 +71,12 @@ public class MenuApplication extends Application {
                 //stage2.close();
                 try{
                     enCours = new Level(-1);
+<<<<<<< HEAD
                     v = new View(enCours);
                     //po.start(stage2);
+=======
+                    window.setScene(new View(enCours));
+>>>>>>> 7ec141183905d441fc9af0af68b9d2cd3cb3875d
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
                 }
@@ -206,7 +225,7 @@ public class MenuApplication extends Application {
                 list.add(new Pair<>(lvls[i], () -> {
                     try {
                         enCours = new Level(Integer.parseInt(lvls[finalI]));
-                        v = new View(enCours);
+                        window.setScene(new View(enCours));
                         //po.start(stage2);
                     } catch (Exception ex) {
                         System.out.println("Niveau manquant");
@@ -243,6 +262,7 @@ public class MenuApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws MalformedURLException {
             Scene scene = new Scene(createContent());
+            window = primaryStage;
             primaryStage.setTitle("Aquavias");
             primaryStage.setScene(scene);
             primaryStage.show();

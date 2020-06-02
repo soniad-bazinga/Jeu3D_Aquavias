@@ -12,6 +12,6 @@ public class Main {
 		level.new_update();
 		level.affiche();
 		View v = new View(level);*/
-		MenuApplication ma = new MenuApplication("");
+		MenuApplication ma = new MenuApplication();
 	}
 }

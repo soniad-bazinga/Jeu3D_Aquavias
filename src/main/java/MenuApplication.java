@@ -30,15 +30,6 @@ import java.util.List;
 
 public class MenuApplication extends Application {
 
-<<<<<<< HEAD
-        private static final int WIDTH = 1280;
-        private static final int HEIGHT = 720;
-        Level enCours;
-        View v;
-        //Stage stage2 = new Stage();
-        File levelsFolder = new File("levels");
-        String [] lvls = levelsFolder.list();
-=======
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
     Level enCours;
@@ -47,8 +38,6 @@ public class MenuApplication extends Application {
     String [] lvls = levelsFolder.list();
     AnimationTimer at;
     Stage window;
->>>>>>> 7ec141183905d441fc9af0af68b9d2cd3cb3875d
-
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
@@ -56,12 +45,7 @@ public class MenuApplication extends Application {
                     //stage2.close();
                     try{
                         enCours = new Level(1);
-<<<<<<< HEAD
-                        v = new View(enCours);
-                        //po.start(stage2);
-=======
                         window.setScene(new View(enCours));
->>>>>>> 7ec141183905d441fc9af0af68b9d2cd3cb3875d
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
                     }
@@ -71,12 +55,7 @@ public class MenuApplication extends Application {
                 //stage2.close();
                 try{
                     enCours = new Level(-1);
-<<<<<<< HEAD
-                    v = new View(enCours);
-                    //po.start(stage2);
-=======
                     window.setScene(new View(enCours));
->>>>>>> 7ec141183905d441fc9af0af68b9d2cd3cb3875d
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
                 }
@@ -128,7 +107,7 @@ public class MenuApplication extends Application {
     }
 
     private void addTitle() {
-        MenuTitle title = new MenuTitle("Aquavias");
+        MenuTitle title = new MenuTitle();
         title.setTranslateX(WIDTH / 2.0 - title.getTitleWidth()/2);
         title.setTranslateY(HEIGHT / 3.0);
         titleBox.getChildren().add(title);

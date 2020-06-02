@@ -21,14 +21,11 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 
-public class View extends Application{
+public class View extends Scene{
 
     /* On definit la taille */
      static final int WIDTH = 720;
      static final int HEIGHT = 720;
-
-     /* utiliser le mode "piece"+piece+".obj" a afficher ! :) */
-    static String piece = "I";
 
     static final double PIECE_SIZE = 2;
 
@@ -50,19 +47,18 @@ public class View extends Application{
 
     /* Créé un aperçu de piece */
     public View(Level level){
-       super();
-       this.level = level;
-       launch();
+       super(new Group(), 1280, 720, true);
+       level.new_update();
+       setUp(level);
     }
 
-    public View(){
-        super();
+    public View() {
+        super(new Group(), 1280, 720, true);
     }
 
+    public void setUp(Level level){
 
-
-    @Override
-    public void start(Stage stage){
+        this.level = level;
 
         level.setOverviewer(this);
 
@@ -74,7 +70,8 @@ public class View extends Application{
 
         globalRoot.getChildren().add(stack);
 
-        Scene scene = new Scene(globalRoot, 1280,720,true);
+        //Scene scene = new Scene(globalRoot, 1280,720,true);
+        this.setRoot(globalRoot);
 
         /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
@@ -140,11 +137,6 @@ public class View extends Application{
                 }
             }
         });
-
-        /* On nome la fenetre, y ajoute la scene et on l'affiche */
-        stage.setTitle("A Q U A V I A S");
-        stage.setScene(scene);
-        stage.show();
 
         /* puis on démarre l'ecoulement de l'eau */
         start_water();

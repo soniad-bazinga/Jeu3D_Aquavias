@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.AnchorPane;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 public class View extends Scene{
 
     /* On definit la taille */
-     static final int WIDTH = 720;
+     static final int WIDTH = 1280;
      static final int HEIGHT = 720;
 
     static final double PIECE_SIZE = 2;
@@ -44,6 +45,8 @@ public class View extends Scene{
 
     /* La pile des ajouts de waterTile */
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
+
+    boolean isPaused = false;
 
     /* Créé un aperçu de piece */
     public View(Level level){
@@ -140,6 +143,33 @@ public class View extends Scene{
 
         /* puis on démarre l'ecoulement de l'eau */
         start_water();
+
+        Group menu = new Group();
+
+        Rectangle menuBackground = new Rectangle(WIDTH,HEIGHT);
+
+        menuBackground.setOpacity(.6);
+
+        menu.getChildren().add(menuBackground);
+
+        menu.setVisible(false);
+
+        setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ESCAPE){
+                menu.setVisible(!menu.isVisible());
+                isPaused = menu.isVisible();
+            }
+            if(!isPaused){
+                if(!pile.isEmpty()){
+                    waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
+                    wp.flow(wp.lastFlowX,wp.lastFlowY);
+                }else{
+                    waterPieces[0][0].flow(1,0);
+                }
+            }
+        });
+
+        globalRoot.getChildren().add(menu);
     }
 
     void initalizeCamera(Camera camera){
@@ -250,7 +280,7 @@ public class View extends Scene{
         level.new_rotate(x,y);
 
         /* puis dans la vue */
-        /* sur les modèles */
+        /* sur les modèles avec l'animation */
         RotateTransition rt= new RotateTransition(Duration.millis(rotateTime), models[x][y]);
         rt.setAxis(Rotate.Y_AXIS);
         rt.setByAngle(90);
@@ -320,7 +350,7 @@ public class View extends Scene{
 
     /* sur la même base qu'update */
     void flow(int i,int j){
-        if(!isWaterPieceFull(i,j)) return;
+        if(!isWaterPieceFull(i,j) || isPaused) return;
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)

@@ -235,6 +235,15 @@ public class MenuApplication extends Application {
                 col[0] = col[0] + 1;//On passe à la colonne suivante
             }
         });
+        MenuItems retour = new MenuItems("Retour");
+        retour.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+                reverseLevelAnimation();
+            }
+        });
+        LevelBox.add(retour,1,1,1,1);
+
         root.getChildren().add(LevelBox);
     }
 

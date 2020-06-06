@@ -1,27 +1,30 @@
 import javafx.application.Application;
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.scene.input.KeyEvent;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,8 +33,10 @@ import java.util.List;
 
 public class MenuApplication extends Application {
 
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
+    private static int WIDTH;
+    private static int HEIGHT;
+    private static double MUSIQUE;
+    private static double SONS;
     Level enCours;
     View v;
     File levelsFolder = new File("levels");
@@ -61,7 +66,7 @@ public class MenuApplication extends Application {
                 }
             }),
             new Pair<String, Runnable>("Choix du Niveau", () -> {System.out.println("Choisir le niveau"); menuLevelAnimation();}),
-            new Pair<String, Runnable>("Réglages", () -> {System.out.println("Modifier les réglages du jeu");}),
+            new Pair<String, Runnable>("Réglages", () -> {System.out.println("Modifier les réglages du jeu"); menuSettingsAnimation();}),
             new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
 
@@ -69,19 +74,27 @@ public class MenuApplication extends Application {
 
     public Pane root = new Pane(); //Panneau sur lequel on va superposer tous les éléments
     public boolean lvlSelect = false;
+    public boolean settingsSelect = false;
     public VBox menuBox = new VBox(); //Boite invisible qui contient les items du menu
     public GridPane LevelBox = new GridPane(); //Boite invisible qui contient les différents niveaux à séléctionner
+    public GridPane settingsBox = new GridPane();
     public HBox titleBox = new HBox(); //Boite invisible qui contient le titre
-    double lineX = WIDTH / 2.0 - 100.0; //Ajoute le menu au centre
-    double lineY = HEIGHT / 3.0 + 50.0; //Ajoute le menu au centre
+    double lineX;
+    double lineY;
 
     public MenuApplication(){
         super();
     }
 
     private Parent createContent() throws MalformedURLException {
+        loadSettings();
+
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
+
+        settingsBox.setHgap(25);
+        settingsBox.setVgap(20);
+
 
         //setButton();
 
@@ -91,6 +104,8 @@ public class MenuApplication extends Application {
 
         addMenu(lineX + 5, lineY + 5); //Crée tous les items du menu et les ajoute au Pane parent (root)
         addLevelSelect(WIDTH * 2.0, HEIGHT/4.0, 3);
+        setSettingsBox(-WIDTH * 2.0, HEIGHT/4.0);
+
         startAnimation(); //Crée les animations du menu
 
         return root;
@@ -130,6 +145,46 @@ public class MenuApplication extends Application {
         st.play();
     }
 
+    void loadSettings(){
+        try {
+            FileReader reader = new FileReader("settings.json");
+            JSONParser jsonParser = new JSONParser();
+            JSONObject obj = (JSONObject) jsonParser.parse(reader);
+
+            WIDTH = Math.toIntExact((long) obj.get("WIDTH"));
+            HEIGHT = Math.toIntExact((long) obj.get("HEIGHT"));
+
+            MUSIQUE =  ((Number) obj.get("MUSIQUE")).doubleValue();
+            SONS = ((Number) obj.get("SONS")).doubleValue();
+
+            lineX = WIDTH / 2.0 - 100.0; //Ajoute le menu au centre
+            lineY = HEIGHT / 3.0 + 50.0; //Ajoute le menu au centre
+
+        }catch(Exception e){
+            System.out.println(e);
+        }
+    }
+
+    void saveSettings(){
+        try{
+            FileReader reader = new FileReader("settings.json");
+            JSONParser jsonParser = new JSONParser();
+            JSONObject obj = (JSONObject) jsonParser.parse(reader);
+
+            obj.put("WIDTH",WIDTH);
+            obj.put("HEIGHT",HEIGHT);
+            obj.put("MUSIQUE",MUSIQUE);
+            obj.put("SONS",SONS);
+
+            FileWriter writer = new FileWriter("settings.json");
+            writer.write(obj.toJSONString());
+            writer.close();
+
+        }catch(Exception e){
+            System.out.println(e);
+        }
+    }
+
     private void menuLevelAnimation(){
         lvlSelect = true;
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
@@ -152,6 +207,30 @@ public class MenuApplication extends Application {
         st.play();
     }
 
+    private void menuSettingsAnimation(){
+        settingsBox.setTranslateY((HEIGHT - settingsBox.getHeight())/2);
+
+        settingsSelect = true;
+        ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
+        st.setToY(1);
+        st.setOnFinished(e ->{
+            TranslateTransition tt = new TranslateTransition((Duration.seconds(1.5)), menuBox);
+            TranslateTransition tt2 = new TranslateTransition((Duration.seconds(1)), titleBox);
+            TranslateTransition settingsTransition = new TranslateTransition((Duration.seconds(1)), settingsBox);
+
+            tt.setToY(1200);
+            tt2.setToY(-75);
+
+            settingsTransition.setToY((HEIGHT - settingsBox.getHeight())/2);
+            settingsTransition.setToX((WIDTH - settingsBox.getWidth())/1.8);
+
+            tt.play();
+            tt2.play();
+            settingsTransition.play();
+        });
+        st.play();
+    }
+
     private void reverseLevelAnimation(){
         lvlSelect = false;
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
@@ -163,6 +242,7 @@ public class MenuApplication extends Application {
 
             tt3.setToX(WIDTH * 2.0);
 
+
             tt2.setToY(tt2.getByY());
 
             tt.setToY(lineY + 5.0);
@@ -171,6 +251,30 @@ public class MenuApplication extends Application {
             tt.play();
             tt2.play();
             tt3.play();
+        });
+        st.play();
+    }
+
+    private void reverseSettingsAnimation(){
+        settingsSelect = false;
+
+        ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
+        st.setToY(1);
+        st.setOnFinished(e->{
+            TranslateTransition tt = new TranslateTransition((Duration.seconds(1)), menuBox);
+            TranslateTransition tt2 = new TranslateTransition((Duration.seconds(1)), titleBox);
+            TranslateTransition settingsTransition = new TranslateTransition((Duration.seconds(1)), settingsBox);
+
+            settingsTransition.setToX(-WIDTH * 2.0);
+
+            tt2.setToY(tt2.getByY());
+
+            tt.setToY(lineY + 5.0);
+            tt.setToX(lineX + 5.0);
+
+            tt.play();
+            tt2.play();
+            settingsTransition.play();
         });
         st.play();
     }
@@ -194,6 +298,7 @@ public class MenuApplication extends Application {
         root.getChildren().add(menuBox);
     }
 
+
     public void addLevelToList(List<Pair<String, Runnable>> list){
         for(int i = 0; i < lvls.length; i++){
             lvls[i] = lvls[i].split("\\.")[0];
@@ -212,6 +317,73 @@ public class MenuApplication extends Application {
                 }));
             }
         }
+    }
+
+    private void setSettingsBox(double x, double y){
+        settingsBox.setTranslateX(x);
+        settingsBox.setTranslateY(y);
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(25);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(25);
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPercentWidth(25);
+        ColumnConstraints col4 = new ColumnConstraints();
+        col4.setPercentWidth(25);
+        settingsBox.getColumnConstraints().addAll(col1,col2,col3,col4);
+
+
+        Slider musique = new Slider(0,100,MUSIQUE);
+        Label labelMusique = new Label("Musique :");
+        Label niveauMusique = new Label(Integer.toString((int)musique.getValue()));
+        settingsBox.add(labelMusique,0,0,1,1);
+        settingsBox.add(musique,1,0,2,1);
+        settingsBox.add(niveauMusique,3,0,1,1);
+
+        Slider bruitages = new Slider(0,100,SONS);
+        Label labelBruitages = new Label("Sons :");
+        Label niveauBruitages = new Label(Integer.toString((int)bruitages.getValue()));
+        settingsBox.add(labelBruitages,0,1,1,1);
+        settingsBox.add(bruitages,1,1,2,1);
+        settingsBox.add(niveauBruitages,3,1,1,1);
+
+        musique.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                niveauMusique.setText(Integer.toString((int)musique.getValue()));
+            }
+        });
+
+        bruitages.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                niveauBruitages.setText(Integer.toString((int)bruitages.getValue()));
+            }
+        });
+
+        MenuItems retour = new MenuItems("Retour");
+        retour.setOnAction(new Runnable(){
+            @Override
+            public void run() {
+                reverseSettingsAnimation();
+                musique.setValue(MUSIQUE);
+                bruitages.setValue(SONS);
+            }
+        });
+        MenuItems sauvegarder = new MenuItems("Sauvegarder les changements");
+        sauvegarder.setOnAction(new Runnable(){
+            @Override
+            public void run(){
+                MUSIQUE = musique.getValue();
+                SONS = bruitages.getValue();
+                saveSettings();
+            }
+        });
+
+        settingsBox.add(retour,0,3,2,1);
+        settingsBox.add(sauvegarder,2,3,2,1);
+
+        root.getChildren().add(settingsBox);
     }
 
     private void addLevelSelect(double x, double y, int taillemax) {
@@ -253,12 +425,17 @@ public class MenuApplication extends Application {
             window = primaryStage;
             primaryStage.setTitle("Aquavias");
             primaryStage.setScene(scene);
+            primaryStage.setWidth(WIDTH);
+            primaryStage.setHeight(HEIGHT);
             primaryStage.show();
             scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent keyEvent) {
                     if (lvlSelect){
                         if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseLevelAnimation();
+                    }
+                    if(settingsSelect){
+                        if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseSettingsAnimation();
                     }
                 }
             });

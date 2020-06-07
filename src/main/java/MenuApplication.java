@@ -45,7 +45,7 @@ public class MenuApplication extends Application {
                     //stage2.close();
                     try{
                         enCours = new Level(1);
-                        window.setScene(new View(enCours));
+                        fadeOut(enCours);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
                     }
@@ -55,7 +55,7 @@ public class MenuApplication extends Application {
                 //stage2.close();
                 try{
                     enCours = new Level(-1);
-                    window.setScene(new View(enCours));
+                    fadeOut(enCours);
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
                 }
@@ -204,8 +204,7 @@ public class MenuApplication extends Application {
                 list.add(new Pair<>(lvls[i], () -> {
                     try {
                         enCours = new Level(Integer.parseInt(lvls[finalI]));
-                        window.setScene(new View(enCours));
-                        //po.start(stage2);
+                        fadeOut(enCours);
                     } catch (Exception ex) {
                         System.out.println("Niveau manquant");
                     }
@@ -238,9 +237,39 @@ public class MenuApplication extends Application {
         root.getChildren().add(LevelBox);
     }
 
+    void fadeOut(Level lvl) throws Exception {
+        View v = new View(lvl, this);
+
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        fade.setNode(root);
+        fade.setOnFinished(EventHandler -> {
+            window.setScene(v);
+            v.fadeIn();
+        });
+        fade.play();
+    }
+
+    void fadeIn(){
+        window.setScene(primaryScene);
+
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.setNode(root);
+
+        fade.play();
+    }
+
+    Scene primaryScene;
+
     @Override
     public void start(Stage primaryStage) throws MalformedURLException {
             Scene scene = new Scene(createContent());
+            primaryScene = scene;
             window = primaryStage;
             primaryStage.setTitle("Aquavias");
             primaryStage.setScene(scene);

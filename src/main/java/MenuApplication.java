@@ -45,7 +45,6 @@ public class MenuApplication extends Application {
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
             new Pair<String, Runnable>("Nouvelle Partie", () -> {
-                    //stage2.close();
                     try{
                         enCours = new Level(1);
                         window.setScene(new View(enCours));
@@ -55,7 +54,6 @@ public class MenuApplication extends Application {
             }),
             //Bouton continuer du menu principal
             new Pair<String, Runnable>("Continuer", () -> {
-                //stage2.close();
                 try{
                     enCours = new Level(-1);
                     window.setScene(new View(enCours));
@@ -68,7 +66,7 @@ public class MenuApplication extends Application {
             new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
         );
 
-    public ImageView retour = new ImageView(new Image (new File("img/retour.png").toURI().toString()));
+    public ImageView retour;
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
     public Pane root = new Pane(); //Panneau sur lequel on va superposer tous les éléments
     public boolean lvlSelect = false;
@@ -82,11 +80,18 @@ public class MenuApplication extends Application {
         super();
     }
 
+    public MenuApplication(int i){
+        super();
+        launch();
+    }
+
     private Parent createContent() throws MalformedURLException {
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
 
         addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu principal
+
+        retour = new ImageView(new Image("img/retour.png"));
 
         retour.setTranslateX((WIDTH/5.0));
         retour.setTranslateY(HEIGHT/1.1);
@@ -277,8 +282,4 @@ public class MenuApplication extends Application {
                 }
             });
         }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
 }

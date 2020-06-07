@@ -45,6 +45,9 @@ public class View extends Scene{
     /* La pile des ajouts de waterTile */
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
+    /*Panneau de fin de niveau*/
+    static LevelEnd fin;
+
     /* Créé un aperçu de piece */
     public View(Level level){
        super(new Group(), 1280, 720, true);
@@ -237,7 +240,12 @@ public class View extends Scene{
     }
 
     void rotate(int x,int y){
-        if(level.compteur <= 0) return;
+        //Si la partie est finie, la rotation ne fonctionne plus
+        if(level.estFinie(false)) {
+            fin = new LevelEnd();
+
+            return;
+        }
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;

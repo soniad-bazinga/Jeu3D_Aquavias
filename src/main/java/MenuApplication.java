@@ -14,6 +14,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -46,7 +48,6 @@ public class MenuApplication extends Application {
     AnimationTimer at;
     Stage window;
     MediaPlayer mediaPlayer;
-    boolean mute= false;
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
@@ -121,43 +122,7 @@ public class MenuApplication extends Application {
         mediaPlayer= new MediaPlayer(sound);
         mediaPlayer.play();
         mediaPlayer.setCycleCount(INDEFINITE);  //loop
-        mute= false; //when we enter the windows, the music plays automatically
-        // until it is muted by clincking on the mute button
-
-       //Icon Music On
-       File img1 = new File("img/soundOn.png");
-       String da = img1.toURI().toURL().toString();
-       ImageView imageView= new ImageView(new Image(da));
-
-       //Icon Music off
-        File img2= new File("img/soundOff.png");
-        String mu= img2.toURI().toURL().toString();
-        ImageView imageView1= new ImageView(new Image(mu));
-
-        //setting an image on benjamin
-        Button benjamin= new Button();
-        benjamin.setStyle("-fx-background-color: transparent");
-        benjamin.setGraphic(imageView);  //icon music On at first
-        benjamin.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                if(!mute){     //turn the music off
-                    benjamin.setGraphic(imageView1);
-                    mediaPlayer.pause();
-                    mute= true;
-
-                }else{     //turn the music on
-                    benjamin.setGraphic(imageView);
-                    mediaPlayer.play();
-                    mute= false;
-                }
-            }
-        });
-
-
-        benjamin.setTranslateX(100);
-        benjamin.setTranslateY(10);
-        root.getChildren().add(benjamin);
+        mediaPlayer.setVolume(MUSIQUE/100);
 
         return root;
     }
@@ -404,6 +369,7 @@ public class MenuApplication extends Application {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 niveauMusique.setText(Integer.toString((int)musique.getValue()));
+                mediaPlayer.setVolume(musique.getValue()/100);
             }
         });
 
@@ -421,6 +387,7 @@ public class MenuApplication extends Application {
                 reverseSettingsAnimation();
                 musique.setValue(MUSIQUE);
                 bruitages.setValue(SONS);
+                mediaPlayer.setVolume(MUSIQUE/100);
             }
         });
         MenuItems sauvegarder = new MenuItems("Sauvegarder les changements");

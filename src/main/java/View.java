@@ -1,4 +1,5 @@
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
@@ -46,12 +47,15 @@ public class View extends Scene{
     /* La pile des ajouts de waterTile */
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
-    boolean isPaused = false;
+    AnchorPane globalRoot;
+
+    MenuApplication menu;
 
     /* Créé un aperçu de piece */
-    public View(Level level){
+    public View(Level level, MenuApplication menu){
        super(new Group(), 1280, 720, true);
        level.new_update();
+       this.menu = menu;
        setUp(level);
     }
 
@@ -65,7 +69,7 @@ public class View extends Scene{
 
         level.setOverviewer(this);
 
-        AnchorPane globalRoot = new AnchorPane();
+        globalRoot = new AnchorPane();
 
         StackPane stack = new StackPane();
 
@@ -140,6 +144,9 @@ public class View extends Scene{
                 }
             }
         });
+
+        /* on rend la root invisible pour la transition */
+        globalRoot.setOpacity(0);
 
         /* puis on démarre l'ecoulement de l'eau */
         start_water();
@@ -264,6 +271,28 @@ public class View extends Scene{
         r.setHeight(50);
 
         r.setFill(new Color(0,0,0,.05));
+    }
+
+    void fadeIn(){
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setNode(globalRoot);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        fade.play();
+    }
+
+    void fadeOut(){
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setNode(globalRoot);
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        fade.setOnFinished(EventHandler ->{
+            menu.fadeIn();
+        });
+        fade.play();
     }
 
     void rotate(int x,int y){

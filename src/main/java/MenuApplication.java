@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static javafx.scene.media.MediaPlayer.INDEFINITE;
+
 
 public class MenuApplication extends Application {
 
@@ -43,6 +45,8 @@ public class MenuApplication extends Application {
     String [] lvls = levelsFolder.list();
     AnimationTimer at;
     Stage window;
+    MediaPlayer mediaPlayer;
+    boolean mute= false;
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
@@ -50,7 +54,7 @@ public class MenuApplication extends Application {
                     //stage2.close();
                     try{
                         enCours = new Level(1);
-                        window.setScene(new View(enCours));
+                        fadeOut(enCours);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
                     }
@@ -60,7 +64,7 @@ public class MenuApplication extends Application {
                 //stage2.close();
                 try{
                     enCours = new Level(-1);
-                    window.setScene(new View(enCours));
+                    fadeOut(enCours);
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
                 }
@@ -68,6 +72,7 @@ public class MenuApplication extends Application {
             new Pair<String, Runnable>("Choix du Niveau", () -> {System.out.println("Choisir le niveau"); menuLevelAnimation();}),
             new Pair<String, Runnable>("Réglages", () -> {System.out.println("Modifier les réglages du jeu"); menuSettingsAnimation();}),
             new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
+
         );
 
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
@@ -102,11 +107,57 @@ public class MenuApplication extends Application {
 
         addTitle();//Fonction qui ajoute le titre créé par MenuTitle.java
 
+
         addMenu(lineX + 5, lineY + 5); //Crée tous les items du menu et les ajoute au Pane parent (root)
         addLevelSelect(WIDTH * 2.0, HEIGHT/4.0, 3);
         setSettingsBox(-WIDTH * 2.0, HEIGHT/4.0);
 
         startAnimation(); //Crée les animations du menu
+
+
+        //for playing music in the background
+        String musicFile= "sounds/menumusic.wav";
+        Media sound = new Media(new File(musicFile).toURI().toString());
+        mediaPlayer= new MediaPlayer(sound);
+        mediaPlayer.play();
+        mediaPlayer.setCycleCount(INDEFINITE);  //loop
+        mute= false; //when we enter the windows, the music plays automatically
+        // until it is muted by clincking on the mute button
+
+       //Icon Music On
+       File img1 = new File("img/soundOn.png");
+       String da = img1.toURI().toURL().toString();
+       ImageView imageView= new ImageView(new Image(da));
+
+       //Icon Music off
+        File img2= new File("img/soundOff.png");
+        String mu= img2.toURI().toURL().toString();
+        ImageView imageView1= new ImageView(new Image(mu));
+
+        //setting an image on benjamin
+        Button benjamin= new Button();
+        benjamin.setStyle("-fx-background-color: transparent");
+        benjamin.setGraphic(imageView);  //icon music On at first
+        benjamin.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if(!mute){     //turn the music off
+                    benjamin.setGraphic(imageView1);
+                    mediaPlayer.pause();
+                    mute= true;
+
+                }else{     //turn the music on
+                    benjamin.setGraphic(imageView);
+                    mediaPlayer.play();
+                    mute= false;
+                }
+            }
+        });
+
+
+        benjamin.setTranslateX(100);
+        benjamin.setTranslateY(10);
+        root.getChildren().add(benjamin);
 
         return root;
     }
@@ -118,7 +169,9 @@ public class MenuApplication extends Application {
         imageView.setFitWidth(WIDTH);
         imageView.setFitHeight(HEIGHT);
         imageView.setEffect(new GaussianBlur());
+
         root.getChildren().add(imageView);
+
     }
 
     private void addTitle() {
@@ -135,6 +188,7 @@ public class MenuApplication extends Application {
         st.setOnFinished(e -> {
             for (int i = 0; i < menuBox.getChildren().size(); i++) {
                 Node n = menuBox.getChildren().get(i);
+
 
                 TranslateTransition tt = new TranslateTransition(Duration.seconds(1 + i * 0.15), n);
                 tt.setToX(0);
@@ -309,8 +363,7 @@ public class MenuApplication extends Application {
                 list.add(new Pair<>(lvls[i], () -> {
                     try {
                         enCours = new Level(Integer.parseInt(lvls[finalI]));
-                        window.setScene(new View(enCours));
-                        //po.start(stage2);
+                        fadeOut(enCours);
                     } catch (Exception ex) {
                         System.out.println("Niveau manquant");
                     }
@@ -419,15 +472,51 @@ public class MenuApplication extends Application {
         root.getChildren().add(LevelBox);
     }
 
+    void fadeOut(Level lvl) throws Exception {
+        View v = new View(lvl, this);
+
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        fade.setNode(root);
+        fade.setOnFinished(EventHandler -> {
+            window.setScene(v);
+            v.fadeIn();
+        });
+        fade.play();
+    }
+
+    void fadeIn(){
+        window.setScene(primaryScene);
+
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.setNode(root);
+
+        fade.play();
+    }
+
+    Scene primaryScene;
+
     @Override
     public void start(Stage primaryStage) throws MalformedURLException {
+
+
             Scene scene = new Scene(createContent());
+            primaryScene = scene;
             window = primaryStage;
             primaryStage.setTitle("Aquavias");
             primaryStage.setScene(scene);
             primaryStage.setWidth(WIDTH);
             primaryStage.setHeight(HEIGHT);
             primaryStage.show();
+
+
+
+
             scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent keyEvent) {

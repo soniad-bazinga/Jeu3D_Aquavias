@@ -89,7 +89,7 @@ public abstract class waterPiece extends Group {
         lastFlowX = i;
         lastFlowY = j;
         /* si la pièce n'est pas pleine dans le modèle on arrête tout */
-        if(!view.isLevelFull(x,y) || !flowing || view.isPaused) return;
+        if(!view.isLevelFull(x,y) || !flowing || view.isPaused()) return;
         /* on utilise pas encore le système de water tile, a modifer dans le futur */
         /* we first set the tiles i j full */
         water[i][j].setFull(true);

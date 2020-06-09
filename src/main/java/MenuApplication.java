@@ -449,6 +449,7 @@ public class MenuApplication extends Application {
         fade.setNode(root);
         fade.setOnFinished(EventHandler -> {
             window.setScene(v);
+            reverseLevelAnimation();
             v.fadeIn();
         });
         fade.play();
@@ -462,7 +463,6 @@ public class MenuApplication extends Application {
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.setNode(root);
-
         fade.play();
     }
 

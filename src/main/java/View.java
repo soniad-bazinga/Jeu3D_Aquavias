@@ -4,15 +4,15 @@ import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class View extends Scene{
 
@@ -50,6 +51,15 @@ public class View extends Scene{
     AnchorPane globalRoot;
 
     MenuApplication menu;
+
+    boolean paused = false;
+
+    boolean loading = false;
+
+    StackPane pauseMenu;
+
+    VBox pMenuElements;
+
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
@@ -151,32 +161,124 @@ public class View extends Scene{
         /* puis on démarre l'ecoulement de l'eau */
         start_water();
 
-        Group menu = new Group();
+        initializePauseMenu();
+
+        pauseMenu.setVisible(false);
+
+        setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ESCAPE){
+                pause();
+            }
+        });
+
+        globalRoot.getChildren().add(pauseMenu);
+    }
+
+    void pause(){
+        if(loading) return;
+        pauseMenu.setVisible(!pauseMenu.isVisible());
+        paused = pauseMenu.isVisible();
+        if(!paused){
+            if(!pile.isEmpty()){
+                waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
+                wp.flow(wp.lastFlowX,wp.lastFlowY);
+            }else{
+                waterPieces[0][0].flow(1,0);
+            }
+        }else{
+            if(pauseMenu.getChildren().get(1) != pMenuElements){
+                pauseMenu.getChildren().remove(1);
+                pauseMenu.getChildren().add(pMenuElements);
+            }
+        }
+    }
+
+    void initializePauseMenu(){
+        pauseMenu = new StackPane();
 
         Rectangle menuBackground = new Rectangle(WIDTH,HEIGHT);
 
         menuBackground.setOpacity(.6);
 
-        menu.getChildren().add(menuBackground);
+        pauseMenu.getChildren().add(menuBackground);
 
-        menu.setVisible(false);
+        pMenuElements = new VBox(15);
 
-        setOnKeyPressed(e -> {
-            if(e.getCode() == KeyCode.ESCAPE){
-                menu.setVisible(!menu.isVisible());
-                isPaused = menu.isVisible();
-            }
-            if(!isPaused){
-                if(!pile.isEmpty()){
-                    waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
-                    wp.flow(wp.lastFlowX,wp.lastFlowY);
-                }else{
-                    waterPieces[0][0].flow(1,0);
-                }
+        pauseMenu.getChildren().add(pMenuElements);
+
+        MenuItems retour = new MenuItems("Retour");
+
+        retour.setOnAction(new Runnable() {
+            public void run(){
+                pause();
             }
         });
 
-        globalRoot.getChildren().add(menu);
+        MenuItems leave = new MenuItems("Revenir au menu principal");
+
+        leave.setOnAction(new Runnable(){
+            public void run(){
+                exit();
+            }
+        });
+
+        MenuItems options = new MenuItems("Options");
+
+        options.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
+
+        pMenuElements.getChildren().addAll(options,leave,retour);
+
+        pMenuElements.setTranslateX(WIDTH / 2.0 - 100.0);
+        pMenuElements.setTranslateY(HEIGHT / 3.0 + 50.0);
+
+    }
+
+    void exit(){
+        pauseMenu.getChildren().remove(1);
+
+        GridPane confirmation = new GridPane();
+
+        confirmation.setHgap(25);
+        confirmation.setVgap(20);
+
+        ColumnConstraints c1 = new ColumnConstraints(200);
+        ColumnConstraints c2 = new ColumnConstraints(200);
+        confirmation.getColumnConstraints().addAll(c1,c2);
+
+        Label t = new Label("Voulez vous vraiment quitter le niveau?");
+
+        t.setTextFill(Color.WHITE);
+
+        MenuItems yes = new MenuItems("Oui");
+        yes.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+                fadeOut();
+            }
+        });
+        MenuItems no = new MenuItems("Non");
+        no.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+                pauseMenu.getChildren().remove(1);
+                pauseMenu.getChildren().add(pMenuElements);
+            }
+        });
+
+        confirmation.add(t,0,0,2,1);
+        GridPane.setHalignment(t, HPos.CENTER);
+        confirmation.add(yes,0,1,1,1);
+        confirmation.add(no,1,1,1,1);
+
+        pauseMenu.getChildren().add(confirmation);
+
+        confirmation.setTranslateX(WIDTH/ 2.0  - 225); //(200 + 200 + 25 + 25)/2
+        confirmation.setTranslateY(HEIGHT / 3.0 + 50.0);
     }
 
     void initalizeCamera(Camera camera){
@@ -274,16 +376,20 @@ public class View extends Scene{
     }
 
     void fadeIn(){
+        loading = true;
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
         fade.setFromValue(0);
         fade.setToValue(1);
-
+        fade.setOnFinished(EventHandler ->{
+            loading = false;
+        });
         fade.play();
     }
 
     void fadeOut(){
+        loading = true;
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
@@ -379,7 +485,7 @@ public class View extends Scene{
 
     /* sur la même base qu'update */
     void flow(int i,int j){
-        if(!isWaterPieceFull(i,j) || isPaused) return;
+        if(!isWaterPieceFull(i,j) || paused) return;
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)
@@ -424,6 +530,8 @@ public class View extends Scene{
     boolean isWaterPieceFull(int x, int y){
         return waterPieces[x][y].isFull();
     }
+
+    boolean isPaused(){ return paused; }
 
     /* Rempli/Vide la pièce de coordoonées i;j */
     void setFull(int i, int j, boolean b){

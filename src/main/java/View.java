@@ -23,6 +23,8 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class View extends Scene{
 
@@ -56,10 +58,8 @@ public class View extends Scene{
 
     boolean loading = false;
 
-    StackPane pauseMenu;
-
-    VBox pMenuElements;
-
+    AnchorPane pauseMenu;
+    Map<String, Pane> pauseMenuWindows = new HashMap<String, Pane>();
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
@@ -161,10 +161,13 @@ public class View extends Scene{
         /* puis on démarre l'ecoulement de l'eau */
         start_water();
 
+        /* on initalise le menu de pause */
         initializePauseMenu();
 
+        /* et on le rend invisible */
         pauseMenu.setVisible(false);
 
+        /* si jamais on appuis sur echap, on appel pause() */
         setOnKeyPressed(e -> {
             if(e.getCode() == KeyCode.ESCAPE){
                 pause();
@@ -174,38 +177,47 @@ public class View extends Scene{
         globalRoot.getChildren().add(pauseMenu);
     }
 
+    /* gère le menu de pause */
     void pause(){
+        /* si on est dans un chargement, ne rien faire */
         if(loading) return;
+
+        /* on inverse la visibilité du menu (visible => !visible) */
         pauseMenu.setVisible(!pauseMenu.isVisible());
         paused = pauseMenu.isVisible();
+
+        /* si jamais on sort du menu pause */
         if(!paused){
+            /* si la pile est non vide, on rappel la fonction d'ecoulement sur le dernier en date */
             if(!pile.isEmpty()){
                 waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
                 wp.flow(wp.lastFlowX,wp.lastFlowY);
             }else{
+                /* sinon depuis la source */
                 waterPieces[0][0].flow(1,0);
             }
         }else{
-            if(pauseMenu.getChildren().get(1) != pMenuElements){
-                pauseMenu.getChildren().remove(1);
-                pauseMenu.getChildren().add(pMenuElements);
-            }
+            /* si on est dans le menu de pause */
+            pauseShow("pause");
         }
     }
 
     void initializePauseMenu(){
-        pauseMenu = new StackPane();
+        pauseMenu = new AnchorPane();
 
+        /* le fond du menu pause, un rectangle noir légerement opaque */
         Rectangle menuBackground = new Rectangle(WIDTH,HEIGHT);
 
         menuBackground.setOpacity(.6);
 
         pauseMenu.getChildren().add(menuBackground);
 
-        pMenuElements = new VBox(15);
+        /* le groupe qui contient les boutons de selection */
+        VBox pMenuElements = new VBox(15);
 
         pauseMenu.getChildren().add(pMenuElements);
 
+        /* le bouton de retour pour sortir de la pause */
         MenuItems retour = new MenuItems("Retour");
 
         retour.setOnAction(new Runnable() {
@@ -214,46 +226,60 @@ public class View extends Scene{
             }
         });
 
+        /* le bouton pour revenir au menu principal */
         MenuItems leave = new MenuItems("Revenir au menu principal");
 
         leave.setOnAction(new Runnable(){
             public void run(){
-                exit();
+                /* on affiche la fenetre de sortie */
+                pauseShow("exit");
             }
         });
 
+        /* le bouton d'options */
         MenuItems options = new MenuItems("Options");
 
         options.setOnAction(new Runnable() {
             @Override
             public void run() {
-
+                /* on affiche la fenetre de réglages */
+                pauseShow("settings");
             }
         });
 
         pMenuElements.getChildren().addAll(options,leave,retour);
 
+        /* puis on le met au milieu de l'ecran */
         pMenuElements.setTranslateX(WIDTH / 2.0 - 100.0);
         pMenuElements.setTranslateY(HEIGHT / 3.0 + 50.0);
 
+        /* on l'ajoute en tant que clé "pause" et valeur lui même */
+        pauseMenuWindows.put("pause",pMenuElements);
+
+        initializeExitPause();
+        initializeSettingsPause();
+
     }
 
-    void exit(){
-        pauseMenu.getChildren().remove(1);
-
+    /* on initialise le menu de sorti de niveau */
+    void initializeExitPause(){
         GridPane confirmation = new GridPane();
 
         confirmation.setHgap(25);
         confirmation.setVgap(20);
 
+        /* les contraintes de colonnes, 2 colonnes de 200px */
         ColumnConstraints c1 = new ColumnConstraints(200);
         ColumnConstraints c2 = new ColumnConstraints(200);
         confirmation.getColumnConstraints().addAll(c1,c2);
 
+        /* le message */
         Label t = new Label("Voulez vous vraiment quitter le niveau?");
 
+        /* affiché en blanc */
         t.setTextFill(Color.WHITE);
 
+        /* le bouton "oui", faisant alors quitter le niveau */
         MenuItems yes = new MenuItems("Oui");
         yes.setOnAction(new Runnable() {
             @Override
@@ -261,15 +287,17 @@ public class View extends Scene{
                 fadeOut();
             }
         });
+
+        /* le bouton "non", retournant sur le menu précedent */
         MenuItems no = new MenuItems("Non");
         no.setOnAction(new Runnable() {
             @Override
             public void run() {
-                pauseMenu.getChildren().remove(1);
-                pauseMenu.getChildren().add(pMenuElements);
+                pauseShow("pause");
             }
         });
 
+        /* on les ajoutes proprements */
         confirmation.add(t,0,0,2,1);
         GridPane.setHalignment(t, HPos.CENTER);
         confirmation.add(yes,0,1,1,1);
@@ -277,8 +305,47 @@ public class View extends Scene{
 
         pauseMenu.getChildren().add(confirmation);
 
-        confirmation.setTranslateX(WIDTH/ 2.0  - 225); //(200 + 200 + 25 + 25)/2
-        confirmation.setTranslateY(HEIGHT / 3.0 + 50.0);
+        /* on l'ajoute en tant que clé "exit" et valeur lui même */
+        pauseMenuWindows.put("exit",confirmation);
+
+        confirmation.setTranslateX(WIDTH * 2);
+        confirmation.setTranslateY(HEIGHT * 2);
+    }
+
+    void pauseShow(String s){
+        for(Map.Entry<String, Pane> p : pauseMenuWindows.entrySet()){
+            /* on les positionne en dehors de l'écran */
+            p.getValue().setTranslateX(WIDTH * 2);
+            p.getValue().setTranslateY(HEIGHT * 2);
+        }
+
+        /* on affiche la pane de clé s au milieu */
+        Pane p = pauseMenuWindows.get(s);
+
+        p.setTranslateX((WIDTH - p.getWidth())/2);
+        p.setTranslateY((HEIGHT - p.getHeight())/2);
+
+    }
+
+    void initializeSettingsPause(){
+        settingsMenu s = new settingsMenu(menu.getMediaPlayer(), Color.WHITE);
+
+        s.setTranslateX(WIDTH * 2);
+        s.setTranslateY(HEIGHT * 2);
+
+        Runnable r = new Runnable(){
+
+            public void run(){
+                pauseShow("pause");
+                s.updateValues();
+            }
+        };
+
+        s.setRetourAction(r);
+
+        pauseMenu.getChildren().add(s);
+
+        pauseMenuWindows.put("settings",s);
     }
 
     void initalizeCamera(Camera camera){

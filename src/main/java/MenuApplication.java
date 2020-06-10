@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -39,8 +40,6 @@ public class MenuApplication extends Application {
 
     private static int WIDTH;
     private static int HEIGHT;
-    private static double MUSIQUE;
-    private static double SONS;
     Level enCours;
     View v;
     File levelsFolder = new File("levels");
@@ -83,7 +82,7 @@ public class MenuApplication extends Application {
     public boolean settingsSelect = false;
     public VBox menuBox = new VBox(); //Boite invisible qui contient les items du menu
     public GridPane LevelBox = new GridPane(); //Boite invisible qui contient les différents niveaux à séléctionner
-    public GridPane settingsBox = new GridPane();
+    public settingsMenu settingsBox;
     public HBox titleBox = new HBox(); //Boite invisible qui contient le titre
     double lineX;
     double lineY;
@@ -95,11 +94,11 @@ public class MenuApplication extends Application {
     private Parent createContent() throws MalformedURLException {
         loadSettings();
 
+        setUpAudio();
+        settingsBox = new settingsMenu(mediaPlayer, Color.BLACK);
+
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
-
-        settingsBox.setHgap(25);
-        settingsBox.setVgap(20);
 
 
         //setButton();
@@ -115,16 +114,16 @@ public class MenuApplication extends Application {
 
         startAnimation(); //Crée les animations du menu
 
+        return root;
+    }
 
+    void setUpAudio(){
         //for playing music in the background
         String musicFile= "sounds/menumusic.wav";
         Media sound = new Media(new File(musicFile).toURI().toString());
         mediaPlayer= new MediaPlayer(sound);
         mediaPlayer.play();
         mediaPlayer.setCycleCount(INDEFINITE);  //loop
-        mediaPlayer.setVolume(MUSIQUE/100);
-
-        return root;
     }
 
     private void addBackground() throws MalformedURLException {
@@ -166,38 +165,17 @@ public class MenuApplication extends Application {
 
     void loadSettings(){
         try {
+            /* on récupère le fichier de réglages*/
             FileReader reader = new FileReader("settings.json");
             JSONParser jsonParser = new JSONParser();
             JSONObject obj = (JSONObject) jsonParser.parse(reader);
 
+            /* et on récupère les valeurs qui nous interessent */
             WIDTH = Math.toIntExact((long) obj.get("WIDTH"));
             HEIGHT = Math.toIntExact((long) obj.get("HEIGHT"));
 
-            MUSIQUE =  ((Number) obj.get("MUSIQUE")).doubleValue();
-            SONS = ((Number) obj.get("SONS")).doubleValue();
-
             lineX = WIDTH / 2.0 - 100.0; //Ajoute le menu au centre
             lineY = HEIGHT / 3.0 + 50.0; //Ajoute le menu au centre
-
-        }catch(Exception e){
-            System.out.println(e);
-        }
-    }
-
-    void saveSettings(){
-        try{
-            FileReader reader = new FileReader("settings.json");
-            JSONParser jsonParser = new JSONParser();
-            JSONObject obj = (JSONObject) jsonParser.parse(reader);
-
-            obj.put("WIDTH",WIDTH);
-            obj.put("HEIGHT",HEIGHT);
-            obj.put("MUSIQUE",MUSIQUE);
-            obj.put("SONS",SONS);
-
-            FileWriter writer = new FileWriter("settings.json");
-            writer.write(obj.toJSONString());
-            writer.close();
 
         }catch(Exception e){
             System.out.println(e);
@@ -337,71 +315,26 @@ public class MenuApplication extends Application {
         }
     }
 
+    MediaPlayer getMediaPlayer(){ return mediaPlayer; }
+
     private void setSettingsBox(double x, double y){
+        /* place le menu de settings a gauche */
         settingsBox.setTranslateX(x);
         settingsBox.setTranslateY(y);
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(25);
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(25);
-        ColumnConstraints col3 = new ColumnConstraints();
-        col3.setPercentWidth(25);
-        ColumnConstraints col4 = new ColumnConstraints();
-        col4.setPercentWidth(25);
-        settingsBox.getColumnConstraints().addAll(col1,col2,col3,col4);
 
-
-        Slider musique = new Slider(0,100,MUSIQUE);
-        Label labelMusique = new Label("Musique :");
-        Label niveauMusique = new Label(Integer.toString((int)musique.getValue()));
-        settingsBox.add(labelMusique,0,0,1,1);
-        settingsBox.add(musique,1,0,2,1);
-        settingsBox.add(niveauMusique,3,0,1,1);
-
-        Slider bruitages = new Slider(0,100,SONS);
-        Label labelBruitages = new Label("Sons :");
-        Label niveauBruitages = new Label(Integer.toString((int)bruitages.getValue()));
-        settingsBox.add(labelBruitages,0,1,1,1);
-        settingsBox.add(bruitages,1,1,2,1);
-        settingsBox.add(niveauBruitages,3,1,1,1);
-
-        musique.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                niveauMusique.setText(Integer.toString((int)musique.getValue()));
-                mediaPlayer.setVolume(musique.getValue()/100);
-            }
-        });
-
-        bruitages.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                niveauBruitages.setText(Integer.toString((int)bruitages.getValue()));
-            }
-        });
-
-        MenuItems retour = new MenuItems("Retour");
-        retour.setOnAction(new Runnable(){
+        /* on créer un runnable pour effectuer l'animation inverse */
+        Runnable r = new Runnable(){
             @Override
             public void run() {
                 reverseSettingsAnimation();
-                musique.setValue(MUSIQUE);
-                bruitages.setValue(SONS);
-                mediaPlayer.setVolume(MUSIQUE/100);
-            }
-        });
-        MenuItems sauvegarder = new MenuItems("Sauvegarder les changements");
-        sauvegarder.setOnAction(new Runnable(){
-            @Override
-            public void run(){
-                MUSIQUE = musique.getValue();
-                SONS = bruitages.getValue();
-                saveSettings();
-            }
-        });
 
-        settingsBox.add(retour,0,3,2,1);
-        settingsBox.add(sauvegarder,2,3,2,1);
+                /* pour reset les valeurs si non sauvegardé */
+                settingsBox.updateValues();
+            }
+        };
+
+        /* et on l'applique comme action de retour a notre bouton */
+        settingsBox.setRetourAction(r);
 
         root.getChildren().add(settingsBox);
     }
@@ -457,6 +390,9 @@ public class MenuApplication extends Application {
 
     void fadeIn(){
         window.setScene(primaryScene);
+
+        settingsBox.loadSettings();
+        settingsBox.updateValues();
 
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));

@@ -91,7 +91,7 @@ public class MenuApplication extends Application {
 
         addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu principal
 
-        retour = new ImageView(new Image("img/retour.png"));
+        retour = new ImageView(new Image(new File("img/retour.png").toURI().toString()));
 
         retour.setTranslateX((WIDTH/5.0));
         retour.setTranslateY(HEIGHT/1.1);

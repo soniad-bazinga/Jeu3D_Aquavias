@@ -7,13 +7,22 @@ import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
+import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -21,6 +30,7 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +45,8 @@ public class View extends Scene{
     static final double PIECE_SIZE = 2;
 
     static int rotateTime = 200;
+
+    AnchorPane globalRoot;
 
     /* ses nouveaux attributs pour afficher le level */
     static Level level;
@@ -60,6 +72,9 @@ public class View extends Scene{
 
     AnchorPane pauseMenu;
     Map<String, Pane> pauseMenuWindows = new HashMap<String, Pane>();
+    
+    /*Panneau de fin de niveau*/
+    static LevelEnd fin;
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
@@ -469,7 +484,15 @@ public class View extends Scene{
     }
 
     void rotate(int x,int y){
-        if(level.compteur <= 0) return;
+        //Si la partie est finie, la rotation ne fonctionne plus
+        if(level.estFinie(false)) {
+            if(level.Victory()) fin = new LevelEnd(WIDTH, 'v');
+            else fin = new LevelEnd(WIDTH, 'd');
+
+            globalRoot.getChildren().add(fin);
+
+            return;
+        }
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;
@@ -640,5 +663,75 @@ public class View extends Scene{
         int getJ(){ return j;}
 
         waterPiece getPiece(){ return waterPieces[i][j]; }
+    }
+
+    //Cette classe gère dans sa quasi totalité la séquence de fin de niveau
+    static class LevelEnd extends Group {
+        StackPane boite;
+        Rectangle bluebox;
+
+        public LevelEnd(double x, char g){ //Le constructeur a besoin de la longueur de la fenètre pour placer la boite
+            //mais également d'une variable pour savoir si la partie est gagnée ou non
+
+            Rectangle behind = new Rectangle(1280, 720);
+            behind.setFill(Paint.valueOf("BLACK"));
+            behind.setOpacity(0.6);
+            behind.setX(0);
+            behind.setY(0);
+
+            getChildren().add(behind);
+
+            boite = new StackPane();
+            boite.setLayoutX(x/2);
+            boite.setLayoutY(210);
+
+            bluebox = new Rectangle(600, 300);
+
+            bluebox.setX(x/2);
+            bluebox.setY(210);
+
+            bluebox.setArcHeight(15);
+            bluebox.setArcWidth(15);
+
+            bluebox.setFill(new ImagePattern(new Image(new File("img/pausemenu.png").toURI().toString())));
+            bluebox.setStroke(Paint.valueOf("GREY"));
+
+            boite.getChildren().add(bluebox);
+
+            addButtons(g);
+
+            getChildren().add(boite);
+        }
+
+        public void addButtons(char win){
+            if (win == 'v'){
+                HBox hboite = new HBox(10);
+                Button suivant = new Button("Niveau suivant");
+                suivant.setOnAction(e -> {
+                    try {
+                        Level next = new Level(level.ID + 1);
+                    } catch (Exception exception) {
+                        System.out.println("Pas de suite !! Vous avez fini le jeu bravo !");
+                    }
+                    
+                });
+                Button replay = new Button("Rejouer");
+                Button quit = new Button("Retour au menu");
+
+                hboite.setAlignment(Pos.CENTER);
+
+                hboite.getChildren().addAll(suivant, replay, quit);
+
+                boite.getChildren().add(hboite);
+            } else {
+                HBox hboite = new HBox(10);
+                Button replay = new Button("Rejouer");
+                Button quit = new Button("Retour au menu");
+
+                hboite.getChildren().addAll(replay, quit);
+
+                boite.getChildren().add(hboite);
+            }
+        }
     }
 }

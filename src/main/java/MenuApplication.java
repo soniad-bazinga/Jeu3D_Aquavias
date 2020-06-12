@@ -51,7 +51,6 @@ public class MenuApplication extends Application {
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
             new Pair<String, Runnable>("Nouvelle Partie", () -> {
-                    //stage2.close();
                     try{
                         enCours = new Level(1);
                         fadeOut(enCours);
@@ -61,7 +60,6 @@ public class MenuApplication extends Application {
             }),
             //Bouton continuer du menu principal
             new Pair<String, Runnable>("Continuer", () -> {
-                //stage2.close();
                 try{
                     enCours = new Level(-1);
                     fadeOut(enCours);
@@ -75,6 +73,7 @@ public class MenuApplication extends Application {
 
         );
 
+    public ImageView retour;
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
 
     public Pane root = new Pane(); //Panneau sur lequel on va superposer tous les éléments
@@ -91,6 +90,11 @@ public class MenuApplication extends Application {
         super();
     }
 
+    public MenuApplication(int i){
+        super();
+        launch();
+    }
+
     private Parent createContent() throws MalformedURLException {
         loadSettings();
 
@@ -100,10 +104,13 @@ public class MenuApplication extends Application {
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
 
-
-        //setButton();
-
         addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu principal
+
+        retour = new ImageView(new Image(new File("img/retour.png").toURI().toString()));
+
+        retour.setTranslateX((WIDTH/5.0));
+        retour.setTranslateY(HEIGHT/1.1);
+
 
         addTitle();//Fonction qui ajoute le titre créé par MenuTitle.java
 
@@ -184,6 +191,8 @@ public class MenuApplication extends Application {
 
     private void menuLevelAnimation(){
         lvlSelect = true;
+        root.getChildren().add(retour);
+        labelAnimation();
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
         st.setOnFinished(e -> {
@@ -205,8 +214,10 @@ public class MenuApplication extends Application {
     }
 
     private void menuSettingsAnimation(){
+        root.getChildren().add(retour);
+        labelAnimation();
         settingsBox.setTranslateY((HEIGHT - settingsBox.getHeight())/2);
-
+        
         settingsSelect = true;
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
@@ -250,6 +261,8 @@ public class MenuApplication extends Application {
             tt3.play();
         });
         st.play();
+        if(at != null) at.stop();
+        root.getChildren().remove(retour);
     }
 
     private void reverseSettingsAnimation(){
@@ -274,6 +287,21 @@ public class MenuApplication extends Application {
             settingsTransition.play();
         });
         st.play();
+        if(at != null) at.stop();
+        root.getChildren().remove(retour);
+    }
+    
+        public void labelAnimation(){ //Cette fonction permet l'animation du texte lorsque l'écran est celui d'une séléction
+        if (at == null) at = new AnimationTimer() {
+                @Override
+                public void handle(long l) {
+                    if (retour.getOpacity() - 0.01 > 0.1) {
+                        retour.setOpacity(retour.getOpacity() - 0.01);
+                    } else
+                        retour.setOpacity(retour.getOpacity() + 1.0);
+                }
+            };
+        at.start();
     }
 
     private void addMenu(double x, double y) {
@@ -360,15 +388,6 @@ public class MenuApplication extends Application {
                 col[0] = col[0] + 1;//On passe à la colonne suivante
             }
         });
-        MenuItems retour = new MenuItems("Retour");
-        retour.setOnAction(new Runnable() {
-            @Override
-            public void run() {
-                reverseLevelAnimation();
-            }
-        });
-        LevelBox.add(retour,1,1,1,1);
-
         root.getChildren().add(LevelBox);
     }
 
@@ -432,8 +451,4 @@ public class MenuApplication extends Application {
                 }
             });
         }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
 }

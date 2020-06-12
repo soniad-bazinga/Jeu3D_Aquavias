@@ -357,8 +357,8 @@ public class Level implements Cloneable {
 	}
 	
 	void newLevel(int id) throws Exception{
-		Level lvl=new Level(id);
-		InputsWindow iw=new InputsWindow(lvl);
+		Level lvl = new Level(id);
+		InputsWindow iw = new InputsWindow(lvl);
 	}
 	
 	boolean Victory() { //retourne si la partie est finie ou non

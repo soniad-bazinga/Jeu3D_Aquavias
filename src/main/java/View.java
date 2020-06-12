@@ -62,8 +62,6 @@ public class View extends Scene{
     /* La pile des ajouts de waterTile */
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
-    AnchorPane globalRoot;
-
     MenuApplication menu;
 
     boolean paused = false;
@@ -486,8 +484,8 @@ public class View extends Scene{
     void rotate(int x,int y){
         //Si la partie est finie, la rotation ne fonctionne plus
         if(level.estFinie(false)) {
-            if(level.Victory()) fin = new LevelEnd(WIDTH, 'v');
-            else fin = new LevelEnd(WIDTH, 'd');
+            if(level.Victory()) fin = new LevelEnd('v');
+            else fin = new LevelEnd('d');
 
             globalRoot.getChildren().add(fin);
 
@@ -666,14 +664,14 @@ public class View extends Scene{
     }
 
     //Cette classe gère dans sa quasi totalité la séquence de fin de niveau
-    static class LevelEnd extends Group {
+    class LevelEnd extends Group {
         StackPane boite;
         Rectangle bluebox;
 
-        public LevelEnd(double x, char g){ //Le constructeur a besoin de la longueur de la fenètre pour placer la boite
+        public LevelEnd(char g){ //Le constructeur a besoin de la longueur de la fenètre pour placer la boite
             //mais également d'une variable pour savoir si la partie est gagnée ou non
 
-            Rectangle behind = new Rectangle(1280, 720);
+            Rectangle behind = new Rectangle(WIDTH, HEIGHT);
             behind.setFill(Paint.valueOf("BLACK"));
             behind.setOpacity(0.6);
             behind.setX(0);
@@ -682,13 +680,10 @@ public class View extends Scene{
             getChildren().add(behind);
 
             boite = new StackPane();
-            boite.setLayoutX(x/2);
+            boite.setLayoutX(340);
             boite.setLayoutY(210);
 
             bluebox = new Rectangle(600, 300);
-
-            bluebox.setX(x/2);
-            bluebox.setY(210);
 
             bluebox.setArcHeight(15);
             bluebox.setArcWidth(15);
@@ -710,12 +705,19 @@ public class View extends Scene{
                 suivant.setOnAction(e -> {
                     try {
                         Level next = new Level(level.ID + 1);
+                        menu.fadeOut(next);
                     } catch (Exception exception) {
                         System.out.println("Pas de suite !! Vous avez fini le jeu bravo !");
                     }
-                    
                 });
                 Button replay = new Button("Rejouer");
+                replay.setOnAction(e -> {
+                    try {
+                        menu.fadeOut(new Level(level.ID));
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                });
                 Button quit = new Button("Retour au menu");
 
                 hboite.setAlignment(Pos.CENTER);

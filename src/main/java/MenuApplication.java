@@ -126,7 +126,7 @@ public class MenuApplication extends Application {
 
     void setUpAudio(){
         //for playing music in the background
-        String musicFile= "sounds/menumusic.wav";
+        String musicFile = "sounds/menumusic.wav";
         Media sound = new Media(new File(musicFile).toURI().toString());
         mediaPlayer= new MediaPlayer(sound);
         mediaPlayer.play();
@@ -214,8 +214,6 @@ public class MenuApplication extends Application {
     }
 
     private void menuSettingsAnimation(){
-        root.getChildren().add(retour);
-        labelAnimation();
         settingsBox.setTranslateY((HEIGHT - settingsBox.getHeight())/2);
         
         settingsSelect = true;
@@ -267,7 +265,6 @@ public class MenuApplication extends Application {
 
     private void reverseSettingsAnimation(){
         settingsSelect = false;
-
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
         st.setOnFinished(e->{
@@ -287,8 +284,6 @@ public class MenuApplication extends Application {
             settingsTransition.play();
         });
         st.play();
-        if(at != null) at.stop();
-        root.getChildren().remove(retour);
     }
     
         public void labelAnimation(){ //Cette fonction permet l'animation du texte lorsque l'écran est celui d'une séléction

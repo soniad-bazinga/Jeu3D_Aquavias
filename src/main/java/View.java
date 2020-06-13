@@ -1,16 +1,18 @@
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
@@ -20,15 +22,15 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public class View extends Application{
+public class View extends Scene{
 
     /* On definit la taille */
-     static final int WIDTH = 720;
+     static final int WIDTH = 1280;
      static final int HEIGHT = 720;
-
-     /* utiliser le mode "piece"+piece+".obj" a afficher ! :) */
-    static String piece = "I";
 
     static final double PIECE_SIZE = 2;
 
@@ -48,25 +50,36 @@ public class View extends Application{
     /* La pile des ajouts de waterTile */
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
+    AnchorPane globalRoot;
+
+    MenuApplication menu;
+
+    boolean paused = false;
+
+    boolean loading = false;
+
+    AnchorPane pauseMenu;
+    Map<String, Pane> pauseMenuWindows = new HashMap<String, Pane>();
+
     /* Créé un aperçu de piece */
-    public View(Level level){
-       super();
-       this.level = level;
-       launch();
+    public View(Level level, MenuApplication menu){
+       super(new Group(), 1280, 720, true);
+       level.new_update();
+       this.menu = menu;
+       setUp(level);
     }
 
-    public View(){
-        super();
+    public View() {
+        super(new Group(), 1280, 720, true);
     }
 
+    public void setUp(Level level){
 
-
-    @Override
-    public void start(Stage stage){
+        this.level = level;
 
         level.setOverviewer(this);
 
-        AnchorPane globalRoot = new AnchorPane();
+        globalRoot = new AnchorPane();
 
         StackPane stack = new StackPane();
 
@@ -74,9 +87,10 @@ public class View extends Application{
 
         globalRoot.getChildren().add(stack);
 
-        Scene scene = new Scene(globalRoot, 1280,720,true);
+        //Scene scene = new Scene(globalRoot, 1280,720,true);
+        this.setRoot(globalRoot);
 
-        /* On créer une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
+        /* On crée une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
         PerspectiveCamera camera  = new PerspectiveCamera(true);
 
         /* on appelle l'initalisateur de caméra */
@@ -141,13 +155,197 @@ public class View extends Application{
             }
         });
 
-        /* On nome la fenetre, y ajoute la scene et on l'affiche */
-        stage.setTitle("A Q U A V I A S");
-        stage.setScene(scene);
-        stage.show();
+        /* on rend la root invisible pour la transition */
+        globalRoot.setOpacity(0);
 
         /* puis on démarre l'ecoulement de l'eau */
         start_water();
+
+        /* on initalise le menu de pause */
+        initializePauseMenu();
+
+        /* et on le rend invisible */
+        pauseMenu.setVisible(false);
+
+        /* si jamais on appuis sur echap, on appel pause() */
+        setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ESCAPE){
+                pause();
+            }
+        });
+
+        globalRoot.getChildren().add(pauseMenu);
+    }
+
+    /* gère le menu de pause */
+    void pause(){
+        /* si on est dans un chargement, ne rien faire */
+        if(loading) return;
+
+        /* on inverse la visibilité du menu (visible => !visible) */
+        pauseMenu.setVisible(!pauseMenu.isVisible());
+        paused = pauseMenu.isVisible();
+
+        /* si jamais on sort du menu pause */
+        if(!paused){
+            /* si la pile est non vide, on rappel la fonction d'ecoulement sur le dernier en date */
+            if(!pile.isEmpty()){
+                waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
+                wp.flow(wp.lastFlowX,wp.lastFlowY);
+            }else{
+                /* sinon depuis la source */
+                waterPieces[0][0].flow(1,0);
+            }
+        }else{
+            /* si on est dans le menu de pause */
+            pauseShow("pause");
+        }
+    }
+
+    void initializePauseMenu(){
+        pauseMenu = new AnchorPane();
+
+        /* le fond du menu pause, un rectangle noir légerement opaque */
+        Rectangle menuBackground = new Rectangle(WIDTH,HEIGHT);
+
+        menuBackground.setOpacity(.6);
+
+        pauseMenu.getChildren().add(menuBackground);
+
+        /* le groupe qui contient les boutons de selection */
+        VBox pMenuElements = new VBox(15);
+
+        pauseMenu.getChildren().add(pMenuElements);
+
+        /* le bouton de retour pour sortir de la pause */
+        MenuItems retour = new MenuItems("Retour");
+
+        retour.setOnAction(new Runnable() {
+            public void run(){
+                pause();
+            }
+        });
+
+        /* le bouton pour revenir au menu principal */
+        MenuItems leave = new MenuItems("Revenir au menu principal");
+
+        leave.setOnAction(new Runnable(){
+            public void run(){
+                /* on affiche la fenetre de sortie */
+                pauseShow("exit");
+            }
+        });
+
+        /* le bouton d'options */
+        MenuItems options = new MenuItems("Options");
+
+        options.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+                /* on affiche la fenetre de réglages */
+                pauseShow("settings");
+            }
+        });
+
+        pMenuElements.getChildren().addAll(options,leave,retour);
+
+        /* puis on le met au milieu de l'ecran */
+        pMenuElements.setTranslateX(WIDTH / 2.0 - 100.0);
+        pMenuElements.setTranslateY(HEIGHT / 3.0 + 50.0);
+
+        /* on l'ajoute en tant que clé "pause" et valeur lui même */
+        pauseMenuWindows.put("pause",pMenuElements);
+
+        initializeExitPause();
+        initializeSettingsPause();
+
+    }
+
+    /* on initialise le menu de sorti de niveau */
+    void initializeExitPause(){
+        GridPane confirmation = new GridPane();
+
+        confirmation.setHgap(25);
+        confirmation.setVgap(20);
+
+        /* les contraintes de colonnes, 2 colonnes de 200px */
+        ColumnConstraints c1 = new ColumnConstraints(200);
+        ColumnConstraints c2 = new ColumnConstraints(200);
+        confirmation.getColumnConstraints().addAll(c1,c2);
+
+        /* le message */
+        Label t = new Label("Voulez vous vraiment quitter le niveau?");
+
+        /* affiché en blanc */
+        t.setTextFill(Color.WHITE);
+
+        /* le bouton "oui", faisant alors quitter le niveau */
+        MenuItems yes = new MenuItems("Oui");
+        yes.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+                fadeOut();
+            }
+        });
+
+        /* le bouton "non", retournant sur le menu précedent */
+        MenuItems no = new MenuItems("Non");
+        no.setOnAction(new Runnable() {
+            @Override
+            public void run() {
+                pauseShow("pause");
+            }
+        });
+
+        /* on les ajoutes proprements */
+        confirmation.add(t,0,0,2,1);
+        GridPane.setHalignment(t, HPos.CENTER);
+        confirmation.add(yes,0,1,1,1);
+        confirmation.add(no,1,1,1,1);
+
+        pauseMenu.getChildren().add(confirmation);
+
+        /* on l'ajoute en tant que clé "exit" et valeur lui même */
+        pauseMenuWindows.put("exit",confirmation);
+
+        confirmation.setTranslateX(WIDTH * 2);
+        confirmation.setTranslateY(HEIGHT * 2);
+    }
+
+    void pauseShow(String s){
+        for(Map.Entry<String, Pane> p : pauseMenuWindows.entrySet()){
+            /* on les positionne en dehors de l'écran */
+            p.getValue().setTranslateX(WIDTH * 2);
+            p.getValue().setTranslateY(HEIGHT * 2);
+        }
+
+        /* on affiche la pane de clé s au milieu */
+        Pane p = pauseMenuWindows.get(s);
+
+        p.setTranslateX((WIDTH - p.getWidth())/2);
+        p.setTranslateY((HEIGHT - p.getHeight())/2);
+
+    }
+
+    void initializeSettingsPause(){
+        settingsMenu s = new settingsMenu(menu.getMediaPlayer(), Color.WHITE);
+
+        s.setTranslateX(WIDTH * 2);
+        s.setTranslateY(HEIGHT * 2);
+
+        Runnable r = new Runnable(){
+
+            public void run(){
+                pauseShow("pause");
+                s.updateValues();
+            }
+        };
+
+        s.setRetourAction(r);
+
+        pauseMenu.getChildren().add(s);
+
+        pauseMenuWindows.put("settings",s);
     }
 
     void initalizeCamera(Camera camera){
@@ -244,6 +442,32 @@ public class View extends Application{
         r.setFill(new Color(0,0,0,.05));
     }
 
+    void fadeIn(){
+        loading = true;
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setNode(globalRoot);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.setOnFinished(EventHandler ->{
+            loading = false;
+        });
+        fade.play();
+    }
+
+    void fadeOut(){
+        loading = true;
+        FadeTransition fade = new FadeTransition();
+        fade.setDuration(Duration.millis(1000));
+        fade.setNode(globalRoot);
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        fade.setOnFinished(EventHandler ->{
+            menu.fadeIn();
+        });
+        fade.play();
+    }
+
     void rotate(int x,int y){
         if(level.compteur <= 0) return;
 
@@ -258,7 +482,7 @@ public class View extends Application{
         level.new_rotate(x,y);
 
         /* puis dans la vue */
-        /* sur les modèles */
+        /* sur les modèles avec l'animation */
         RotateTransition rt= new RotateTransition(Duration.millis(rotateTime), models[x][y]);
         rt.setAxis(Rotate.Y_AXIS);
         rt.setByAngle(90);
@@ -328,7 +552,7 @@ public class View extends Application{
 
     /* sur la même base qu'update */
     void flow(int i,int j){
-        if(!isWaterPieceFull(i,j)) return;
+        if(!isWaterPieceFull(i,j) || paused) return;
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)
@@ -373,6 +597,8 @@ public class View extends Application{
     boolean isWaterPieceFull(int x, int y){
         return waterPieces[x][y].isFull();
     }
+
+    boolean isPaused(){ return paused; }
 
     /* Rempli/Vide la pièce de coordoonées i;j */
     void setFull(int i, int j, boolean b){

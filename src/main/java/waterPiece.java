@@ -14,6 +14,9 @@ public abstract class waterPiece extends Group {
     int x,y;
     boolean flowing = true;
 
+    int lastFlowX;
+    int lastFlowY;
+
     public waterPiece(double size, View p, int x, int y){
         this.x = x; this. y = y;
         view = p;
@@ -83,8 +86,10 @@ public abstract class waterPiece extends Group {
 
 
     void flow(int i, int j){
+        lastFlowX = i;
+        lastFlowY = j;
         /* si la pièce n'est pas pleine dans le modèle on arrête tout */
-        if(!view.isLevelFull(x,y) || !flowing) return;
+        if(!view.isLevelFull(x,y) || !flowing || view.isPaused()) return;
         /* on utilise pas encore le système de water tile, a modifer dans le futur */
         /* we first set the tiles i j full */
         water[i][j].setFull(true);

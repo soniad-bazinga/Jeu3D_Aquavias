@@ -86,6 +86,7 @@ public class MenuApplication extends Application {
     public HBox titleBox = new HBox(); //Boite invisible qui contient le titre
     double lineX;
     double lineY;
+    public static levelTracker levelTracker;
 
     public MenuApplication(){
         super();
@@ -93,6 +94,8 @@ public class MenuApplication extends Application {
 
     private Parent createContent() throws MalformedURLException {
         loadSettings();
+
+        levelTracker = new levelTracker();
 
         setUpAudio();
         settingsBox = new settingsMenu(mediaPlayer, Color.BLACK);
@@ -297,10 +300,9 @@ public class MenuApplication extends Application {
 
 
     public void addLevelToList(List<Pair<String, Runnable>> list){
-        for(int i = 0; i < lvls.length; i++){
+        for(int i = 1; i < lvls.length; i++){
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);
-
             if(lvls[i] != null && !lvls[i].equals("-1")) {
                 int finalI = i;
                 list.add(new Pair<>(lvls[i], () -> {
@@ -345,10 +347,16 @@ public class MenuApplication extends Application {
         LevelBox.setTranslateX(x);
         LevelBox.setTranslateY(y);
         addLevelToList(levelData);
+
+        final int[] i = {0};
+
         levelData.forEach(data -> {
             if (!data.getKey().equals("")){
                 LevelItems l = new LevelItems(data.getKey());
                 l.setOnAction(data.getValue());
+
+                //si le niveau est débloque alors on l'affiche comme tel
+                if(col[0] + ligne[0] <= levelTracker.getCurrent()) l.setUnlocked(true);
 
                 Rectangle clip = new Rectangle(200, 100);//Coupe le Polygon dans LvlItems, s'il est plus grand que 200x100
                 clip.translateXProperty().bind(l.translateXProperty().negate());
@@ -358,6 +366,7 @@ public class MenuApplication extends Application {
                 LevelBox.add(l, col[0]%taillemax, ligne[0], 1, 1);// On ajoute le niveau à la colonne "colonne mod taillemax" et ligne
                 if ((col[0]+ 1)%taillemax == 0) ligne[0] = ligne[0] + 1; //Si on arrive au bout de la ligne (nb max d'éléments par ligne) on pas à la suivante
                 col[0] = col[0] + 1;//On passe à la colonne suivante
+
             }
         });
         MenuItems retour = new MenuItems("Retour");
@@ -402,6 +411,14 @@ public class MenuApplication extends Application {
         fade.play();
     }
 
+    void incrementeCurr(){
+        /* si on a pas dépassé les nombres de niveau dispo, on incrémente le niveau sur lequel on se trouve */
+        if(levelTracker.getCurrent() < levelData.size() - 1) levelTracker.incrementeCurrent();
+
+        /* puis on l'unlock */
+        ((LevelItems) LevelBox.getChildren().get(levelTracker.getCurrent())).setUnlocked(true);
+    }
+
     Scene primaryScene;
 
     @Override
@@ -417,12 +434,12 @@ public class MenuApplication extends Application {
             primaryStage.setHeight(HEIGHT);
             primaryStage.show();
 
-
-
+            cheatHandler c = new cheatHandler(4, this);
 
             scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent keyEvent) {
+                    c.addInput(keyEvent);
                     if (lvlSelect){
                         if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseLevelAnimation();
                     }

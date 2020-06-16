@@ -9,7 +9,8 @@ import java.io.IOException;
 
 public class levelTracker {
 
-    int currentLevel;
+    int maxLevel;
+    int lastPlayed;
 
     public levelTracker(){
         try{
@@ -20,18 +21,32 @@ public class levelTracker {
     }
 
     /* on incremente currentLevel */
-    public void incrementeCurrent(){
+    public void incrementeMax(){
         try {
-            currentLevel++;
+            maxLevel++;
             updateCurr();
         }catch(IOException | ParseException e){
             System.out.println(e);
         }
     }
 
-    /* on retourne le niveau actuel */
-    public int getCurrent(){
-        return currentLevel;
+    public void setLastPlayed(int i){
+        try{
+            lastPlayed = i;
+            updateCurr();
+        }catch(IOException | ParseException e){
+            System.out.println(e);
+        }
+    }
+
+    /* on retourne le dernier niveau joué */
+    public int getLastPlayed(){
+        return lastPlayed;
+    }
+
+    /* on retourne le niveau max débloqué */
+    public int getMaxLevel(){
+        return maxLevel;
     }
 
     /* on charge le niveau courant dans les fichiers */
@@ -42,7 +57,8 @@ public class levelTracker {
         JSONParser jsonParser = new JSONParser();
         JSONObject obj = (JSONObject) jsonParser.parse(f);
 
-        currentLevel = Math.toIntExact((long) obj.get("current"));
+        maxLevel = Math.toIntExact((long) obj.get("maxLevel"));
+        lastPlayed = Math.toIntExact((long) obj.get("lastPlayed"));
     }
 
     /* on met a jour le niveau dans les fichiers */
@@ -51,7 +67,8 @@ public class levelTracker {
         JSONParser jsonParser = new JSONParser();
         JSONObject obj = (JSONObject) jsonParser.parse(f);
 
-        obj.put("current",currentLevel);
+        obj.put("maxLevel",maxLevel);
+        obj.put("lastPlayed",lastPlayed);
 
         FileWriter r = new FileWriter("levels/curr.json");
         r.write(obj.toJSONString());

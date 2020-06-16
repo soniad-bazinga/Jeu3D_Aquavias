@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.*;
@@ -305,7 +306,9 @@ public class View extends Scene{
         yes.setOnAction(new Runnable() {
             @Override
             public void run() {
-                fadeOut();
+                fadeOut(EventHandler ->{
+                    menu.fadeIn();
+                });
             }
         });
 
@@ -478,22 +481,20 @@ public class View extends Scene{
         fade.play();
     }
 
-    void fadeOut(){
+    /* L'EventHandler permet de specifier l'action de fin d'animation */
+    void fadeOut(EventHandler e){
         loading = true;
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
         fade.setFromValue(1);
         fade.setToValue(0);
-        fade.setOnFinished(EventHandler ->{
-            menu.fadeIn();
-        });
+        fade.setOnFinished(e);
         fade.play();
     }
 
-    void rotate(int x,int y){
-        //Si la partie est finie, la rotation ne fonctionne plus
-
+    void win(){
+        loading = true;
         //Si le niveau est de type f (avec un timer)
         if(level.type == 'f'){
             if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
@@ -508,11 +509,15 @@ public class View extends Scene{
         }
 
         else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
-                if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
-                else fin = new LevelEnd('d'); //Sinon, la version défaite
-                globalRoot.getChildren().add(fin);
+            if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+            else fin = new LevelEnd('d'); //Sinon, la version défaite
+            globalRoot.getChildren().add(fin);
             return;
         }
+    }
+
+    void rotate(int x,int y){
+        //Si la partie est finie, la rotation ne fonctionne plus
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;
@@ -558,19 +563,16 @@ public class View extends Scene{
             Sinon on repart de la première piece
          */
         /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
-        if (!pile.isEmpty()) {
-            Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+        Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+            if (!pile.isEmpty()) {
                 flow(pile.get(0).getI(), pile.get(0).getJ());
-            }));
-            wait.setCycleCount(1);
-            wait.play();
-        } else {
-            Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+            } else {
                 flow(0, 0);
-            }));
-            wait.setCycleCount(1);
-            wait.play();
-        }
+            }
+        }));
+        wait.setCycleCount(1);
+        wait.play();
+
         /* on update dans le modèle */
 
         if(level.type != 'f') compteur.setText(level.compteurToString());
@@ -596,6 +598,7 @@ public class View extends Scene{
     /* sur la même base qu'update */
     void flow(int i,int j){
         if(!isWaterPieceFull(i,j) || paused) return;
+        if(i == level.HEIGHT - 1 && j == level.WIDTH + 1 || level.compteur <= 0) win(); //si l'eau à atteint la fin
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)
@@ -721,55 +724,54 @@ public class View extends Scene{
         }
 
         public void addButtons(char win){
-            if (win == 'v'){
-                HBox hboite = new HBox(10);
+
+            HBox hboite = new HBox(10);
+
+            if (win == 'v') {
                 Button suivant = new Button("Niveau suivant");
                 suivant.setOnAction(e -> {
-                    try {
-                        Level next = new Level(level.ID + 1);
-                        menu.fadeOut(next);
-                    } catch (Exception exception) {
-                        System.out.println("Pas de suite !! Vous avez fini le jeu bravo !");
-                    }
-                });
-                Button replay = new Button("Rejouer");
-                replay.setOnAction(e -> {
-                    try {
-                        menu.fadeOut(new Level(level.ID));
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                    }
-                });
-                Button quit = new Button("Retour au menu");
-                quit.setOnAction(e -> {
-                    fadeOut();
+                    fadeOut(EventHandler -> {
+                        try {
+                            menu.nextLevel(level.ID);
+                        } catch (Exception exception) {
+                            System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
+                        }
+                    });
                 });
 
-                hboite.setAlignment(Pos.CENTER);
-
-                hboite.getChildren().addAll(suivant, replay, quit);
-
-                boite.getChildren().add(hboite);
-            } else {
-                HBox hboite = new HBox(10);
-                Button replay = new Button("Rejouer");
-                replay.setOnAction(e -> {
-                    try {
-                        menu.fadeOut(new Level(level.ID));
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                    }
-                });
-                Button quit = new Button("Retour au menu");
-                quit.setOnAction(e -> {
-                    fadeOut();
-                });
-                hboite.setAlignment(Pos.CENTER);
-
-                hboite.getChildren().addAll(replay, quit);
-
-                boite.getChildren().add(hboite);
+                hboite.getChildren().add(suivant);
             }
+
+            Button replay = new Button("Rejouer");
+            replay.setOnAction(e -> {
+                try {
+                    fadeOut(EventHandler -> {
+                        try {
+                            menu.fadeOut(new Level(level.ID));
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+            Button quit = new Button("Retour au menu");
+            quit.setOnAction(e -> {
+                fadeOut(EventHandler ->{
+                    if(win == 'v'){
+                        menu.incrementeMax();
+                        menu.updateLastPlayed(level.ID + 1);
+                    }
+                    menu.fadeIn();
+                });
+            });
+            hboite.setAlignment(Pos.CENTER);
+
+            hboite.getChildren().addAll(replay, quit);
+
+            boite.getChildren().add(hboite);
         }
     }
 }

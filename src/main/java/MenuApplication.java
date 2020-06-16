@@ -52,7 +52,7 @@ public class MenuApplication extends Application {
             //Bouton Nouvelle Partie du menu principal
             new Pair<String, Runnable>("Nouvelle Partie", () -> {
                     try{
-                        enCours = new Level(1);
+                        enCours = new Level(0);
                         fadeOut(enCours);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
@@ -61,7 +61,7 @@ public class MenuApplication extends Application {
             //Bouton continuer du menu principal
             new Pair<String, Runnable>("Continuer", () -> {
                 try{
-                    enCours = new Level(-1);
+                    enCours = new Level(levelTracker.getLastPlayed());
                     fadeOut(enCours);
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
@@ -379,7 +379,7 @@ public class MenuApplication extends Application {
                 l.setOnAction(data.getValue());
 
                 //si le niveau est débloque alors on l'affiche comme tel
-                if(col[0] + ligne[0] <= levelTracker.getCurrent()) l.setUnlocked(true);
+                if(col[0] + ligne[0] <= levelTracker.getMaxLevel()) l.setUnlocked(true);
 
                 Rectangle clip = new Rectangle(200, 100);//Coupe le Polygon dans LvlItems, s'il est plus grand que 200x100
                 clip.translateXProperty().bind(l.translateXProperty().negate());
@@ -397,6 +397,9 @@ public class MenuApplication extends Application {
 
     void fadeOut(Level lvl) throws Exception {
         View v = new View(lvl, this);
+
+        /* on met a jour le dernier niveau joué */
+        updateLastPlayed(lvl.ID);
 
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
@@ -425,12 +428,25 @@ public class MenuApplication extends Application {
         fade.play();
     }
 
-    void incrementeCurr(){
+    void incrementeMax(){
         /* si on a pas dépassé les nombres de niveau dispo, on incrémente le niveau sur lequel on se trouve */
-        if(levelTracker.getCurrent() < levelData.size() - 1) levelTracker.incrementeCurrent();
+        if(levelTracker.getMaxLevel() < levelData.size() - 1) levelTracker.incrementeMax();
 
         /* puis on l'unlock */
-        ((LevelItems) LevelBox.getChildren().get(levelTracker.getCurrent())).setUnlocked(true);
+        ((LevelItems) LevelBox.getChildren().get(levelTracker.getMaxLevel())).setUnlocked(true);
+    }
+
+    void updateLastPlayed(int i){
+        /* pour être sur de ne pas mettre un niveau joué a un niveau non existant */
+        if(i < levelData.size()) levelTracker.setLastPlayed(i);
+    }
+
+    void nextLevel(int levelId) throws Exception {
+        /* si on débloque le niveau, on incrémente le max */
+        if(levelId + 1 > levelTracker.getMaxLevel()) incrementeMax();
+
+        /* puis on lance l'animation pour charger le niveau */
+        fadeOut(new Level(levelId + 1));
     }
 
     Scene primaryScene;

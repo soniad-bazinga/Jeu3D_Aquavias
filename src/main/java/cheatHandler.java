@@ -28,6 +28,7 @@ public class cheatHandler {
 
         /* on créer ici un cheat "Haut Haut Haut Bas" qui nous fait gagner un niveau */
         Pair<KeyCode[],Runnable> c1 = new Pair<KeyCode[],Runnable>(new KeyCode[]{KeyCode.UP, KeyCode.UP, KeyCode.UP, KeyCode.DOWN},() -> {
+            System.out.println("Code de triche : +1 un niveau débloqué (si possible)!");
             menu.incrementeMax();
         });
 

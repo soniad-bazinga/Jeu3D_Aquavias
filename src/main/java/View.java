@@ -26,6 +26,7 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -233,6 +234,16 @@ public class View extends Scene{
         menuBackground.setOpacity(.6);
 
         pauseMenu.getChildren().add(menuBackground);
+
+        /* on ajoute un petit titre */
+        Text title = new Text("Niveau "+(level.ID+1));
+        title.setFill(Color.WHITE);
+        title.setFont(Font.font("Roboto", 60));
+
+        pauseMenu.getChildren().add(title);
+
+        title.setLayoutX((WIDTH - title.getLayoutBounds().getWidth())/2);
+        title.setLayoutY(HEIGHT/3);
 
         /* le groupe qui contient les boutons de selection */
         VBox pMenuElements = new VBox(15);
@@ -720,7 +731,23 @@ public class View extends Scene{
 
             addButtons(g);
 
-            getChildren().add(boite);
+            Text status = new Text();
+
+            if(g == 'v'){
+                status.setText("Victoire !");
+            }else{
+                status.setText("Perdu...");
+            }
+
+            /* on ajoute le texte de status (victoire/défaite) */
+            status.setFill(Color.WHITE);
+            status.setFont(Font.font("Roboto", 60));
+
+            status.setLayoutX((WIDTH - status.getLayoutBounds().getWidth())/2);
+            status.setLayoutY(HEIGHT/2.5);
+
+            getChildren().addAll(boite,status);
+
         }
 
         public void addButtons(char win){
@@ -728,6 +755,7 @@ public class View extends Scene{
             HBox hboite = new HBox(10);
 
             if (win == 'v') {
+
                 Button suivant = new Button("Niveau suivant");
                 suivant.setOnAction(e -> {
                     fadeOut(EventHandler -> {

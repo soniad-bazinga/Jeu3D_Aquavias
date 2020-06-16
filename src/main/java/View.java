@@ -74,6 +74,9 @@ public class View extends Scene{
     /*Panneau de fin de niveau*/
     static LevelEnd fin;
 
+    /*En cas de niveau à temps*/
+    Clock timer;
+
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
        super(new Group(), 1280, 720, true);
@@ -188,6 +191,11 @@ public class View extends Scene{
         });
 
         globalRoot.getChildren().add(pauseMenu);
+
+        if (level.type =='f'){ //Si le niveau est de type f, on ajoute une Clock pour le timer
+            timer = new Clock(level.compteur);
+            globalRoot.getChildren().add(timer);
+        }
     }
 
     /* gère le menu de pause */
@@ -437,22 +445,24 @@ public class View extends Scene{
     }
 
     void initalizeCounter(StackPane stack){
-        Text compteur = new Text(level.compteurToString());
+        if(level.type != 'f') { //Si le niveau est de type f, il n'est pas nécessaire de rajouter le compteur de coups
+            Text compteur = new Text(level.compteurToString());
 
-        compteur.setFill(new Color(0,0,0,.6));
+            compteur.setFill(new Color(0, 0, 0, .6));
 
-        this.compteur = compteur;
+            View.compteur = compteur;
 
-        Rectangle r = new Rectangle();
+            Rectangle r = new Rectangle();
 
-        r.setEffect(new DropShadow());
+            r.setEffect(new DropShadow());
 
-        stack.getChildren().addAll(r, compteur);
+            stack.getChildren().addAll(r, compteur);
 
-        r.setWidth(150);
-        r.setHeight(50);
+            r.setWidth(150);
+            r.setHeight(50);
 
-        r.setFill(new Color(0,0,0,.05));
+            r.setFill(new Color(0, 0, 0, .05));
+        }
     }
 
     void fadeIn(){
@@ -483,12 +493,24 @@ public class View extends Scene{
 
     void rotate(int x,int y){
         //Si la partie est finie, la rotation ne fonctionne plus
-        if(level.estFinie(false)) {
-            if(level.Victory()) fin = new LevelEnd('v');
-            else fin = new LevelEnd('d');
 
-            globalRoot.getChildren().add(fin);
+        //Si le niveau est de type f (avec un timer)
+        if(level.type == 'f'){
+            if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
+                fin = new LevelEnd('d'); //Si oui, c'est la version défaite que l'on appel alors
+                globalRoot.getChildren().add(fin);
+                return;
+            } else if (level.estFinie(false)){ //Sinon, on vérifie seulement que le jeu soit terminé
+                fin = new LevelEnd('v');//Pour envoyer la version victoire
+                globalRoot.getChildren().add(fin);
+                return;
+            }
+        }
 
+        else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
+                if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+                else fin = new LevelEnd('d'); //Sinon, la version défaite
+                globalRoot.getChildren().add(fin);
             return;
         }
 
@@ -551,7 +573,7 @@ public class View extends Scene{
         }
         /* on update dans le modèle */
 
-        compteur.setText(level.compteurToString());
+        if(level.type != 'f') compteur.setText(level.compteurToString());
 
         level.new_update();
         level.affiche();
@@ -719,6 +741,9 @@ public class View extends Scene{
                     }
                 });
                 Button quit = new Button("Retour au menu");
+                quit.setOnAction(e -> {
+                    fadeOut();
+                });
 
                 hboite.setAlignment(Pos.CENTER);
 
@@ -728,7 +753,18 @@ public class View extends Scene{
             } else {
                 HBox hboite = new HBox(10);
                 Button replay = new Button("Rejouer");
+                replay.setOnAction(e -> {
+                    try {
+                        menu.fadeOut(new Level(level.ID));
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                });
                 Button quit = new Button("Retour au menu");
+                quit.setOnAction(e -> {
+                    fadeOut();
+                });
+                hboite.setAlignment(Pos.CENTER);
 
                 hboite.getChildren().addAll(replay, quit);
 

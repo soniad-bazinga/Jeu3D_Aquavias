@@ -4,23 +4,35 @@ import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
+import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +48,8 @@ public class View extends Scene{
 
     static int rotateTime = 200;
 
+    AnchorPane globalRoot;
+
     /* ses nouveaux attributs pour afficher le level */
     static Level level;
 
@@ -50,8 +64,6 @@ public class View extends Scene{
     /* La pile des ajouts de waterTile */
     ArrayList<Coordonnes> pile = new ArrayList<Coordonnes>();
 
-    AnchorPane globalRoot;
-
     MenuApplication menu;
 
     boolean paused = false;
@@ -60,6 +72,12 @@ public class View extends Scene{
 
     AnchorPane pauseMenu;
     Map<String, Pane> pauseMenuWindows = new HashMap<String, Pane>();
+    
+    /*Panneau de fin de niveau*/
+    static LevelEnd fin;
+
+    /*En cas de niveau à temps*/
+    Clock timer;
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
@@ -175,6 +193,11 @@ public class View extends Scene{
         });
 
         globalRoot.getChildren().add(pauseMenu);
+
+        if (level.type =='f'){ //Si le niveau est de type f, on ajoute une Clock pour le timer
+            timer = new Clock(level.compteur);
+            globalRoot.getChildren().add(timer);
+        }
     }
 
     /* gère le menu de pause */
@@ -211,6 +234,16 @@ public class View extends Scene{
         menuBackground.setOpacity(.6);
 
         pauseMenu.getChildren().add(menuBackground);
+
+        /* on ajoute un petit titre */
+        Text title = new Text("Niveau "+(level.ID+1));
+        title.setFill(Color.WHITE);
+        title.setFont(Font.font("Roboto", 60));
+
+        pauseMenu.getChildren().add(title);
+
+        title.setLayoutX((WIDTH - title.getLayoutBounds().getWidth())/2);
+        title.setLayoutY(HEIGHT/3);
 
         /* le groupe qui contient les boutons de selection */
         VBox pMenuElements = new VBox(15);
@@ -284,7 +317,9 @@ public class View extends Scene{
         yes.setOnAction(new Runnable() {
             @Override
             public void run() {
-                fadeOut();
+                fadeOut(EventHandler ->{
+                    menu.fadeIn();
+                });
             }
         });
 
@@ -424,22 +459,24 @@ public class View extends Scene{
     }
 
     void initalizeCounter(StackPane stack){
-        Text compteur = new Text(level.compteurToString());
+        if(level.type != 'f') { //Si le niveau est de type f, il n'est pas nécessaire de rajouter le compteur de coups
+            Text compteur = new Text(level.compteurToString());
 
-        compteur.setFill(new Color(0,0,0,.6));
+            compteur.setFill(new Color(0, 0, 0, .6));
 
-        this.compteur = compteur;
+            View.compteur = compteur;
 
-        Rectangle r = new Rectangle();
+            Rectangle r = new Rectangle();
 
-        r.setEffect(new DropShadow());
+            r.setEffect(new DropShadow());
 
-        stack.getChildren().addAll(r, compteur);
+            stack.getChildren().addAll(r, compteur);
 
-        r.setWidth(150);
-        r.setHeight(50);
+            r.setWidth(150);
+            r.setHeight(50);
 
-        r.setFill(new Color(0,0,0,.05));
+            r.setFill(new Color(0, 0, 0, .05));
+        }
     }
 
     void fadeIn(){
@@ -455,21 +492,43 @@ public class View extends Scene{
         fade.play();
     }
 
-    void fadeOut(){
+    /* L'EventHandler permet de specifier l'action de fin d'animation */
+    void fadeOut(EventHandler e){
         loading = true;
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
         fade.setFromValue(1);
         fade.setToValue(0);
-        fade.setOnFinished(EventHandler ->{
-            menu.fadeIn();
-        });
+        fade.setOnFinished(e);
         fade.play();
     }
 
+    void win(){
+        loading = true;
+        //Si le niveau est de type f (avec un timer)
+        if(level.type == 'f'){
+            if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
+                fin = new LevelEnd('d'); //Si oui, c'est la version défaite que l'on appel alors
+                globalRoot.getChildren().add(fin);
+                return;
+            } else if (level.estFinie(false)){ //Sinon, on vérifie seulement que le jeu soit terminé
+                fin = new LevelEnd('v');//Pour envoyer la version victoire
+                globalRoot.getChildren().add(fin);
+                return;
+            }
+        }
+
+        else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
+            if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+            else fin = new LevelEnd('d'); //Sinon, la version défaite
+            globalRoot.getChildren().add(fin);
+            return;
+        }
+    }
+
     void rotate(int x,int y){
-        if(level.compteur <= 0) return;
+        //Si la partie est finie, la rotation ne fonctionne plus
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;
@@ -515,22 +574,19 @@ public class View extends Scene{
             Sinon on repart de la première piece
          */
         /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
-        if (!pile.isEmpty()) {
-            Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+        Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+            if (!pile.isEmpty()) {
                 flow(pile.get(0).getI(), pile.get(0).getJ());
-            }));
-            wait.setCycleCount(1);
-            wait.play();
-        } else {
-            Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+            } else {
                 flow(0, 0);
-            }));
-            wait.setCycleCount(1);
-            wait.play();
-        }
+            }
+        }));
+        wait.setCycleCount(1);
+        wait.play();
+
         /* on update dans le modèle */
 
-        compteur.setText(level.compteurToString());
+        if(level.type != 'f') compteur.setText(level.compteurToString());
 
         level.new_update();
         level.affiche();
@@ -553,6 +609,7 @@ public class View extends Scene{
     /* sur la même base qu'update */
     void flow(int i,int j){
         if(!isWaterPieceFull(i,j) || paused) return;
+        if(i == level.HEIGHT - 1 && j == level.WIDTH + 1 || level.compteur <= 0) win(); //si l'eau à atteint la fin
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)
@@ -640,5 +697,109 @@ public class View extends Scene{
         int getJ(){ return j;}
 
         waterPiece getPiece(){ return waterPieces[i][j]; }
+    }
+
+    //Cette classe gère dans sa quasi totalité la séquence de fin de niveau
+    class LevelEnd extends Group {
+        StackPane boite;
+        Rectangle bluebox;
+
+        public LevelEnd(char g){ //Le constructeur a besoin de la longueur de la fenètre pour placer la boite
+            //mais également d'une variable pour savoir si la partie est gagnée ou non
+
+            Rectangle behind = new Rectangle(WIDTH, HEIGHT);
+            behind.setFill(Paint.valueOf("BLACK"));
+            behind.setOpacity(0.6);
+            behind.setX(0);
+            behind.setY(0);
+
+            getChildren().add(behind);
+
+            boite = new StackPane();
+            boite.setLayoutX(340);
+            boite.setLayoutY(210);
+
+            bluebox = new Rectangle(600, 300);
+
+            bluebox.setArcHeight(15);
+            bluebox.setArcWidth(15);
+
+            bluebox.setFill(new ImagePattern(new Image(new File("img/pausemenu.png").toURI().toString())));
+            bluebox.setStroke(Paint.valueOf("GREY"));
+
+            boite.getChildren().add(bluebox);
+
+            addButtons(g);
+
+            Text status = new Text();
+
+            if(g == 'v'){
+                status.setText("Victoire !");
+            }else{
+                status.setText("Perdu...");
+            }
+
+            /* on ajoute le texte de status (victoire/défaite) */
+            status.setFill(Color.WHITE);
+            status.setFont(Font.font("Roboto", 60));
+
+            status.setLayoutX((WIDTH - status.getLayoutBounds().getWidth())/2);
+            status.setLayoutY(HEIGHT/2.5);
+
+            getChildren().addAll(boite,status);
+
+        }
+
+        public void addButtons(char win){
+
+            HBox hboite = new HBox(10);
+
+            if (win == 'v') {
+
+                Button suivant = new Button("Niveau suivant");
+                suivant.setOnAction(e -> {
+                    fadeOut(EventHandler -> {
+                        try {
+                            menu.nextLevel(level.ID);
+                        } catch (Exception exception) {
+                            System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
+                        }
+                    });
+                });
+
+                hboite.getChildren().add(suivant);
+            }
+
+            Button replay = new Button("Rejouer");
+            replay.setOnAction(e -> {
+                try {
+                    fadeOut(EventHandler -> {
+                        try {
+                            menu.fadeOut(new Level(level.ID));
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+            Button quit = new Button("Retour au menu");
+            quit.setOnAction(e -> {
+                fadeOut(EventHandler ->{
+                    if(win == 'v'){
+                        menu.incrementeMax();
+                        menu.updateLastPlayed(level.ID + 1);
+                    }
+                    menu.fadeIn();
+                });
+            });
+            hboite.setAlignment(Pos.CENTER);
+
+            hboite.getChildren().addAll(replay, quit);
+
+            boite.getChildren().add(hboite);
+        }
     }
 }

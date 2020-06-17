@@ -35,7 +35,7 @@ public class Level implements Cloneable {
 
 	char type;
 	//c pour le compteur, f pour fuite, n pour 'normal' c'est à dire sans restriction
-	int compteur = 50;
+	int compteur;
 	Instant start = Instant.now(); //Commence le décompte dès le début du niveau
 	Instant end; //Se mettra à jour à chaque action de la part des utilisateurs
 	int gametime;
@@ -325,7 +325,7 @@ public class Level implements Cloneable {
 			}
 			return false;
 		} else if (type == 'f'){
-			if (gametime >= compteur || Victory()){
+			if (/*gametime >= compteur ||*/ Victory()){
 				if(affichage){
 					if (Victory()) {
 						clearScreen();
@@ -357,14 +357,14 @@ public class Level implements Cloneable {
 	}
 	
 	void newLevel(int id) throws Exception{
-		Level lvl=new Level(id);
-		InputsWindow iw=new InputsWindow(lvl);
+		Level lvl = new Level(id);
+		InputsWindow iw = new InputsWindow(lvl);
 	}
 	
 	boolean Victory() { //retourne si la partie est finie ou non
 		if(type == 'c' && compteur > 0 && !isLeaking())
         	return (pieces[HEIGHT - 1][WIDTH + 1].isFull());
-		else if (type == 'f' && gametime < compteur && !isLeaking())
+		else if (type == 'f' /*&& gametime < compteur*/ && !isLeaking())
 			return pieces[HEIGHT - 1][WIDTH + 1].isFull();
 		else
 			return pieces[HEIGHT - 1][WIDTH + 1].isFull() && !isLeaking();

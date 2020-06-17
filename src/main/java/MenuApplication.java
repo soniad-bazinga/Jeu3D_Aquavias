@@ -51,9 +51,8 @@ public class MenuApplication extends Application {
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
             new Pair<String, Runnable>("Nouvelle Partie", () -> {
-                    //stage2.close();
                     try{
-                        enCours = new Level(1);
+                        enCours = new Level(0);
                         fadeOut(enCours);
                     } catch (Exception e){
                         System.out.println("Niveau manquant");
@@ -61,9 +60,8 @@ public class MenuApplication extends Application {
             }),
             //Bouton continuer du menu principal
             new Pair<String, Runnable>("Continuer", () -> {
-                //stage2.close();
                 try{
-                    enCours = new Level(-1);
+                    enCours = new Level(levelTracker.getLastPlayed());
                     fadeOut(enCours);
                 } catch (Exception e){
                     System.out.println("Niveau manquant");
@@ -75,6 +73,7 @@ public class MenuApplication extends Application {
 
         );
 
+    public ImageView retour;
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
 
     public Pane root = new Pane(); //Panneau sur lequel on va superposer tous les éléments
@@ -86,13 +85,21 @@ public class MenuApplication extends Application {
     public HBox titleBox = new HBox(); //Boite invisible qui contient le titre
     double lineX;
     double lineY;
+    public static levelTracker levelTracker;
 
     public MenuApplication(){
         super();
     }
 
+    public MenuApplication(int i){
+        super();
+        launch();
+    }
+
     private Parent createContent() throws MalformedURLException {
         loadSettings();
+
+        levelTracker = new levelTracker();
 
         setUpAudio();
         settingsBox = new settingsMenu(mediaPlayer, Color.BLACK);
@@ -100,10 +107,13 @@ public class MenuApplication extends Application {
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
 
-
-        //setButton();
-
         addBackground(); //Fonction qui choisit une image, la floute et l'ajoute en fond du menu principal
+
+        retour = new ImageView(new Image(new File("img/retour.png").toURI().toString()));
+
+        retour.setTranslateX((WIDTH/5.0));
+        retour.setTranslateY(HEIGHT/1.1);
+
 
         addTitle();//Fonction qui ajoute le titre créé par MenuTitle.java
 
@@ -119,7 +129,7 @@ public class MenuApplication extends Application {
 
     void setUpAudio(){
         //for playing music in the background
-        String musicFile= "sounds/menumusic.wav";
+        String musicFile = "sounds/menumusic.wav";
         Media sound = new Media(new File(musicFile).toURI().toString());
         mediaPlayer= new MediaPlayer(sound);
         mediaPlayer.play();
@@ -184,6 +194,8 @@ public class MenuApplication extends Application {
 
     private void menuLevelAnimation(){
         lvlSelect = true;
+        root.getChildren().add(retour);
+        labelAnimation();
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
         st.setOnFinished(e -> {
@@ -206,7 +218,7 @@ public class MenuApplication extends Application {
 
     private void menuSettingsAnimation(){
         settingsBox.setTranslateY((HEIGHT - settingsBox.getHeight())/2);
-
+        
         settingsSelect = true;
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
@@ -250,11 +262,12 @@ public class MenuApplication extends Application {
             tt3.play();
         });
         st.play();
+        if(at != null) at.stop();
+        root.getChildren().remove(retour);
     }
 
     private void reverseSettingsAnimation(){
         settingsSelect = false;
-
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
         st.setOnFinished(e->{
@@ -274,6 +287,19 @@ public class MenuApplication extends Application {
             settingsTransition.play();
         });
         st.play();
+    }
+    
+        public void labelAnimation(){ //Cette fonction permet l'animation du texte lorsque l'écran est celui d'une séléction
+        if (at == null) at = new AnimationTimer() {
+                @Override
+                public void handle(long l) {
+                    if (retour.getOpacity() - 0.01 > 0.1) {
+                        retour.setOpacity(retour.getOpacity() - 0.01);
+                    } else
+                        retour.setOpacity(retour.getOpacity() + 1.0);
+                }
+            };
+        at.start();
     }
 
     private void addMenu(double x, double y) {
@@ -297,10 +323,9 @@ public class MenuApplication extends Application {
 
 
     public void addLevelToList(List<Pair<String, Runnable>> list){
-        for(int i = 0; i < lvls.length; i++){
+        for(int i = 1; i < lvls.length; i++){
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);
-
             if(lvls[i] != null && !lvls[i].equals("-1")) {
                 int finalI = i;
                 list.add(new Pair<>(lvls[i], () -> {
@@ -345,10 +370,16 @@ public class MenuApplication extends Application {
         LevelBox.setTranslateX(x);
         LevelBox.setTranslateY(y);
         addLevelToList(levelData);
+
+        final int[] i = {0};
+
         levelData.forEach(data -> {
             if (!data.getKey().equals("")){
                 LevelItems l = new LevelItems(data.getKey());
                 l.setOnAction(data.getValue());
+
+                //si le niveau est débloque alors on l'affiche comme tel
+                if(col[0] + ligne[0] <= levelTracker.getMaxLevel()) l.setUnlocked(true);
 
                 Rectangle clip = new Rectangle(200, 100);//Coupe le Polygon dans LvlItems, s'il est plus grand que 200x100
                 clip.translateXProperty().bind(l.translateXProperty().negate());
@@ -358,22 +389,17 @@ public class MenuApplication extends Application {
                 LevelBox.add(l, col[0]%taillemax, ligne[0], 1, 1);// On ajoute le niveau à la colonne "colonne mod taillemax" et ligne
                 if ((col[0]+ 1)%taillemax == 0) ligne[0] = ligne[0] + 1; //Si on arrive au bout de la ligne (nb max d'éléments par ligne) on pas à la suivante
                 col[0] = col[0] + 1;//On passe à la colonne suivante
-            }
-        });
-        MenuItems retour = new MenuItems("Retour");
-        retour.setOnAction(new Runnable() {
-            @Override
-            public void run() {
-                reverseLevelAnimation();
-            }
-        });
-        LevelBox.add(retour,1,1,1,1);
 
+            }
+        });
         root.getChildren().add(LevelBox);
     }
 
     void fadeOut(Level lvl) throws Exception {
         View v = new View(lvl, this);
+
+        /* on met a jour le dernier niveau joué */
+        updateLastPlayed(lvl.ID);
 
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
@@ -402,6 +428,27 @@ public class MenuApplication extends Application {
         fade.play();
     }
 
+    void incrementeMax(){
+        /* si on a pas dépassé les nombres de niveau dispo, on incrémente le niveau sur lequel on se trouve */
+        if(levelTracker.getMaxLevel() < levelData.size() - 1) levelTracker.incrementeMax();
+
+        /* puis on l'unlock */
+        ((LevelItems) LevelBox.getChildren().get(levelTracker.getMaxLevel())).setUnlocked(true);
+    }
+
+    void updateLastPlayed(int i){
+        /* pour être sur de ne pas mettre un niveau joué a un niveau non existant */
+        if(i < levelData.size()) levelTracker.setLastPlayed(i);
+    }
+
+    void nextLevel(int levelId) throws Exception {
+        /* si on débloque le niveau, on incrémente le max */
+        if(levelId + 1 > levelTracker.getMaxLevel()) incrementeMax();
+
+        /* puis on lance l'animation pour charger le niveau */
+        fadeOut(new Level(levelId + 1));
+    }
+
     Scene primaryScene;
 
     @Override
@@ -417,12 +464,12 @@ public class MenuApplication extends Application {
             primaryStage.setHeight(HEIGHT);
             primaryStage.show();
 
-
-
+            cheatHandler c = new cheatHandler(4, this);
 
             scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent keyEvent) {
+                    c.addInput(keyEvent);
                     if (lvlSelect){
                         if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseLevelAnimation();
                     }
@@ -432,8 +479,4 @@ public class MenuApplication extends Application {
                 }
             });
         }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
 }

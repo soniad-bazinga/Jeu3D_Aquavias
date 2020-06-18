@@ -536,6 +536,8 @@ public class View extends Scene{
         /* Si c'est la première piece, on ne peut pas la tourner */
         if(x == 0 && y == 0) return;
 
+        menu.playSon("rotation");
+
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
         level.new_rotate(x,y);

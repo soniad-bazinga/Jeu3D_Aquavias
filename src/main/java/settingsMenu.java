@@ -14,7 +14,7 @@ import java.io.FileWriter;
 
 public class settingsMenu extends GridPane {
 
-    MediaPlayer mediaPlayer;
+    AudioController mediaPlayer;
     double MUSIQUE;
     double SONS;
     int WIDTH;
@@ -23,7 +23,7 @@ public class settingsMenu extends GridPane {
     Slider musique;
     Slider sons;
 
-    public settingsMenu(MediaPlayer player, Color textColor){
+    public settingsMenu(AudioController player, Color textColor){
         loadSettings();
         mediaPlayer = player;
 
@@ -73,7 +73,7 @@ public class settingsMenu extends GridPane {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 niveauMusique.setText(Integer.toString((int)musique.getValue()));
-                mediaPlayer.setVolume(musique.getValue()/100);
+                mediaPlayer.setMusiqueVolume(musique.getValue()/100);
             }
         });
 
@@ -82,6 +82,7 @@ public class settingsMenu extends GridPane {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 niveauSons.setText(Integer.toString((int)sons.getValue()));
+                mediaPlayer.setSonsVolume(sons.getValue()/100);
             }
         });
 
@@ -103,7 +104,8 @@ public class settingsMenu extends GridPane {
         add(sauvegarder,2,3,2,1);
 
         /* puis on applique les changement du volume au controleur audio */
-        mediaPlayer.setVolume(MUSIQUE/100);
+        mediaPlayer.setSonsVolume(SONS/100);
+        mediaPlayer.setMusiqueVolume(MUSIQUE/100);
     }
 
     /* pour change l'action de retour */
@@ -115,7 +117,8 @@ public class settingsMenu extends GridPane {
     void updateValues(){
         musique.setValue(MUSIQUE);
         sons.setValue(SONS);
-        mediaPlayer.setVolume(MUSIQUE/100);
+        mediaPlayer.setMusiqueVolume(MUSIQUE/100);
+        mediaPlayer.setSonsVolume(SONS/100);
     }
 
     /* pour charger les réglages */

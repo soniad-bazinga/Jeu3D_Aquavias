@@ -1,6 +1,9 @@
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.util.HashMap;
@@ -23,20 +26,56 @@ public class AudioController {
         musique.setCycleCount(INDEFINITE);  //loop
 
         /* ici on ajoute tout les sons */
-        Media son1 = new Media(new File("sounds/hover.mp3").toURI().toString());
-        sons.put("hover",son1);
+        addSounds();
+    }
 
-        Media son2 = new Media(new File("sounds/click.mp3").toURI().toString());
-        sons.put("click",son2);
-
-        Media son3 = new Media(new File("sounds/rotation.mp3").toURI().toString());
-        sons.put("rotation",son3);
+    private void addSounds(){
+        /* on récupère tout les fichiers du dossier son */
+        File directory = new File("sounds");
+        /* on parcours chaque fichier dedans */
+        for(File f : directory.listFiles()){
+            /* on récupère le media correspondant au son */
+            Media m = new Media(f.toURI().toString());
+            /* et son nom avant le '.' */
+            String s = f.getName().substring(0,f.getName().indexOf("."));
+            /* et on l'ajoute a sons */
+            sons.put(s,m);
+        }
     }
 
     public void play(String s){
         son = new AudioClip(sons.get(s).getSource());
         son.setVolume(volumeSon);
         son.play();
+    }
+
+    double tempMusique;
+    int cycle = 500;
+
+    public void pauseMusique(){
+        tempMusique = musique.getVolume();
+
+        double reduce = tempMusique/cycle;
+
+        Timeline lowerVolume = new Timeline(new KeyFrame(Duration.millis(1), event -> {
+            musique.setVolume(musique.getVolume() - reduce);
+        }));
+        lowerVolume.setCycleCount(cycle);
+        lowerVolume.play();
+
+        lowerVolume.setOnFinished(e -> musique.pause());
+    }
+
+    public void playMusique(){
+        musique.play();
+
+        double reduce = tempMusique/cycle;
+
+        Timeline upVolume = new Timeline(new KeyFrame(Duration.millis(1),event -> {
+            musique.setVolume(musique.getVolume() + reduce);
+        }));
+        upVolume.setCycleCount(cycle);
+        upVolume.play();
     }
 
     void setSonsVolume(double volume){

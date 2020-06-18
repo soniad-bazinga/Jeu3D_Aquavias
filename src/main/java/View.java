@@ -487,6 +487,7 @@ public class View extends Scene{
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.setOnFinished(EventHandler ->{
+            menu.playMusique();
             loading = false;
         });
         fade.play();
@@ -495,6 +496,10 @@ public class View extends Scene{
     /* L'EventHandler permet de specifier l'action de fin d'animation */
     void fadeOut(EventHandler e){
         loading = true;
+
+        menu.pauseMusique();
+        menu.playSon("wind");
+
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
@@ -736,8 +741,12 @@ public class View extends Scene{
             Text status = new Text();
 
             if(g == 'v'){
+                /* on joue le son de la victoire */
+                menu.playSon("win");
                 status.setText("Victoire !");
             }else{
+                /* sinon on joue le son de la défaite */
+                menu.playSon("lose");
                 status.setText("Perdu...");
             }
 
@@ -753,11 +762,9 @@ public class View extends Scene{
         }
 
         public void addButtons(char win){
-
             HBox hboite = new HBox(10);
 
             if (win == 'v') {
-
                 Button suivant = new Button("Niveau suivant");
                 suivant.setOnAction(e -> {
                     fadeOut(EventHandler -> {
@@ -800,6 +807,12 @@ public class View extends Scene{
             hboite.setAlignment(Pos.CENTER);
 
             hboite.getChildren().addAll(replay, quit);
+
+            /* on ajoute les sosn a chaque noeuds */
+            for(Node n : hboite.getChildren()){
+                n.setOnMouseEntered(e -> menu.playSon("hover"));
+                n.setOnMouseClicked(e -> menu.playSon("click"));
+            }
 
             boite.getChildren().add(hboite);
         }

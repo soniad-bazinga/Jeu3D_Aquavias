@@ -401,6 +401,9 @@ public class MenuApplication extends Application {
     void fadeOut(Level lvl) throws Exception {
         View v = new View(lvl, this);
 
+        mediaPlayer.pauseMusique();
+        mediaPlayer.play("wind");
+
         /* on met a jour le dernier niveau joué */
         updateLastPlayed(lvl.ID);
 
@@ -420,15 +423,25 @@ public class MenuApplication extends Application {
     void fadeIn(){
         window.setScene(primaryScene);
 
-        settingsBox.loadSettings();
-        settingsBox.updateValues();
-
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.setNode(root);
+        fade.setOnFinished(e -> {
+            mediaPlayer.playMusique();
+            settingsBox.loadSettings();
+            settingsBox.updateValues();
+        });
         fade.play();
+    }
+
+    void playMusique(){
+        mediaPlayer.playMusique();
+    }
+
+    void pauseMusique(){
+        mediaPlayer.pauseMusique();
     }
 
     void incrementeMax(){

@@ -553,24 +553,25 @@ public class View extends Scene{
 
         /* puis les pieces d'eau */
         waterPieces[x][y].rotate();
+
+        Coordonnes[] coord = pile.toArray(new Coordonnes[0]);
+
+        /* lastRotate pointe vers la dernière pièce tournée */
+        lastRotate = new Coordonnes(x,y);
+
         /*
-            on va ensuite vider chaque pièce pleine ajouté (durant la
-            propagation de l'eau) APRES la pièce que l'ont vient
-            de tourner qui n'est pas pleine dans le jeu
+         inc permet de suivre la vraie place d'une piece dans la pile
+         lorsque l'on retire une piece, toutes les autres sont décalés d'un index
+         d'ou le role de inc :)
          */
-        if(pileContains(x,y)) {
-            while (!pile.isEmpty() && (pile.get(0).getI() != x || pile.get(0).getJ() != y)) {
-                if(isLevelFull(pile.get(0).getI(), pile.get(0).getJ())) break;
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
-                pile.remove(0);
-            }
-            /* si la pile n'est pas vide et que la pièce n'est pas pleine dans le jeu, on enlève aussi la piece qu'on vient de tourner */
-            if (!pile.isEmpty() && !isLevelFull(pile.get(0).getI(), pile.get(0).getJ())) {
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
-                pile.remove(0);
-            }
+        int inc = 0;
+        for(int i = 0; i < coord.length; i++){
+            p.clear();
+            if(isConnectedToSource(coord[i].getI(),coord[i].getJ())) continue;
+            waterPieces[coord[i].getI()][coord[i].getJ()].setFull(false);
+            waterPieces[coord[i].getI()][coord[i].getJ()].flowing = false;
+            pile.remove(i + inc);
+            inc -= 1;
         }
         /*
             Si la pile n'est pas vide, on part de la pièce au sommet de la pile
@@ -591,9 +592,41 @@ public class View extends Scene{
         wait.setCycleCount(1);
         wait.play();
 
-        /* on update dans le modèle */
-
         if(level.type != 'f') compteur.setText(level.compteurToString());
+    }
+
+    ArrayList<Coordonnes> p = new ArrayList<Coordonnes>();
+    Coordonnes lastRotate;
+
+    /* cette fonction regarde si la pièce i, j est connecté a la source, sans passer par la dernière pièce tournée */
+    boolean isConnectedToSource(int i, int j){
+        if(i == 0 && j == 0){
+            return true;
+        }
+
+        if(isVisited(i,j)) return false;
+
+        p.add(new Coordonnes(i,j));
+
+        if(!isLastRotate(i + 1,j ) && level.isInTab(i + 1, j) && level.connected(level.pieces[i][j], level.pieces[i + 1][j], "DOWN") && isConnectedToSource(i + 1, j)) return true;
+        if(!isLastRotate(i - 1,j ) && level.isInTab(i - 1, j) && level.connected(level.pieces[i][j], level.pieces[i - 1][j], "UP") && isConnectedToSource(i - 1, j)) return true;
+        if(!isLastRotate(i,j + 1) && level.isInTab(i, j + 1) && level.connected(level.pieces[i][j], level.pieces[i][j + 1], "RIGHT") && isConnectedToSource(i, j + 1)) return true;
+        if(!isLastRotate(i,j - 1) && level.isInTab(i, j-1) && level.connected(level.pieces[i][j], level.pieces[i][j - 1], "LEFT") && isConnectedToSource(i, j - 1)) return true;
+
+        return false;
+    }
+
+    /* cette fonction regarde si la pièce i, j a déjà été testé */
+    boolean isVisited(int i, int j){
+        for(Coordonnes c : p){
+            if(c.getI() == i && c.getJ() == j) return true;
+        }
+        return false;
+    }
+
+    /* cette fonction regarde si i,j est la dernière pièce tournée */
+    boolean isLastRotate(int i, int j){
+        return (i == lastRotate.getI() && j == lastRotate.getJ());
     }
 
 
@@ -699,6 +732,8 @@ public class View extends Scene{
 
         int getI(){ return i;}
         int getJ(){ return j;}
+
+        public String toString(){ return "["+i+";"+j+"]"; }
 
         waterPiece getPiece(){ return waterPieces[i][j]; }
     }

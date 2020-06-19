@@ -400,7 +400,7 @@ public class Level implements Cloneable {
 	}
 
 	boolean isInTab(int i, int j) { /* Vérifie que la pièce de coordonnées i et j est dans le tableau */
-		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j > 0);
+		return (i < HEIGHT && j < WIDTH + 2 && i >= 0 && j >= 0);
 	}
 	// i = y j = x
 

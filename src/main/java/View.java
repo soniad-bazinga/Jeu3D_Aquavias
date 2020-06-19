@@ -590,6 +590,7 @@ public class View extends Scene{
         //au cas où on clique sur un élément du décor
         if(!level.isInTab(x,y)) return;
 
+
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;
 

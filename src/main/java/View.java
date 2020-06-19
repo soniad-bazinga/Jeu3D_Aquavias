@@ -3,24 +3,17 @@ import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
-import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.PickResult;
-import javafx.scene.layout.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
@@ -29,20 +22,19 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class View extends Scene{
 
     /* On definit la taille */
-     static final int WIDTH = 1280;
-     static final int HEIGHT = 720;
+    static final int WIDTH = 1280;
+    static final int HEIGHT = 720;
 
     static final double PIECE_SIZE = 2;
 
@@ -55,6 +47,12 @@ public class View extends Scene{
 
     /* une matrice de piece3D (des groupes de mesh) */
     static Piece3D[][] models;
+
+    static Piece3D tableau;
+    static Piece3D numModel2;
+    static Piece3D numModel1;
+
+    Group root3D;
 
     static Text compteur;
 
@@ -72,7 +70,7 @@ public class View extends Scene{
 
     AnchorPane pauseMenu;
     Map<String, Pane> pauseMenuWindows = new HashMap<String, Pane>();
-    
+
     /*Panneau de fin de niveau*/
     static LevelEnd fin;
 
@@ -81,10 +79,10 @@ public class View extends Scene{
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
-       super(new Group(), 1280, 720, true);
-       level.new_update();
-       this.menu = menu;
-       setUp(level);
+        super(new Group(), 1280, 720, true);
+        level.new_update();
+        this.menu = menu;
+        setUp(level);
     }
 
     public View() {
@@ -101,8 +99,6 @@ public class View extends Scene{
 
         StackPane stack = new StackPane();
 
-        initalizeCounter(stack);
-
         globalRoot.getChildren().add(stack);
 
         //Scene scene = new Scene(globalRoot, 1280,720,true);
@@ -118,13 +114,21 @@ public class View extends Scene{
         camera.setFarClip(1000);
 
         /* On importe le model de la piece */
-        Group root3D = new Group();
+        root3D = new Group();
+
 
         /* On initialise nos deux tableaus */
         /* waterPieces représente les carrés d'eau */
         waterPieces = new waterPiece[level.pieces.length][level.pieces[0].length];
         /* models les modèles de pièces */
         models = new Piece3D[level.pieces.length][level.pieces[0].length];
+
+        tableau= new Piece3D();
+
+        numModel2= new Piece3D();
+        numModel1= new Piece3D();
+
+        addTableau();
 
         /*On appelle l'initalisateur de ces tableaux */
         initalizeBoards(root3D);
@@ -384,20 +388,20 @@ public class View extends Scene{
     }
 
     void initalizeCamera(Camera camera){
-    	/* Encore à modifier, il ne s'adapte pas bien à tout types de niveaux */
-    	//On place l'origine x à la moitié de la largeur (qui est en fait la hauteur) du niveau
-    	//On ajoute 1 car l'origine est initialisé à 0
-    	
-    	camera.setTranslateX(PIECE_SIZE*level.HEIGHT/2);
+        /* Encore à modifier, il ne s'adapte pas bien à tout types de niveaux */
+        //On place l'origine x à la moitié de la largeur (qui est en fait la hauteur) du niveau
+        //On ajoute 1 car l'origine est initialisé à 0
+
+        camera.setTranslateX(PIECE_SIZE*level.HEIGHT/2);
         camera.setTranslateY(-PIECE_SIZE/2);
         //camera.setTranslateZ(-(level.HEIGHT * PIECE_SIZE *2));
-    	camera.setTranslateZ(-(level.HEIGHT+level.WIDTH+2)*2/2);
-        
-    	
+        camera.setTranslateZ(-(level.HEIGHT+level.WIDTH+2)*2/2);
+
+
         camera.getTransforms().add(new Rotate(-55, Rotate.X_AXIS));
         camera.getTransforms().add(new Rotate(-35, Rotate.Y_AXIS));
         camera.getTransforms().add(new Rotate(-35, Rotate.Z_AXIS));
-        
+
         /*
         camera.setLayoutX(-rotation-level.WIDTH);
         camera.setLayoutY(rotation+level.HEIGHT/2);*/
@@ -458,25 +462,78 @@ public class View extends Scene{
         }
     }
 
-    void initalizeCounter(StackPane stack){
+    void addTableau() {
         if(level.type != 'f') { //Si le niveau est de type f, il n'est pas nécessaire de rajouter le compteur de coups
-            Text compteur = new Text(level.compteurToString());
 
-            compteur.setFill(new Color(0, 0, 0, .6));
+            tableau.importModel("model_test/tableau.obj");  //on ajoute le modèle 3D du tableau d'affichage
 
-            View.compteur = compteur;
+            //apply the wood texture
 
-            Rectangle r = new Rectangle();
 
-            r.setEffect(new DropShadow());
+            tableau.setTranslateX(-6);
+            tableau.setTranslateY(-1);
+            tableau.setTranslateZ(10);
 
-            stack.getChildren().addAll(r, compteur);
+            tableau.setScaleX(40);
+            tableau.setScaleY(40);
+            tableau.setScaleZ(40);
 
-            r.setWidth(150);
-            r.setHeight(50);
+            tableau.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
+            root3D.getChildren().add(tableau);
 
-            r.setFill(new Color(0, 0, 0, .05));
+            numModel2.getTransforms().add(new Rotate(272,Rotate.Y_AXIS));  //on initialise la rotation des modèles 3D des chiffres affichés sur le tableau
+            numModel1.getTransforms().add(new Rotate(272,Rotate.Y_AXIS));
+            addNumberModels(level.compteur);  //on affiche le nombre de coups au départ
+
         }
+    }
+
+    void addNumberModels(int num ){ //charge les modèles 3D des nombres qui seront affichés sur le tableau
+        //ils représentent le nombre de coup qu'il reste à faire
+
+        int num1= num%10;
+        int num2= num/10;
+
+        if(num <10){
+            numModel2.setVisible(false);
+            numModel2.importModel("model_test/0.2.obj"); //valeur par défaut sinon on a une nullPointer error  b
+
+            numModel1.importModel("model_test/"+num1+".2.obj");
+            numModel1.setTranslateX(-5.6);
+            numModel1.setTranslateY(-1.8);
+            numModel1.setTranslateZ(10);
+
+            numModel1.setScaleX(3.3);
+            numModel1.setScaleY(3.3);
+            numModel1.setScaleZ(3.3);
+        }else {
+
+
+            //unité
+
+            numModel1.importModel("model_test/" + num1 + ".obj");
+            numModel1.setTranslateX(-5.6);
+            numModel1.setTranslateY(-1.8);
+            numModel1.setTranslateZ(10.7);
+
+            numModel1.setScaleX(3.3);
+            numModel1.setScaleY(3.3);
+            numModel1.setScaleZ(3.3);
+
+            //dizaine
+
+            numModel2.importModel("model_test/" + num2 + ".obj");
+            numModel2.setTranslateX(-5.6);
+            numModel2.setTranslateY(-1.8);
+            numModel2.setTranslateZ(9.3);
+
+            numModel2.setScaleX(3.3);
+            numModel2.setScaleY(3.3);
+            numModel2.setScaleZ(3.3);
+        }
+
+        root3D.getChildren().addAll(numModel1, numModel2);
+
     }
 
     void fadeIn(){
@@ -529,6 +586,9 @@ public class View extends Scene{
 
     void rotate(int x,int y){
         //Si la partie est finie, la rotation ne fonctionne plus
+
+        //au cas où on clique sur un élément du décor
+        if(!level.isInTab(x,y)) return;
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;
@@ -586,12 +646,21 @@ public class View extends Scene{
 
         /* on update dans le modèle */
 
-        if(level.type != 'f') compteur.setText(level.compteurToString());
+        if(level.type != 'f'){
+            changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
+        }
 
         level.new_update();
         level.affiche();
     }
 
+    void changeNumer(){  //on doit vider d'abord pour remplir à nouveau avec les nouveaux models 3D
+        root3D.getChildren().remove(numModel1);
+        root3D.getChildren().remove(numModel2);
+        numModel2.closeModel();
+        numModel1.closeModel();
+        addNumberModels(level.compteur);
+    }
 
     void start_water(){
         /* on lance la fonction a la case 0 */
@@ -665,13 +734,14 @@ public class View extends Scene{
 
     /* Permet d'importer une pièce via une URL */
 
-    private class Piece3D extends Group{
+    private static class Piece3D extends Group{
 
+        private ObjModelImporter objModelImporter;
         public void importModel(String url){
 
             /* On utilise l'API d'import de modelobj pour javafx */
             /* on créer un objet vide */
-            ObjModelImporter objModelImporter = new ObjModelImporter();
+            objModelImporter = new ObjModelImporter();
 
             /* et on utilise la fonction read sur l'url */
             objModelImporter.read(url);
@@ -680,7 +750,16 @@ public class View extends Scene{
             for(MeshView view : objModelImporter.getImport()){
                 this.getChildren().addAll(view);
             }
+
         }
+
+        public void closeModel(){
+            for(MeshView view: objModelImporter.getImport()){
+                this.getChildren().removeAll(view);
+            }
+            objModelImporter.close();
+        }
+
     }
 
     /* Couples de valeurs, représentant des coordonnées */

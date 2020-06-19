@@ -82,7 +82,7 @@ public class View extends Scene{
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
        super(new Group(), 1280, 720, true);
-       level.new_update();
+       level.update();
        this.menu = menu;
        setUp(level);
     }
@@ -147,12 +147,12 @@ public class View extends Scene{
             /* Si il est non nul alors */
             if(pr!=null && pr.getIntersectedNode() != null){
 
-                if(pr.getIntersectedNode() instanceof waterPiece.waterTile){
+                if(pr.getIntersectedNode() instanceof waterPiece.waterGrid){
                     /*
                         On a cliqué sur l'eau
                         une waterTile possède des coordonées, utilisons les !
                      */
-                    waterPiece.waterTile p = (waterPiece.waterTile) pr.getIntersectedNode();
+                    waterPiece.waterGrid p = (waterPiece.waterGrid) pr.getIntersectedNode();
                     rotate(p.getX(),p.getY());
                 }else {
                     /* Sinon, on recupère le Node associé */
@@ -451,6 +451,7 @@ public class View extends Scene{
                 if(level.pieces[i][j].getType() == "L"){
                     for(int r = 0 ; r < 3 ; r++)  models[i][j].getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
                 }
+                if(level.pieces[i][j].getType() == "T") models[i][j].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
                 /* puis on les ajoutes a root */
                 root.getChildren().add(waterPieces[i][j]);
                 root.getChildren().add(models[i][j]);
@@ -538,7 +539,8 @@ public class View extends Scene{
 
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
-        level.new_rotate(x,y);
+        level.rotate(x,y);
+        level.affiche();
 
         /* puis dans la vue */
         /* sur les modèles avec l'animation */
@@ -554,16 +556,17 @@ public class View extends Scene{
         /*
             on va ensuite vider chaque pièce pleine ajouté (durant la
             propagation de l'eau) APRES la pièce que l'ont vient
-            de tourner
+            de tourner qui n'est pas pleine dans le jeu
          */
         if(pileContains(x,y)) {
             while (!pile.isEmpty() && (pile.get(0).getI() != x || pile.get(0).getJ() != y)) {
+                if(isLevelFull(pile.get(0).getI(), pile.get(0).getJ())) break;
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
                 pile.remove(0);
             }
-            /* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
-            if (!pile.isEmpty()) {
+            /* si la pile n'est pas vide et que la pièce n'est pas pleine dans le jeu, on enlève aussi la piece qu'on vient de tourner */
+            if (!pile.isEmpty() && !isLevelFull(pile.get(0).getI(), pile.get(0).getJ())) {
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
                 waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
                 pile.remove(0);
@@ -576,7 +579,11 @@ public class View extends Scene{
         /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
         Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
             if (!pile.isEmpty()) {
-                flow(pile.get(0).getI(), pile.get(0).getJ());
+                /* on execute la fonction d'écoulment sur chaque pièce de la pile, à la manière de la vraie propagation de l'eau */
+                Coordonnes[] c = pile.toArray(new Coordonnes[0]);
+                for(int i = 0; i < c.length; i++){
+                    flow(c[i].getI(),c[i].getJ());
+                }
             } else {
                 flow(0, 0);
             }
@@ -587,9 +594,6 @@ public class View extends Scene{
         /* on update dans le modèle */
 
         if(level.type != 'f') compteur.setText(level.compteurToString());
-
-        level.new_update();
-        level.affiche();
     }
 
 

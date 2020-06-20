@@ -3,6 +3,9 @@ import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -25,7 +28,6 @@ import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,13 +50,14 @@ public class View extends Scene{
     /* une matrice de piece3D (des groupes de mesh) */
     static Piece3D[][] models;
 
+    //compteur de coups à jouer
     static Piece3D tableau;
     static Piece3D numModel2;
     static Piece3D numModel1;
 
+
     Group root3D;
 
-    static Text compteur;
 
     /* une matrice de carrés bleus representant l'eau */
     waterPiece[][] waterPieces;
@@ -76,6 +79,7 @@ public class View extends Scene{
 
     /*En cas de niveau à temps*/
     Clock timer;
+    Timeline sevenMinutesInHeaven;
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
@@ -123,12 +127,13 @@ public class View extends Scene{
         /* models les modèles de pièces */
         models = new Piece3D[level.pieces.length][level.pieces[0].length];
 
-        tableau= new Piece3D();
 
+
+        //ajout d'un compteur de coups à jouer ou de temps, d'après le type du level
         numModel2= new Piece3D();
         numModel1= new Piece3D();
 
-        addTableau();
+        initializeCompteur();
 
         /*On appelle l'initalisateur de ces tableaux */
         initalizeBoards(root3D);
@@ -198,10 +203,10 @@ public class View extends Scene{
 
         globalRoot.getChildren().add(pauseMenu);
 
-        if (level.type =='f'){ //Si le niveau est de type f, on ajoute une Clock pour le timer
+        /*if (level.type =='f'){ //Si le niveau est de type f, on ajoute une Clock pour le timer
             timer = new Clock(level.compteur);
             globalRoot.getChildren().add(timer);
-        }
+        }*/
     }
 
     /* gère le menu de pause */
@@ -211,10 +216,13 @@ public class View extends Scene{
 
         /* on inverse la visibilité du menu (visible => !visible) */
         pauseMenu.setVisible(!pauseMenu.isVisible());
+        pauseTime();
         paused = pauseMenu.isVisible();
 
         /* si jamais on sort du menu pause */
         if(!paused){
+
+           replayTime();
             /* si la pile est non vide, on rappel la fonction d'ecoulement sur le dernier en date */
             if(!pile.isEmpty()){
                 waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
@@ -227,6 +235,21 @@ public class View extends Scene{
             /* si on est dans le menu de pause */
             pauseShow("pause");
         }
+    }
+
+    void pauseTime(){   //time paused when echap is clicked
+        sevenMinutesInHeaven.pause();
+        timer.pause();
+    }
+
+    void stopTime(){    //time stoped at the end of the game
+        sevenMinutesInHeaven.stop();
+        timer.stop();
+    }
+
+    void replayTime(){   //replay time after exiting the pause menu
+        timer.play();
+        sevenMinutesInHeaven.play();
     }
 
     void initializePauseMenu(){
@@ -462,12 +485,11 @@ public class View extends Scene{
         }
     }
 
-    void addTableau() {
-        if(level.type != 'f') { //Si le niveau est de type f, il n'est pas nécessaire de rajouter le compteur de coups
+
+    void initializeCompteur() {
+            tableau= new Piece3D();  //tableau d'affichage
 
             tableau.importModel("model_test/tableau.obj");  //on ajoute le modèle 3D du tableau d'affichage
-
-            //apply the wood texture
 
 
             tableau.setTranslateX(-6);
@@ -483,13 +505,28 @@ public class View extends Scene{
 
             numModel2.getTransforms().add(new Rotate(272,Rotate.Y_AXIS));  //on initialise la rotation des modèles 3D des chiffres affichés sur le tableau
             numModel1.getTransforms().add(new Rotate(272,Rotate.Y_AXIS));
-            addNumberModels(level.compteur);  //on affiche le nombre de coups au départ
 
-        }
+           addNumberModels(level.compteur);
+
+           if(level.type =='f'){
+               timer= new Clock(level.compteur);
+                sevenMinutesInHeaven= new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+                   @Override
+                   public void handle(ActionEvent actionEvent) {
+                       changeNumer();
+                   }
+               }));
+               sevenMinutesInHeaven.setCycleCount(Timeline.INDEFINITE);
+               sevenMinutesInHeaven.play();
+
+           }
+
     }
 
+
+
     void addNumberModels(int num ){ //charge les modèles 3D des nombres qui seront affichés sur le tableau
-        //ils représentent le nombre de coup qu'il reste à faire
+        //ils représentent le nombre de coup qu'il reste à faire (type c) ou le temps qu'il reste à jouer (type f)
 
         int num1= num%10;
         int num2= num/10;
@@ -568,19 +605,17 @@ public class View extends Scene{
             if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
                 fin = new LevelEnd('d'); //Si oui, c'est la version défaite que l'on appel alors
                 globalRoot.getChildren().add(fin);
-                return;
             } else if (level.estFinie(false)){ //Sinon, on vérifie seulement que le jeu soit terminé
                 fin = new LevelEnd('v');//Pour envoyer la version victoire
                 globalRoot.getChildren().add(fin);
-                return;
             }
+           stopTime();
         }
 
         else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
             if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
             else fin = new LevelEnd('d'); //Sinon, la version défaite
             globalRoot.getChildren().add(fin);
-            return;
         }
     }
 
@@ -647,20 +682,21 @@ public class View extends Scene{
 
         /* on update dans le modèle */
 
-        if(level.type != 'f'){
-            changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
-        }
+        if(level.type =='c') changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
 
         level.new_update();
         level.affiche();
     }
 
-    void changeNumer(){  //on doit vider d'abord pour remplir à nouveau avec les nouveaux models 3D
+
+    void changeNumer() {  //on doit vider d'abord pour remplir à nouveau avec les nouveaux models 3D
         root3D.getChildren().remove(numModel1);
         root3D.getChildren().remove(numModel2);
         numModel2.closeModel();
         numModel1.closeModel();
-        addNumberModels(level.compteur);
+
+        if(level.type == 'c') addNumberModels(level.compteur);
+        if(level.type == 'f') addNumberModels(timer.tmp);
     }
 
     void start_water(){

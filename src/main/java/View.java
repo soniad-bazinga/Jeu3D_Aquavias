@@ -758,13 +758,7 @@ public class View extends Scene{
             boite.setLayoutX(340);
             boite.setLayoutY(210);
 
-            bluebox = new Rectangle(600, 300);
-
-            bluebox.setArcHeight(15);
-            bluebox.setArcWidth(15);
-
-            bluebox.setFill(new ImagePattern(new Image(new File("img/pausemenu.png").toURI().toString())));
-            bluebox.setStroke(Paint.valueOf("GREY"));
+            bluebox = new Rectangle(600, 300, new Color(.5,.92,.96, 1));
 
             boite.getChildren().add(bluebox);
 

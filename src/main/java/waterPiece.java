@@ -45,10 +45,10 @@ public abstract class waterPiece extends Group {
 
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3 ; j++){
-                water[i][j] = new waterGrid(3);
+                water[i][j] = new waterGrid(waterSize/3);
                 water[i][j].setTranslateX(waterSize/3 *(i-1) * 2);
                 water[i][j].setTranslateZ(waterSize/3 * (j-1)* 2);
-                water[i][j].setVisible(true);
+                water[i][j].setFull(false);
                 this.getChildren().add(water[i][j]);
             }
         }
@@ -127,105 +127,31 @@ public abstract class waterPiece extends Group {
         }
     }
 
-    public class waterGrid extends Group{
-        double waterGridSize;
-        int waterGridLength;
-        double waterTileSize;
-        waterTile[][] tiles;
-        int xProgression,yProgression;
+    public class waterGrid extends Box{
         boolean full;
         boolean pass;
 
-        public waterGrid(int w){
-            full = false;
-            waterGridLength = w; //Le nombre de sous divisions d'une waterTile
-            waterGridSize = waterSize/3; //une water grid est divisé en 3 (comme reprensenté en haut)
-            waterTileSize = waterGridSize/waterGridLength; // la taille d'une tile, soit la taille de la gride / le nombre d'elements
-            /*System.out.println("waterGridLength : "+waterGridLength+
-                    "\nwaterGridSize :"+waterGridSize+
-                    "\nwaterTileSize :"+waterTileSize); */
-            xProgression = 0;
-            yProgression = 0;
-            tiles = new waterTile[waterGridLength][waterGridLength];
-            for(int i = 0; i < waterGridLength ; i++){
-                for(int j = 0 ; j < waterGridLength ; j++){
-                    tiles[i][j] = new waterTile(waterTileSize);
-                    tiles[i][j].setTranslateX(waterTileSize*(i-1)*2);
-                    tiles[i][j].setTranslateZ(waterTileSize*(j-1)*2);
-                    getChildren().add(tiles[i][j]);
-
-                }
-            }
-        }
-
-        void setPass(boolean b){ pass = b; }
-        boolean canPass(){ return pass; }
-
-        void reset(){
-            xProgression = 0;
-            yProgression = 0;
-            for(int i = 0; i < waterGridLength; i++){
-                for(int j = 0 ; j < waterGridLength; j++){
-                    tiles[i][j].setVisible(false);
-                }
-            }
-        }
-
-        void setFull(boolean b){
-            full = b;
-            xProgression = waterGridLength;
-            yProgression = waterGridLength;
-            for(int i = 0; i < waterGridLength; i++){
-                for(int j = 0 ; j < waterGridLength; j++){
-                    tiles[i][j].setVisible(b);
-                }
-            }
-        }
-
-        boolean isFull(){ return full; }
-
-        void flowX(boolean forward){
-            /* On créer un semblant d'ecoulement de l'eau :
-                On déplace l'eau par collonne
-             */
-            if(xProgression > 0 && xProgression < waterGridSize){
-                for(int i = 0; i < waterGridSize ; i++){
-                    if(forward) {
-                        tiles[xProgression + 1][i].setVisible(true);
-                    }else{
-                        tiles[xProgression][i].setVisible(false);
-                    }
-                }
-            }
-        }
-
-        void flowY(boolean forward){
-            if(yProgression > 0 && yProgression < waterGridSize){
-                for(int i = 0; i < waterGridSize ; i++){
-                    if(forward) {
-                        tiles[i][yProgression+1].setVisible(true);
-                    }else{
-                        tiles[i][yProgression].setVisible(false);
-                    }
-                }
-            }
-        }
-
-    }
-
-    public class waterTile extends Box {
-        waterTile(double size){
-            setVisible(false);
-            setScaleX(size);
+        public waterGrid(double w){
+            setScaleX(w);
             setScaleY(.5);
-            setScaleZ(size);
+            setScaleZ(w);
             PhongMaterial material = new PhongMaterial();
             material.setDiffuseColor(new Color(.61,.80,.87,.9));
             material.setSpecularColor(Color.AQUAMARINE);
             setMaterial(material);
         }
 
-        int getX(){ return x;}
-        int getY(){ return y;}
+        void setPass(boolean b){ pass = b; }
+        boolean canPass(){ return pass; }
+
+        void setFull(boolean b){
+            full = b;
+            setVisible(b);
+        }
+
+        boolean isFull(){ return full; }
+
+        public int getX(){ return x; }
+        public int getY(){ return y; }
     }
 }

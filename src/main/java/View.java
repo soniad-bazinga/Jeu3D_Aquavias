@@ -82,7 +82,7 @@ public class View extends Scene{
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
        super(new Group(), 1280, 720, true);
-       level.new_update();
+       level.update();
        this.menu = menu;
        setUp(level);
     }
@@ -147,12 +147,12 @@ public class View extends Scene{
             /* Si il est non nul alors */
             if(pr!=null && pr.getIntersectedNode() != null){
 
-                if(pr.getIntersectedNode() instanceof waterPiece.waterTile){
+                if(pr.getIntersectedNode() instanceof waterPiece.waterGrid){
                     /*
                         On a cliqué sur l'eau
                         une waterTile possède des coordonées, utilisons les !
                      */
-                    waterPiece.waterTile p = (waterPiece.waterTile) pr.getIntersectedNode();
+                    waterPiece.waterGrid p = (waterPiece.waterGrid) pr.getIntersectedNode();
                     rotate(p.getX(),p.getY());
                 }else {
                     /* Sinon, on recupère le Node associé */
@@ -451,6 +451,7 @@ public class View extends Scene{
                 if(level.pieces[i][j].getType() == "L"){
                     for(int r = 0 ; r < 3 ; r++)  models[i][j].getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
                 }
+                if(level.pieces[i][j].getType() == "T") models[i][j].getTransforms().add(new Rotate(90,Rotate.Y_AXIS));
                 /* puis on les ajoutes a root */
                 root.getChildren().add(waterPieces[i][j]);
                 root.getChildren().add(models[i][j]);
@@ -545,7 +546,8 @@ public class View extends Scene{
 
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
-        level.new_rotate(x,y);
+        level.rotate(x,y);
+        level.affiche();
 
         /* puis dans la vue */
         /* sur les modèles avec l'animation */
@@ -558,23 +560,25 @@ public class View extends Scene{
 
         /* puis les pieces d'eau */
         waterPieces[x][y].rotate();
+
+        Coordonnes[] coord = pile.toArray(new Coordonnes[0]);
+
+        /* lastRotate pointe vers la dernière pièce tournée */
+        lastRotate = new Coordonnes(x,y);
+
         /*
-            on va ensuite vider chaque pièce pleine ajouté (durant la
-            propagation de l'eau) APRES la pièce que l'ont vient
-            de tourner
+         inc permet de suivre la vraie place d'une piece dans la pile
+         lorsque l'on retire une piece, toutes les autres sont décalés d'un index
+         d'ou le role de inc :)
          */
-        if(pileContains(x,y)) {
-            while (!pile.isEmpty() && (pile.get(0).getI() != x || pile.get(0).getJ() != y)) {
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
-                pile.remove(0);
-            }
-            /* si la pile n'est pas vide, on enlève aussi la piece qu'on vient de tourner */
-            if (!pile.isEmpty()) {
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].setFull(false);
-                waterPieces[pile.get(0).getI()][pile.get(0).getJ()].flowing = false;
-                pile.remove(0);
-            }
+        int inc = 0;
+        for(int i = 0; i < coord.length; i++){
+            p.clear();
+            if(isConnectedToSource(coord[i].getI(),coord[i].getJ())) continue;
+            waterPieces[coord[i].getI()][coord[i].getJ()].setFull(false);
+            waterPieces[coord[i].getI()][coord[i].getJ()].flowing = false;
+            pile.remove(i + inc);
+            inc -= 1;
         }
         /*
             Si la pile n'est pas vide, on part de la pièce au sommet de la pile
@@ -583,7 +587,11 @@ public class View extends Scene{
         /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
         Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
             if (!pile.isEmpty()) {
-                flow(pile.get(0).getI(), pile.get(0).getJ());
+                /* on execute la fonction d'écoulment sur chaque pièce de la pile, à la manière de la vraie propagation de l'eau */
+                Coordonnes[] c = pile.toArray(new Coordonnes[0]);
+                for(int i = 0; i < c.length; i++){
+                    flow(c[i].getI(),c[i].getJ());
+                }
             } else {
                 flow(0, 0);
             }
@@ -591,12 +599,41 @@ public class View extends Scene{
         wait.setCycleCount(1);
         wait.play();
 
-        /* on update dans le modèle */
-
         if(level.type != 'f') compteur.setText(level.compteurToString());
+    }
 
-        level.new_update();
-        level.affiche();
+    ArrayList<Coordonnes> p = new ArrayList<Coordonnes>();
+    Coordonnes lastRotate;
+
+    /* cette fonction regarde si la pièce i, j est connecté a la source, sans passer par la dernière pièce tournée */
+    boolean isConnectedToSource(int i, int j){
+        if(i == 0 && j == 0){
+            return true;
+        }
+
+        if(isVisited(i,j)) return false;
+
+        p.add(new Coordonnes(i,j));
+
+        if(!isLastRotate(i + 1,j ) && level.isInTab(i + 1, j) && level.connected(level.pieces[i][j], level.pieces[i + 1][j], "DOWN") && isConnectedToSource(i + 1, j)) return true;
+        if(!isLastRotate(i - 1,j ) && level.isInTab(i - 1, j) && level.connected(level.pieces[i][j], level.pieces[i - 1][j], "UP") && isConnectedToSource(i - 1, j)) return true;
+        if(!isLastRotate(i,j + 1) && level.isInTab(i, j + 1) && level.connected(level.pieces[i][j], level.pieces[i][j + 1], "RIGHT") && isConnectedToSource(i, j + 1)) return true;
+        if(!isLastRotate(i,j - 1) && level.isInTab(i, j-1) && level.connected(level.pieces[i][j], level.pieces[i][j - 1], "LEFT") && isConnectedToSource(i, j - 1)) return true;
+
+        return false;
+    }
+
+    /* cette fonction regarde si la pièce i, j a déjà été testé */
+    boolean isVisited(int i, int j){
+        for(Coordonnes c : p){
+            if(c.getI() == i && c.getJ() == j) return true;
+        }
+        return false;
+    }
+
+    /* cette fonction regarde si i,j est la dernière pièce tournée */
+    boolean isLastRotate(int i, int j){
+        return (i == lastRotate.getI() && j == lastRotate.getJ());
     }
 
 
@@ -703,6 +740,8 @@ public class View extends Scene{
         int getI(){ return i;}
         int getJ(){ return j;}
 
+        public String toString(){ return "["+i+";"+j+"]"; }
+
         waterPiece getPiece(){ return waterPieces[i][j]; }
     }
 
@@ -726,13 +765,7 @@ public class View extends Scene{
             boite.setLayoutX(340);
             boite.setLayoutY(210);
 
-            bluebox = new Rectangle(600, 300);
-
-            bluebox.setArcHeight(15);
-            bluebox.setArcWidth(15);
-
-            bluebox.setFill(new ImagePattern(new Image(new File("img/pausemenu.png").toURI().toString())));
-            bluebox.setStroke(Paint.valueOf("GREY"));
+            bluebox = new Rectangle(600, 300, new Color(.5,.92,.96, 1));
 
             boite.getChildren().add(bluebox);
 

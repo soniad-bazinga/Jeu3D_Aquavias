@@ -53,9 +53,7 @@ public class View extends Scene{
     static Piece3D numModel2;
     static Piece3D numModel1;
 
-
     Group root3D;
-
 
     /* une matrice de carrés bleus representant l'eau */
     waterPiece[][] waterPieces;
@@ -236,16 +234,19 @@ public class View extends Scene{
     }
 
     void pauseTime(){   //time paused when echap is clicked
+        if(level.type == 'c') return;
         sevenMinutesInHeaven.pause();
         timer.pause();
     }
 
     void stopTime(){    //time stoped at the end of the game
+        if(level.type == 'c') return;
         sevenMinutesInHeaven.stop();
         timer.stop();
     }
 
     void replayTime(){   //replay time after exiting the pause menu
+        if(level.type == 'c') return;
         timer.play();
         sevenMinutesInHeaven.play();
     }
@@ -599,12 +600,15 @@ public class View extends Scene{
 
     void win(){
         loading = true;
+
         //Si le niveau est de type f (avec un timer)
         if(level.type == 'f'){
             if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
                 fin = new LevelEnd('d'); //Si oui, c'est la version défaite que l'on appel alors
                 globalRoot.getChildren().add(fin);
             } else if (level.estFinie(false)){ //Sinon, on vérifie seulement que le jeu soit terminé
+                /* si c'était le dernier coup, mais que l'eau atteint quand même la fin,on lui laisse le temps de s'écouler */
+                if(!waterPieces[level.HEIGHT - 1][level.WIDTH + 1].isFull()) return;
                 fin = new LevelEnd('v');//Pour envoyer la version victoire
                 globalRoot.getChildren().add(fin);
             }
@@ -612,33 +616,42 @@ public class View extends Scene{
         }
 
         else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
-            if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+            if (level.Victory()){
+                /* si c'était le dernier coup, mais que l'eau atteint quand même la fin,on lui laisse le temps de s'écouler */
+                if(!waterPieces[level.HEIGHT - 1][level.WIDTH + 1].isFull()) return;
+                fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+            }
             else fin = new LevelEnd('d'); //Sinon, la version défaite
             globalRoot.getChildren().add(fin);
         }
     }
 
-    void rotate(int x,int y){
+    void rotate(int x,int y) {
         //Si la partie est finie, la rotation ne fonctionne plus
+        if(level.type == 'c') {
+            if (level.compteur <= 0) return;
+        }else{
+            if(timer.tmp <= 0) return;
+        }
 
         //au cas où on clique sur un élément du décor
-        if(!level.isInTab(x,y)) return;
+        if (!level.isInTab(x, y)) return;
 
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
-        if(models[x][y].getRotate() % 90 != 0) return;
+        if (models[x][y].getRotate() % 90 != 0) return;
 
         /* Si c'est la première piece, on ne peut pas la tourner */
-        if(x == 0 && y == 0) return;
+        if (x == 0 && y == 0) return;
 
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
-        level.rotate(x,y);
+        level.rotate(x, y);
         level.affiche();
 
         /* puis dans la vue */
         /* sur les modèles avec l'animation */
-        RotateTransition rt= new RotateTransition(Duration.millis(rotateTime), models[x][y]);
+        RotateTransition rt = new RotateTransition(Duration.millis(rotateTime), models[x][y]);
         rt.setAxis(Rotate.Y_AXIS);
         rt.setByAngle(90);
         rt.setCycleCount(1);
@@ -651,7 +664,7 @@ public class View extends Scene{
         Coordonnes[] coord = pile.toArray(new Coordonnes[0]);
 
         /* lastRotate pointe vers la dernière pièce tournée */
-        lastRotate = new Coordonnes(x,y);
+        lastRotate = new Coordonnes(x, y);
 
         /*
          inc permet de suivre la vraie place d'une piece dans la pile
@@ -659,9 +672,9 @@ public class View extends Scene{
          d'ou le role de inc :)
          */
         int inc = 0;
-        for(int i = 0; i < coord.length; i++){
+        for (int i = 0; i < coord.length; i++) {
             p.clear();
-            if(isConnectedToSource(coord[i].getI(),coord[i].getJ())) continue;
+            if (isConnectedToSource(coord[i].getI(), coord[i].getJ())) continue;
             waterPieces[coord[i].getI()][coord[i].getJ()].setFull(false);
             waterPieces[coord[i].getI()][coord[i].getJ()].flowing = false;
             pile.remove(i + inc);
@@ -672,12 +685,12 @@ public class View extends Scene{
             Sinon on repart de la première piece
          */
         /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
-        Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+        Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event -> {
             if (!pile.isEmpty()) {
                 /* on execute la fonction d'écoulment sur chaque pièce de la pile, à la manière de la vraie propagation de l'eau */
                 Coordonnes[] c = pile.toArray(new Coordonnes[0]);
-                for(int i = 0; i < c.length; i++){
-                    flow(c[i].getI(),c[i].getJ());
+                for (int i = 0; i < c.length; i++) {
+                    flow(c[i].getI(), c[i].getJ());
                 }
             } else {
                 flow(0, 0);
@@ -688,7 +701,8 @@ public class View extends Scene{
 
         /* on update dans le modèle */
 
-        if(level.type =='c') changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
+        if (level.type == 'c') changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
+    }
 
     ArrayList<Coordonnes> p = new ArrayList<Coordonnes>();
     Coordonnes lastRotate;
@@ -726,6 +740,9 @@ public class View extends Scene{
 
 
     void changeNumer() {  //on doit vider d'abord pour remplir à nouveau avec les nouveaux models 3D
+
+        if(level.type == 'f' && timer.tmp <= 0) win();
+
         root3D.getChildren().remove(numModel1);
         root3D.getChildren().remove(numModel2);
         numModel2.closeModel();
@@ -751,7 +768,7 @@ public class View extends Scene{
     /* sur la même base qu'update */
     void flow(int i,int j){
         if(!isWaterPieceFull(i,j) || paused) return;
-        if(i == level.HEIGHT - 1 && j == level.WIDTH + 1 || level.compteur <= 0) win(); //si l'eau à atteint la fin
+        if((i == level.HEIGHT - 1 && j == level.WIDTH + 1) || level.compteur <= 0) win(); //si l'eau à atteint la fin
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)

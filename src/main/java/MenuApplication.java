@@ -47,7 +47,7 @@ public class MenuApplication extends Application {
     String [] lvls = levelsFolder.list();
     AnimationTimer at;
     Stage window;
-    MediaPlayer mediaPlayer;
+    AudioController mediaPlayer = new AudioController();
 
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
@@ -102,7 +102,8 @@ public class MenuApplication extends Application {
 
         levelTracker = new levelTracker();
 
-        setUpAudio();
+        MenuItems.setAudioController(mediaPlayer);
+
         settingsBox = new settingsMenu(mediaPlayer, Color.BLACK);
 
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
@@ -126,15 +127,6 @@ public class MenuApplication extends Application {
         startAnimation(); //Crée les animations du menu
 
         return root;
-    }
-
-    void setUpAudio(){
-        //for playing music in the background
-        String musicFile = "sounds/menumusic.wav";
-        Media sound = new Media(new File(musicFile).toURI().toString());
-        mediaPlayer= new MediaPlayer(sound);
-        mediaPlayer.play();
-        mediaPlayer.setCycleCount(INDEFINITE);  //loop
     }
 
     private void addBackground() throws MalformedURLException {
@@ -172,6 +164,10 @@ public class MenuApplication extends Application {
             }
         });
         st.play();
+    }
+
+    void playSon(String s){
+        mediaPlayer.play(s);
     }
 
     void loadSettings(){
@@ -334,6 +330,10 @@ public class MenuApplication extends Application {
                 list.add(new Pair<>(lvls[i], () -> {
                     try {
                         enCours = new Level(Integer.parseInt(lvls[finalI]));
+
+                        /* on ajoute le son aussi */
+                        mediaPlayer.play("click");
+
                         fadeOut(enCours);
                     } catch (Exception ex) {
                         System.out.println("Niveau manquant");
@@ -343,7 +343,7 @@ public class MenuApplication extends Application {
         }
     }
 
-    MediaPlayer getMediaPlayer(){ return mediaPlayer; }
+    AudioController getMediaPlayer(){ return mediaPlayer; }
 
     private void setSettingsBox(double x, double y){
         /* place le menu de settings a gauche */
@@ -401,6 +401,9 @@ public class MenuApplication extends Application {
     void fadeOut(Level lvl) throws Exception {
         View v = new View(lvl, this);
 
+        mediaPlayer.pauseMusique();
+        mediaPlayer.play("wind");
+
         /* on met a jour le dernier niveau joué */
         updateLastPlayed(lvl.ID);
 
@@ -420,15 +423,25 @@ public class MenuApplication extends Application {
     void fadeIn(){
         window.setScene(primaryScene);
 
-        settingsBox.loadSettings();
-        settingsBox.updateValues();
-
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.setNode(root);
+        fade.setOnFinished(e -> {
+            mediaPlayer.playMusique();
+            settingsBox.loadSettings();
+            settingsBox.updateValues();
+        });
         fade.play();
+    }
+
+    void playMusique(){
+        mediaPlayer.playMusique();
+    }
+
+    void pauseMusique(){
+        mediaPlayer.pauseMusique();
     }
 
     void incrementeMax(){

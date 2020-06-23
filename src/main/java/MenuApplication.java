@@ -24,6 +24,7 @@ import javafx.util.Pair;
 import javafx.scene.input.KeyEvent;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import java.util.Arrays;
 
 import java.io.File;
 import java.io.FileReader;
@@ -323,6 +324,8 @@ public class MenuApplication extends Application {
 
 
     public void addLevelToList(List<Pair<String, Runnable>> list){
+        /* tri des niveaux pour les avoir dans l'ordre croissant */
+        Arrays.sort(lvls);
         for(int i = 1; i < lvls.length; i++){
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);

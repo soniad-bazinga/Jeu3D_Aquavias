@@ -805,6 +805,7 @@ public class View extends Scene{
                             menu.nextLevel(level.ID);
                         } catch (Exception exception) {
                             System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
+                            menu.fadeIn();
                         }
                     });
                 });

@@ -105,7 +105,7 @@ public class MenuApplication extends Application {
         MenuItems.setAudioController(mediaPlayer);
 
         settingsBox = new settingsMenu(mediaPlayer, Color.BLACK);
-
+        
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
 
@@ -121,7 +121,7 @@ public class MenuApplication extends Application {
 
 
         addMenu(lineX + 5, lineY + 5); //Crée tous les items du menu et les ajoute au Pane parent (root)
-        addLevelSelect(WIDTH * 2.0, HEIGHT/4.0, 3);
+        addLevelSelect(WIDTH*2, HEIGHT/4.0, 5);
         setSettingsBox(-WIDTH * 2.0, HEIGHT/4.0);
 
         startAnimation(); //Crée les animations du menu
@@ -204,7 +204,7 @@ public class MenuApplication extends Application {
             tt2.setToY(-150);
 
             tt3.setToY(HEIGHT/4.0);
-            tt3.setToX(WIDTH/4.0);
+            tt3.setToX(WIDTH/4.0-220);
 
             tt.play();
             tt2.play();

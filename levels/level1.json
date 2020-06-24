@@ -1,5 +1,5 @@
 {"WIDTH":4,
-    "ID":6,
+    "ID":1,
     "HEIGHT":6,
     "Pieces":
 [[{"ROTATION":1,"TYPE":"I","FULL":true},
@@ -44,4 +44,4 @@
 {"ROTATION":2,"TYPE":"L","FULL":false},
 {"ROTATION":3,"TYPE":"I","FULL":false}]],
   "type":"c",
-  "compteur": 50}
+  "compteur": 25}

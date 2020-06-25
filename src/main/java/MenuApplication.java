@@ -333,9 +333,7 @@ public class MenuApplication extends Application {
 
                         fadeOut(enCours);
                     } catch (Exception ex) {
-                        System.out.print(Integer.parseInt(lvls[finalI]));
                         System.out.println("Niveau manquant");
-                        System.out.println(ex);
                     }
                 }));
             }
@@ -381,7 +379,8 @@ public class MenuApplication extends Application {
                 l.setOnAction(data.getValue());
 
                 //si le niveau est débloque alors on l'affiche comme tel
-                if(col[0] + ligne[0] <= levelTracker.getMaxLevel()) l.setUnlocked(true);
+                if(i[0] <= levelTracker.getMaxLevel()) l.setUnlocked(true);
+
 
                 Rectangle clip = new Rectangle(200, 100);//Coupe le Polygon dans LvlItems, s'il est plus grand que 200x100
                 clip.translateXProperty().bind(l.translateXProperty().negate());
@@ -391,6 +390,8 @@ public class MenuApplication extends Application {
                 LevelBox.add(l, col[0]%taillemax, ligne[0], 1, 1);// On ajoute le niveau à la colonne "colonne mod taillemax" et ligne
                 if ((col[0]+ 1)%taillemax == 0) ligne[0] = ligne[0] + 1; //Si on arrive au bout de la ligne (nb max d'éléments par ligne) on pas à la suivante
                 col[0] = col[0] + 1;//On passe à la colonne suivante
+
+                i[0]++;
 
             }
         });

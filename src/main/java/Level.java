@@ -227,6 +227,7 @@ public class Level implements Cloneable {
 								 * i = y, j = x Fait tourner la pièces de coordonnées "i" et "j" mais reset
 								 * l'eau qu'elle contient avant
 								 */
+		System.out.println(i+" "+j);
 		if(i==0 && j==0 || i==HEIGHT-1 && j==WIDTH+1) return;
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);
@@ -357,7 +358,8 @@ public class Level implements Cloneable {
 
 	private void voidAll() { // vide l'eau de tout le circuit sauf de la source
 		for (int i = 0; i < HEIGHT; i++) {
-			for (int j = 1; j < WIDTH + 2; j++) {
+			for (int j = 0; j < WIDTH + 2; j++) {
+				if(i == 0 && j == 0) continue;
 				if (pieces[i][j] != null) {
 					pieces[i][j].setFull(false);
 				}
@@ -368,8 +370,8 @@ public class Level implements Cloneable {
 	void update(int i, int j) {
 		// vérifie que les pièces limitrophes existent, qu'elles sont connectées à
 		// l'actuelle et qu'elles ne sont pas déjà remplies
-		if (i == HEIGHT - 1 && j == WIDTH + 1)
-			return;
+		if (i == HEIGHT - 1 && j == WIDTH + 1) return;
+
 		if (isInTab(i + 1, j) && connected(pieces[i][j], pieces[i + 1][j], "DOWN") && !pieces[i + 1][j].isFull()) {
 			setFull(i + 1, j);
 			update(i + 1, j);

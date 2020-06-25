@@ -99,6 +99,10 @@ public class settingsMenu extends GridPane {
             }
         });
 
+        /* on leurs enlève l'auto focus */
+        musique.setFocusTraversable(false);
+        sons.setFocusTraversable(false);
+
         add(retour,0,3,2,1);
         add(sauvegarder,2,3,2,1);
 

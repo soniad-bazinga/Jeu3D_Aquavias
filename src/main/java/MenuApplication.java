@@ -439,6 +439,13 @@ public class MenuApplication extends Application {
         ((LevelItems) LevelBox.getChildren().get(levelTracker.getMaxLevel())).setUnlocked(true);
     }
 
+    void unlockAll(){
+        while(levelTracker.getMaxLevel() < levelData.size() - 1){
+            levelTracker.incrementeMax();
+            ((LevelItems) LevelBox.getChildren().get(levelTracker.getMaxLevel())).setUnlocked(true);
+        }
+    }
+
     void updateLastPlayed(int i){
         /* pour être sur de ne pas mettre un niveau joué a un niveau non existant */
         if(i < levelData.size()) levelTracker.setLastPlayed(i);
@@ -467,7 +474,7 @@ public class MenuApplication extends Application {
             primaryStage.setHeight(HEIGHT);
             primaryStage.show();
 
-            cheatHandler c = new cheatHandler(4, this);
+            cheatHandler c = new cheatHandler(10, this);
 
             scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override

@@ -10,13 +10,11 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
@@ -25,27 +23,26 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class View extends Scene{
+public class View extends Scene {
 
-    /* On definit la taille */
-    static final int WIDTH = 1280;
-    static final int HEIGHT = 720;
+    /*on définit la taille*/
+    static final int WIDTH= 1280;
+    static final int HEIGHT= 720;
 
-    static final double PIECE_SIZE = 2;
+    static final double PIECE_SIZE=2 ;
 
-    static int rotateTime = 200;
+    static int rotateTime= 200;
 
     AnchorPane globalRoot;
 
-    /* ses nouveaux attributs pour afficher le level */
+    /*ses nouveaux attributs pour afficher le level*/
     static Level level;
 
-    /* une matrice de piece3D (des groupes de mesh) */
+    /*une matrice de piece3D(des groupes de mesh)*/
     static Piece3D[][] models;
 
     //compteur de coups à jouer
@@ -53,9 +50,7 @@ public class View extends Scene{
     static Piece3D numModel2;
     static Piece3D numModel1;
 
-
     Group root3D;
-
 
     /* une matrice de carrés bleus representant l'eau */
     waterPiece[][] waterPieces;
@@ -81,17 +76,17 @@ public class View extends Scene{
 
     /* Créé un aperçu de piece */
     public View(Level level, MenuApplication menu){
-       super(new Group(), 1280, 720, true);
-       level.update();
-       this.menu = menu;
-       setUp(level);
+        super(new Group(), 1280, 720, true);
+        level.update();
+        this.menu = menu;
+        setUp(level);
     }
 
     public View() {
         super(new Group(), 1280, 720, true);
     }
 
-    public void setUp(Level level){
+    public void setUp(Level level) {
 
         this.level = level;
 
@@ -107,7 +102,7 @@ public class View extends Scene{
         this.setRoot(globalRoot);
 
         /* On crée une caméra qui pointe vers 0,0 (true) et la recule sur l'axe Z */
-        PerspectiveCamera camera  = new PerspectiveCamera(true);
+        PerspectiveCamera camera = new PerspectiveCamera(true);
 
         /* on appelle l'initalisateur de caméra */
         initalizeCamera(camera);
@@ -126,10 +121,9 @@ public class View extends Scene{
         models = new Piece3D[level.pieces.length][level.pieces[0].length];
 
 
-
         //ajout d'un compteur de coups à jouer ou de temps, d'après le type du level
-        numModel2= new Piece3D();
-        numModel1= new Piece3D();
+        numModel2 = new Piece3D();
+        numModel1 = new Piece3D();
 
         initializeCompteur();
 
@@ -180,6 +174,7 @@ public class View extends Scene{
             }
         });
 
+
         /* on rend la root invisible pour la transition */
         globalRoot.setOpacity(0);
 
@@ -220,7 +215,7 @@ public class View extends Scene{
         /* si jamais on sort du menu pause */
         if(!paused){
 
-           replayTime();
+            replayTime();
             /* si la pile est non vide, on rappel la fonction d'ecoulement sur le dernier en date */
             if(!pile.isEmpty()){
                 waterPiece wp = waterPieces[pile.get(0).getI()][pile.get(0).getJ()];
@@ -236,16 +231,19 @@ public class View extends Scene{
     }
 
     void pauseTime(){   //time paused when echap is clicked
+        if(level.type == 'c') return;
         sevenMinutesInHeaven.pause();
         timer.pause();
     }
 
     void stopTime(){    //time stoped at the end of the game
+        if(level.type == 'c') return;
         sevenMinutesInHeaven.stop();
         timer.stop();
     }
 
     void replayTime(){   //replay time after exiting the pause menu
+        if(level.type == 'c') return;
         timer.play();
         sevenMinutesInHeaven.play();
     }
@@ -318,7 +316,6 @@ public class View extends Scene{
         initializeSettingsPause();
 
     }
-
     /* on initialise le menu de sorti de niveau */
     void initializeExitPause(){
         GridPane confirmation = new GridPane();
@@ -430,28 +427,35 @@ public class View extends Scene{
         camera.setLayoutY((level.HEIGHT+level.WIDTH)*-43/18.9);
 
     }
-
     void initalizeBoards(Group root){
         /* On recopie à l'identique le niveau en 3d */
         /* on parcours le tableau */
         for(int i = 0 ; i < models.length ; i++) {
             for(int j = 0 ; j < models[i].length ; j++) {
-                if(level.pieces[i][j] == null) continue;
+                if (level.pieces[i][j] == null) continue;
                 /* chaque modèle une pièce 3D */
                 models[i][j] = new Piece3D();
                 /* On importe selon le type de pièce */
-                models[i][j].importModel("model_test/piece"+level.pieces[i][j].getType()+".obj");
+                models[i][j].importModel("model_test/piece" + level.pieces[i][j].getType() + ".obj");
                 /* on place la pièce en coordonnées [i;j] (décale de la taille d'une pièce) */
                 models[i][j].setTranslateX(PIECE_SIZE * i);
                 models[i][j].setTranslateY(0);
                 models[i][j].setTranslateZ(PIECE_SIZE * j);
 
                 /* on créé le type de pièce correspondant */
-                switch(level.pieces[i][j].getType()){
-                    case("L") : waterPieces[i][j] = new waterPieceL(PIECE_SIZE/2,this,i,j); break;
-                    case("T") : waterPieces[i][j] = new waterPieceT(PIECE_SIZE/2,this,i,j); break;
-                    case("I") : waterPieces[i][j] = new waterPieceI(PIECE_SIZE/2,this,i,j); break;
-                    case("X") : waterPieces[i][j] = new waterPieceX(PIECE_SIZE/2,this,i,j); break;
+                switch (level.pieces[i][j].getType()) {
+                    case ("L"):
+                        waterPieces[i][j] = new waterPieceL(PIECE_SIZE / 2, this, i, j);
+                        break;
+                    case ("T"):
+                        waterPieces[i][j] = new waterPieceT(PIECE_SIZE / 2, this, i, j);
+                        break;
+                    case ("I"):
+                        waterPieces[i][j] = new waterPieceI(PIECE_SIZE / 2, this, i, j);
+                        break;
+                    case ("X"):
+                        waterPieces[i][j] = new waterPieceX(PIECE_SIZE / 2, this, i, j);
+                        break;
                 }
                 /* on place l'eau au même coordonnées que les modèles */
                 waterPieces[i][j].setTranslateX(PIECE_SIZE * i);
@@ -484,45 +488,41 @@ public class View extends Scene{
         }
     }
 
-
     void initializeCompteur() {
-            tableau= new Piece3D();  //tableau d'affichage
+        tableau = new Piece3D();  //tableau d'affichage
 
-            tableau.importModel("model_test/tableau.obj");  //on ajoute le modèle 3D du tableau d'affichage
+        tableau.importModel("model_test/tableau.obj");  //on ajoute le modèle 3D du tableau d'affichage
 
 
-            tableau.setTranslateX(-6);
-            tableau.setTranslateY(-1);
-            tableau.setTranslateZ(10);
+        tableau.setTranslateX(-6);
+        tableau.setTranslateY(-1);
+        tableau.setTranslateZ(10);
 
-            tableau.setScaleX(40);
-            tableau.setScaleY(40);
-            tableau.setScaleZ(40);
+        tableau.setScaleX(40);
+        tableau.setScaleY(40);
+        tableau.setScaleZ(40);
 
-            tableau.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
-            root3D.getChildren().add(tableau);
+        tableau.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
+        root3D.getChildren().add(tableau);
 
-            numModel2.getTransforms().add(new Rotate(272,Rotate.Y_AXIS));  //on initialise la rotation des modèles 3D des chiffres affichés sur le tableau
-            numModel1.getTransforms().add(new Rotate(272,Rotate.Y_AXIS));
+        numModel2.getTransforms().add(new Rotate(272, Rotate.Y_AXIS));  //on initialise la rotation des modèles 3D des chiffres affichés sur le tableau
+        numModel1.getTransforms().add(new Rotate(272, Rotate.Y_AXIS));
 
-           addNumberModels(level.compteur);
+        addNumberModels(level.compteur);
 
-           if(level.type =='f'){
-               timer= new Clock(level.compteur);
-                sevenMinutesInHeaven= new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
-                   @Override
-                   public void handle(ActionEvent actionEvent) {
-                       changeNumer();
-                   }
-               }));
-               sevenMinutesInHeaven.setCycleCount(Timeline.INDEFINITE);
-               sevenMinutesInHeaven.play();
+        if (level.type == 'f') {
+            timer = new Clock(level.compteur);
+            sevenMinutesInHeaven = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    changeNumer();
+                }
+            }));
+            sevenMinutesInHeaven.setCycleCount(Timeline.INDEFINITE);
+            sevenMinutesInHeaven.play();
 
-           }
-
+        }
     }
-
-
 
     void addNumberModels(int num ){ //charge les modèles 3D des nombres qui seront affichés sur le tableau
         //ils représentent le nombre de coup qu'il reste à faire (type c) ou le temps qu'il reste à jouer (type f)
@@ -543,7 +543,6 @@ public class View extends Scene{
             numModel1.setScaleY(3.3);
             numModel1.setScaleZ(3.3);
         }else {
-
 
             //unité
 
@@ -599,46 +598,58 @@ public class View extends Scene{
 
     void win(){
         loading = true;
+
         //Si le niveau est de type f (avec un timer)
         if(level.type == 'f'){
             if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
                 fin = new LevelEnd('d'); //Si oui, c'est la version défaite que l'on appel alors
                 globalRoot.getChildren().add(fin);
             } else if (level.estFinie(false)){ //Sinon, on vérifie seulement que le jeu soit terminé
+                /* si c'était le dernier coup, mais que l'eau atteint quand même la fin,on lui laisse le temps de s'écouler */
+                if(!waterPieces[level.HEIGHT - 1][level.WIDTH + 1].isFull()) return;
                 fin = new LevelEnd('v');//Pour envoyer la version victoire
                 globalRoot.getChildren().add(fin);
             }
-           stopTime();
+            stopTime();
         }
 
         else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
-            if (level.Victory()) fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+            if (level.Victory()){
+                /* si c'était le dernier coup, mais que l'eau atteint quand même la fin,on lui laisse le temps de s'écouler */
+                if(!waterPieces[level.HEIGHT - 1][level.WIDTH + 1].isFull()) return;
+                fin = new LevelEnd('v'); //Si la partie est gagnée, on envoie la version victoire
+            }
             else fin = new LevelEnd('d'); //Sinon, la version défaite
             globalRoot.getChildren().add(fin);
         }
     }
 
-    void rotate(int x,int y){
+    void rotate(int x,int y) {
         //Si la partie est finie, la rotation ne fonctionne plus
+        if(level.type == 'c') {
+            if (level.compteur <= 0) return;
+        }else{
+            if(timer.tmp <= 0) return;
+        }
 
         //au cas où on clique sur un élément du décor
-        if(!level.isInTab(x,y)) return;
+        if (!level.isInTab(x, y)) return;
 
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
-        if(models[x][y].getRotate() % 90 != 0) return;
+        if (models[x][y].getRotate() % 90 != 0) return;
 
         /* Si c'est la première piece, on ne peut pas la tourner */
-        if(x == 0 && y == 0) return;
+        if (x == 0 && y == 0) return;
 
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
-        level.rotate(x,y);
+        level.rotate(x, y);
         level.affiche();
 
         /* puis dans la vue */
         /* sur les modèles avec l'animation */
-        RotateTransition rt= new RotateTransition(Duration.millis(rotateTime), models[x][y]);
+        RotateTransition rt = new RotateTransition(Duration.millis(rotateTime), models[x][y]);
         rt.setAxis(Rotate.Y_AXIS);
         rt.setByAngle(90);
         rt.setCycleCount(1);
@@ -651,7 +662,7 @@ public class View extends Scene{
         Coordonnes[] coord = pile.toArray(new Coordonnes[0]);
 
         /* lastRotate pointe vers la dernière pièce tournée */
-        lastRotate = new Coordonnes(x,y);
+        lastRotate = new Coordonnes(x, y);
 
         /*
          inc permet de suivre la vraie place d'une piece dans la pile
@@ -659,9 +670,9 @@ public class View extends Scene{
          d'ou le role de inc :)
          */
         int inc = 0;
-        for(int i = 0; i < coord.length; i++){
+        for (int i = 0; i < coord.length; i++) {
             p.clear();
-            if(isConnectedToSource(coord[i].getI(),coord[i].getJ())) continue;
+            if (isConnectedToSource(coord[i].getI(), coord[i].getJ())) continue;
             waterPieces[coord[i].getI()][coord[i].getJ()].setFull(false);
             waterPieces[coord[i].getI()][coord[i].getJ()].flowing = false;
             pile.remove(i + inc);
@@ -672,12 +683,12 @@ public class View extends Scene{
             Sinon on repart de la première piece
          */
         /* On attend la fin de l'animation avant de relancer la fonction d'écoulement */
-        Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event ->{
+        Timeline wait = new Timeline(new KeyFrame(Duration.millis(rotateTime * 2), event -> {
             if (!pile.isEmpty()) {
                 /* on execute la fonction d'écoulment sur chaque pièce de la pile, à la manière de la vraie propagation de l'eau */
                 Coordonnes[] c = pile.toArray(new Coordonnes[0]);
-                for(int i = 0; i < c.length; i++){
-                    flow(c[i].getI(),c[i].getJ());
+                for (int i = 0; i < c.length; i++) {
+                    flow(c[i].getI(), c[i].getJ());
                 }
             } else {
                 flow(0, 0);
@@ -688,7 +699,8 @@ public class View extends Scene{
 
         /* on update dans le modèle */
 
-        if(level.type =='c') changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
+        if (level.type == 'c') changeNumer();        //changer les nombre sur le tableau d'affichage du compteur
+    }
 
     ArrayList<Coordonnes> p = new ArrayList<Coordonnes>();
     Coordonnes lastRotate;
@@ -726,6 +738,9 @@ public class View extends Scene{
 
 
     void changeNumer() {  //on doit vider d'abord pour remplir à nouveau avec les nouveaux models 3D
+
+        if(level.type == 'f' && timer.tmp <= 0) win();
+
         root3D.getChildren().remove(numModel1);
         root3D.getChildren().remove(numModel2);
         numModel2.closeModel();
@@ -751,7 +766,7 @@ public class View extends Scene{
     /* sur la même base qu'update */
     void flow(int i,int j){
         if(!isWaterPieceFull(i,j) || paused) return;
-        if(i == level.HEIGHT - 1 && j == level.WIDTH + 1 || level.compteur <= 0) win(); //si l'eau à atteint la fin
+        if((i == level.HEIGHT - 1 && j == level.WIDTH + 1) || level.compteur <= 0) win(); //si l'eau à atteint la fin
         /*
             Cette fonction marche de la manière suivante :
             - Elle regarde si elle est connectées aux pièces d'a côté (comme sur level)
@@ -805,9 +820,12 @@ public class View extends Scene{
         waterPieces[i][j].setFull(b);
     }
 
+
+
+
     /* Permet d'importer une pièce via une URL */
 
-    private static class Piece3D extends Group{
+    private static class Piece3D extends Group {
 
         private ObjModelImporter objModelImporter;
         public void importModel(String url){
@@ -858,7 +876,7 @@ public class View extends Scene{
         StackPane boite;
         Rectangle bluebox;
 
-        public LevelEnd(char g){ //Le constructeur a besoin de la longueur de la fenètre pour placer la boite
+        public LevelEnd(char g) { //Le constructeur a besoin de la longueur de la fenètre pour placer la boite
             //mais également d'une variable pour savoir si la partie est gagnée ou non
 
             Rectangle behind = new Rectangle(WIDTH, HEIGHT);
@@ -873,7 +891,7 @@ public class View extends Scene{
             boite.setLayoutX(340);
             boite.setLayoutY(210);
 
-            bluebox = new Rectangle(600, 300, new Color(.5,.92,.96, 1));
+            bluebox = new Rectangle(600, 300, new Color(.5, .92, .96, 1));
 
             boite.getChildren().add(bluebox);
 
@@ -881,23 +899,21 @@ public class View extends Scene{
 
             Text status = new Text();
 
-            if(g == 'v'){
+            if (g == 'v') {
                 status.setText("Victoire !");
-            }else{
+            } else {
                 status.setText("Perdu...");
             }
-
             /* on ajoute le texte de status (victoire/défaite) */
             status.setFill(Color.WHITE);
             status.setFont(Font.font("Roboto", 60));
 
-            status.setLayoutX((WIDTH - status.getLayoutBounds().getWidth())/2);
-            status.setLayoutY(HEIGHT/2.5);
+            status.setLayoutX((WIDTH - status.getLayoutBounds().getWidth()) / 2);
+            status.setLayoutY(HEIGHT / 2.5);
 
-            getChildren().addAll(boite,status);
+            getChildren().addAll(boite, status);
 
         }
-
         public void addButtons(char win){
 
             HBox hboite = new HBox(10);
@@ -932,7 +948,6 @@ public class View extends Scene{
                     exception.printStackTrace();
                 }
             });
-
             Button quit = new Button("Retour au menu");
             quit.setOnAction(e -> {
                 fadeOut(EventHandler ->{
@@ -949,5 +964,11 @@ public class View extends Scene{
 
             boite.getChildren().add(hboite);
         }
+
     }
-}
+
+
+
+
+
+    }

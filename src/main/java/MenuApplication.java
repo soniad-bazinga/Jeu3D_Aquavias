@@ -318,7 +318,7 @@ public class MenuApplication extends Application {
                 return i1 - i2;
             }
         });
-        for(int i = 1; i < lvls.length; i++){
+        for(int i = 0; i < lvls.length; i++){
             System.out.println(lvls[i]);
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);
@@ -333,7 +333,9 @@ public class MenuApplication extends Application {
 
                         fadeOut(enCours);
                     } catch (Exception ex) {
+                        System.out.print(Integer.parseInt(lvls[finalI]));
                         System.out.println("Niveau manquant");
+                        System.out.println(ex);
                     }
                 }));
             }

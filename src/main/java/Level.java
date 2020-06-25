@@ -227,7 +227,6 @@ public class Level implements Cloneable {
 								 * i = y, j = x Fait tourner la pièces de coordonnées "i" et "j" mais reset
 								 * l'eau qu'elle contient avant
 								 */
-		System.out.println(i+" "+j);
 		if(i==0 && j==0 || i==HEIGHT-1 && j==WIDTH+1) return;
 		if (i < pieces.length && j < pieces[i].length && pieces[i][j] != null) {
 			pieces[i][j].setFull(false);

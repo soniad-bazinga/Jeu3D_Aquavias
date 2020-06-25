@@ -24,15 +24,14 @@ import javafx.util.Pair;
 import javafx.scene.input.KeyEvent;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import java.util.Arrays;
+
+import java.util.*;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static javafx.scene.media.MediaPlayer.INDEFINITE;
 
@@ -171,22 +170,11 @@ public class MenuApplication extends Application {
     }
 
     void loadSettings(){
-        try {
-            /* on récupère le fichier de réglages*/
-            FileReader reader = new FileReader("settings.json");
-            JSONParser jsonParser = new JSONParser();
-            JSONObject obj = (JSONObject) jsonParser.parse(reader);
+        WIDTH = 1280;
+        HEIGHT = 720;
 
-            /* et on récupère les valeurs qui nous interessent */
-            WIDTH = Math.toIntExact((long) obj.get("WIDTH"));
-            HEIGHT = Math.toIntExact((long) obj.get("HEIGHT"));
-
-            lineX = WIDTH / 2.0 - 100.0; //Ajoute le menu au centre
-            lineY = HEIGHT / 3.0 + 50.0; //Ajoute le menu au centre
-
-        }catch(Exception e){
-            System.out.println(e);
-        }
+        lineX = WIDTH / 2.0 - 100.0; //Ajoute le menu au centre
+        lineY = HEIGHT / 3.0 + 50.0; //Ajoute le menu au centre
     }
 
     private void menuLevelAnimation(){
@@ -321,8 +309,17 @@ public class MenuApplication extends Application {
 
     public void addLevelToList(List<Pair<String, Runnable>> list){
         /* tri des niveaux pour les avoir dans l'ordre croissant */
-        Arrays.sort(lvls);
+
+        Arrays.sort(lvls, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2){
+                int i1 = Integer.valueOf(o1.substring(5,o1.indexOf('.')));
+                int i2 = Integer.valueOf(o2.substring(5,o2.indexOf('.')));
+                return i1 - i2;
+            }
+        });
         for(int i = 1; i < lvls.length; i++){
+            System.out.println(lvls[i]);
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);
             if(lvls[i] != null && !lvls[i].equals("-1")) {

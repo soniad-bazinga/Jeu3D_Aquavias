@@ -15,11 +15,12 @@ import java.io.FileWriter;
 public class settingsMenu extends GridPane {
 
     AudioController mediaPlayer;
+
     double MUSIQUE;
     double SONS;
-    int WIDTH;
-    int HEIGHT;
+
     MenuItems retour;
+
     Slider musique;
     Slider sons;
 
@@ -124,12 +125,9 @@ public class settingsMenu extends GridPane {
     /* pour charger les réglages */
     void loadSettings(){
         try {
-            FileReader reader = new FileReader("settings.json");
+            FileReader reader = new FileReader("options/settings.json");
             JSONParser jsonParser = new JSONParser();
             JSONObject obj = (JSONObject) jsonParser.parse(reader);
-
-            WIDTH = Math.toIntExact((long) obj.get("WIDTH"));
-            HEIGHT = Math.toIntExact((long) obj.get("HEIGHT"));
 
             MUSIQUE =  ((Number) obj.get("MUSIQUE")).doubleValue();
             SONS = ((Number) obj.get("SONS")).doubleValue();
@@ -141,16 +139,14 @@ public class settingsMenu extends GridPane {
     /* pour sauvegarder les réglages */
     void saveSettings(){
         try{
-            FileReader reader = new FileReader("settings.json");
+            FileReader reader = new FileReader("options/settings.json");
             JSONParser jsonParser = new JSONParser();
             JSONObject obj = (JSONObject) jsonParser.parse(reader);
 
-            obj.put("WIDTH",WIDTH);
-            obj.put("HEIGHT",HEIGHT);
             obj.put("MUSIQUE",MUSIQUE);
             obj.put("SONS",SONS);
 
-            FileWriter writer = new FileWriter("settings.json");
+            FileWriter writer = new FileWriter("options/settings.json");
             writer.write(obj.toJSONString());
             writer.close();
 
@@ -158,7 +154,4 @@ public class settingsMenu extends GridPane {
             System.out.println(e);
         }
     }
-
-    public int getWindowHeight(){ return HEIGHT; }
-    public int getWindowWidth(){ return WIDTH; }
 }

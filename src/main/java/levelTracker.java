@@ -52,7 +52,7 @@ public class levelTracker {
     /* on charge le niveau courant dans les fichiers */
     private void loadCurr() throws IOException, ParseException {
         /* On charge le fichier qui track les niveaux */
-        FileReader f = new FileReader("levels/curr.json");
+        FileReader f = new FileReader("options/curr.json");
 
         JSONParser jsonParser = new JSONParser();
         JSONObject obj = (JSONObject) jsonParser.parse(f);
@@ -63,14 +63,14 @@ public class levelTracker {
 
     /* on met a jour le niveau dans les fichiers */
     private void updateCurr() throws IOException, ParseException {
-        FileReader f = new FileReader("levels/curr.json");
+        FileReader f = new FileReader("options/curr.json");
         JSONParser jsonParser = new JSONParser();
         JSONObject obj = (JSONObject) jsonParser.parse(f);
 
         obj.put("maxLevel",maxLevel);
         obj.put("lastPlayed",lastPlayed);
 
-        FileWriter r = new FileWriter("levels/curr.json");
+        FileWriter r = new FileWriter("options/curr.json");
         r.write(obj.toJSONString());
         r.close();
 

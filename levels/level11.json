@@ -58,5 +58,5 @@
 {"ROTATION":2,"TYPE":"L","FULL":false},
 {"ROTATION":1,"TYPE":"T","FULL":false},
 {"ROTATION":1,"TYPE":"I","FULL":false}]],
-  "type":"c",
-  "compteur": 50}
+  "type":"f",
+  "compteur": 40}

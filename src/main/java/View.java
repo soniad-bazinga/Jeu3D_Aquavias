@@ -126,7 +126,7 @@ public class View extends Scene{
         camera.setFarClip(1000);
 
         /* On importe le model de la piece */
-        Group root3D = new Group();
+        root3D = new Group();
 
         /* On initialise nos deux tableaus */
         /* waterPieces représente les carrés d'eau */

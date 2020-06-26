@@ -94,6 +94,7 @@ public class View extends Scene{
        super(new Group(), 1280, 720, true);
        level.update();
        this.menu = menu;
+
        setUp(level);
     }
 
@@ -138,7 +139,26 @@ public class View extends Scene{
         numModel2 = new Piece3D();
         numModel1 = new Piece3D();
 
+
         initializeCompteur();
+        if (level.type == 'f') {
+
+
+            timer = new Clock(level.compteur);
+
+
+            sevenMinutesInHeaven = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    changeNumer();
+                }
+            }));
+            sevenMinutesInHeaven.setCycleCount(Timeline.INDEFINITE);
+            sevenMinutesInHeaven.play();
+
+        }
+
+
 
 
         /*On appelle l'initalisateur de ces tableaux */
@@ -254,6 +274,8 @@ public class View extends Scene{
         timer.play();
         sevenMinutesInHeaven.play();
     }
+
+
 
 
 
@@ -512,18 +534,7 @@ public class View extends Scene{
 
         addNumberModels(level.compteur);
 
-        if (level.type == 'f') {
-            timer = new Clock(level.compteur);
-            sevenMinutesInHeaven = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    changeNumer();
-                }
-            }));
-            sevenMinutesInHeaven.setCycleCount(Timeline.INDEFINITE);
-            sevenMinutesInHeaven.play();
 
-        }
     }
 
     void addNumberModels(int num ){ //charge les modèles 3D des nombres qui seront affichés sur le tableau
@@ -595,6 +606,7 @@ public class View extends Scene{
         menu.pauseMusique();
         menu.playSon("wind");
 
+
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
@@ -609,6 +621,7 @@ public class View extends Scene{
 
         //Si le niveau est de type f (avec un timer)
         if(level.type == 'f'){
+            stopTime();
             if(timer.tmp <= 0){ //On vérifie que le timer est bien arrivé à la fin
                 fin = new LevelEnd('d'); //Si oui, c'est la version défaite que l'on appel alors
                 globalRoot.getChildren().add(fin);
@@ -618,7 +631,8 @@ public class View extends Scene{
                 globalRoot.getChildren().add(fin);
                 return;
             }
-            stopTime();
+
+
         }
 
         else if(level.estFinie(false) && level.type != 'f') { //Autrement, (dans les deux autres cas de niveau possible
@@ -936,7 +950,9 @@ public class View extends Scene{
                             endGameMessage();
                         }else {
                             try {
+
                                 menu.nextLevel(level.ID);
+                               // playAgain();
                             } catch (Exception exception) {
                                 /* le jeu est fini */
                             }
@@ -952,7 +968,9 @@ public class View extends Scene{
                 try {
                     fadeOut(EventHandler -> {
                         try {
+
                             menu.fadeOut(new Level(level.ID));
+
                         } catch (Exception exception) {
                             exception.printStackTrace();
                         }

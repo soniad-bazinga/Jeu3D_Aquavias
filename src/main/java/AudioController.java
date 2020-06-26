@@ -58,7 +58,9 @@ public class AudioController {
     int cycle = 500;
 
     public void pauseMusique(){
+        if(!musique.getStatus().equals(MediaPlayer.Status.PLAYING)) return;
         tempMusique = musique.getVolume();
+
         finalMusique = musique.getVolume();
 
         double reduce = tempMusique/cycle;
@@ -73,6 +75,7 @@ public class AudioController {
     }
 
     public void playMusique(){
+        if(musique.getStatus().equals(MediaPlayer.Status.PLAYING)) return;
         musique.play();
 
         double reduce = tempMusique/cycle;

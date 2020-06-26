@@ -943,21 +943,34 @@ public class View extends Scene{
 
                 Button suivant = new Button("Niveau suivant");
                 suivant.setOnAction(e -> {
-                    fadeOut(EventHandler -> {
-                        if(menu.lvls.length - 1 == menu.getMaxLevel()) {
-                            System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
+                    if(menu.lvls.length - 1 == level.ID) {
+                        System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
+
+                        FadeTransition fade = new FadeTransition();
+                        fade.setFromValue(1);
+                        fade.setToValue(0);
+                        fade.setDuration(Duration.seconds(1));
+                        fade.setNode(globalRoot);
+
+                        menu.pauseMusique();
+                        menu.playSon("wind");
+
+                        fade.setOnFinished(x -> {
                             globalRoot.setVisible(false);
                             endGameMessage();
-                        }else {
-                            try {
+                        });
 
+                        fade.play();
+                    }else {
+                        fadeOut(EventHandler -> {
+                            try {
                                 menu.nextLevel(level.ID);
                                // playAgain();
                             } catch (Exception exception) {
                                 /* le jeu est fini */
                             }
-                        }
-                    });
+                        });
+                    }
                 });
 
                 hboite.getChildren().add(suivant);
@@ -1032,6 +1045,7 @@ public class View extends Scene{
         Timeline wait = new Timeline(new KeyFrame(Duration.seconds(4.8), event -> {
             fadeOut(e -> menu.fadeIn());
         }));
+
         wait.setCycleCount(1);
         wait.play();
     }

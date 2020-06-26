@@ -113,7 +113,7 @@ public class MenuApplication extends Application {
         retour = new ImageView(new Image(new File("img/retour.png").toURI().toString()));
 
         retour.setTranslateX((WIDTH/5.0));
-        retour.setTranslateY(HEIGHT/1.1);
+        retour.setTranslateY(HEIGHT/1.2);
 
 
         addTitle();//Fonction qui ajoute le titre créé par MenuTitle.java
@@ -428,9 +428,9 @@ public class MenuApplication extends Application {
         fade.setToValue(1);
         fade.setNode(root);
         fade.setOnFinished(e -> {
-            mediaPlayer.playMusique();
             settingsBox.loadSettings();
             settingsBox.updateValues();
+            mediaPlayer.playMusique();
         });
         fade.play();
     }

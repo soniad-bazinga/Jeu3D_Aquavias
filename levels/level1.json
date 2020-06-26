@@ -1,327 +1,37 @@
-{
-  "WIDTH": 12,
-  "ID": 1,
-  "HEIGHT": 6,
-  "Pieces": [
-    [
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": true
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      }
-    ],
-    [
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      }
-    ],
-    [
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      }
-    ],
-    [
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      }
-    ],
-    [
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      }
-    ],
-    [
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "TYPE": "NONE"
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "L",
-        "FULL": false
-      },
-      {
-        "ROTATION": 1,
-        "TYPE": "I",
-        "FULL": false
-      }
-    ]
-  ],
-  "type": "c",
-  "compteur": 50
-}
+{"WIDTH":9,
+    "ID":1,
+    "HEIGHT":3,
+    "Pieces":
+[[{"ROTATION":1,"TYPE":"I","FULL":true},
+{"ROTATION":1,"TYPE":"L","FULL":false},
+{"ROTATION":1,"TYPE":"L","FULL":false},
+{"ROTATION":2,"TYPE":"L","FULL":false},
+{"ROTATION":1,"TYPE":"I","FULL":true},
+{"ROTATION":1,"TYPE":"L","FULL":false},
+{"TYPE":"NONE"},
+{"TYPE":"NONE"},
+{"TYPE":"NONE"},
+{"TYPE":"NONE"},
+{"TYPE":"NONE"}],
+
+[{"TYPE":"NONE"},
+{"ROTATION":1,"TYPE":"L","FULL":false},
+{"ROTATION":1,"TYPE":"L","FULL":false},
+{"ROTATION":2,"TYPE":"L","FULL":false},
+{"ROTATION":1,"TYPE":"I","FULL":true},
+{"ROTATION":1,"TYPE":"T","FULL":false},
+{"ROTATION":3,"TYPE":"L","FULL":false},
+{"TYPE":"NONE"},
+{"ROTATION":1,"TYPE":"L","FULL":false},
+{"ROTATION":3,"TYPE":"L","FULL":false},
+{"TYPE":"NONE"}],
+
+[{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},
+{"ROTATION":2,"TYPE":"L","FULL":false},
+{"ROTATION":1,"TYPE":"T","FULL":false},
+{"ROTATION":3,"TYPE":"I","FULL":false},
+{"ROTATION":2,"TYPE":"L","FULL":false},
+{"ROTATION":2,"TYPE":"L","FULL":false}
+{"ROTATION":1,"TYPE":"I","FULL":false}]],
+  "type":"c",
+  "compteur": 28}

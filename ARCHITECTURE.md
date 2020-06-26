@@ -40,5 +40,3 @@ La classe **AudioController**, comme son nom l'indique, permettait de contrôler
 Une classe **levelTracker** permet de garder en mémoire l'état d'avancement du jeu et du joueur, afin qu'il puisse garder sa progression lorsqu'il quitte le jeu. 
 
 Et finalement, la classe **cheatHandler** gère les codes secrets implémentés dans le jeu permettant de sauter les niveaux lorsque ceux-ci sont trop durs ! Mais bon, c'est déconseillé...
-
- 

@@ -48,4 +48,18 @@ public class Clock extends Pane {
         s = "[" + tmp + "]";
         compteur.setText(s);
     }
+
+    void pause(){
+        animation.pause();
+    }
+
+    void play(){
+        animation.play();
+    }
+
+    void stop(){
+        animation.stop();
+    }
+
+
 }

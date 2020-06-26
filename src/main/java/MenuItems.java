@@ -11,6 +11,8 @@ import javafx.scene.text.Text;
 
 public class MenuItems extends Pane{
 
+        private static AudioController audioController;
+
         private Text text; //Le texte qui est présent dans chacune des boites du menu
 
         private Effect shadow = new DropShadow(5, Color.BLACK); //L'effet d'ombre derrière le texte quand on passe la souris dessus
@@ -48,6 +50,16 @@ public class MenuItems extends Pane{
         }
 
         public void setOnAction(Runnable action) {
-            setOnMouseClicked(e -> action.run());
+            setOnMouseClicked(e -> {
+                action.run();
+                /* on joue le son quande on clique */
+                audioController.play("click");
+            });
+            /* on joue le son en hover */
+            setOnMouseEntered(e -> audioController.play("hover"));
         } //Définit une action à effectuer dès que le bouton est cliqué
+
+        public static void setAudioController(AudioController a){
+            audioController = a;
+        }
 }

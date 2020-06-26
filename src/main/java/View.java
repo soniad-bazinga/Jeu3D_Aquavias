@@ -10,6 +10,8 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
@@ -21,6 +23,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -488,11 +491,11 @@ public class View extends Scene {
         }
     }
 
+
     void initializeCompteur() {
         tableau = new Piece3D();  //tableau d'affichage
 
         tableau.importModel("model_test/tableau.obj");  //on ajoute le modèle 3D du tableau d'affichage
-
 
         tableau.setTranslateX(-6);
         tableau.setTranslateY(-1);
@@ -532,9 +535,9 @@ public class View extends Scene {
 
         if(num <10){
             numModel2.setVisible(false);
-            numModel2.importModel("model_test/0.2.obj"); //valeur par défaut sinon on a une nullPointer error  b
+            numModel2.importModel("model_test/0.obj"); //valeur par défaut sinon on a une nullPointer error  b
 
-            numModel1.importModel("model_test/"+num1+".2.obj");
+            numModel1.importModel("model_test/"+num1+".obj");
             numModel1.setTranslateX(-5.6);
             numModel1.setTranslateY(-1.8);
             numModel1.setTranslateZ(10);

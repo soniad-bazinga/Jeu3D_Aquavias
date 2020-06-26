@@ -45,7 +45,11 @@ public class AudioController {
 
     public void play(String s){
         son = new AudioClip(sons.get(s).getSource());
+
         son.setVolume(volumeSon);
+        /* Bruit de vent trop faible, on triple son volume */
+        if(s.contains("wind")) son.setVolume(volumeSon * 3);
+
         son.play();
     }
 

@@ -27,7 +27,9 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -798,14 +800,23 @@ public class View extends Scene{
             HBox hboite = new HBox(10);
 
             if (win == 'v') {
+
+                if(menu.getMaxLevel() <= level.ID) menu.incrementeMax();
+                menu.updateLastPlayed(level.ID + 1);
+
                 Button suivant = new Button("Niveau suivant");
                 suivant.setOnAction(e -> {
                     fadeOut(EventHandler -> {
-                        try {
-                            menu.nextLevel(level.ID);
-                        } catch (Exception exception) {
+                        if(menu.lvls.length - 1 == menu.getMaxLevel()) {
                             System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
-                            menu.fadeIn();
+                            globalRoot.setVisible(false);
+                            endGameMessage();
+                        }else {
+                            try {
+                                menu.nextLevel(level.ID);
+                            } catch (Exception exception) {
+                                /* le jeu est fini */
+                            }
                         }
                     });
                 });
@@ -831,10 +842,6 @@ public class View extends Scene{
             Button quit = new Button("Retour au menu");
             quit.setOnAction(e -> {
                 fadeOut(EventHandler ->{
-                    if(win == 'v'){
-                        menu.incrementeMax();
-                        menu.updateLastPlayed(level.ID + 1);
-                    }
                     menu.fadeIn();
                 });
             });
@@ -850,5 +857,41 @@ public class View extends Scene{
 
             boite.getChildren().add(hboite);
         }
+    }
+
+    void endGameMessage(){
+
+        for(Node n : globalRoot.getChildren()){
+            n.setVisible(false);
+        }
+
+        AnchorPane endG = new AnchorPane();
+
+        Rectangle r = new Rectangle(WIDTH,HEIGHT,Color.WHITE);
+
+        Text t = new Text("Merci beaucoup d'avoir joué ! :)");
+
+        t.setStyle("-fx-font-weight: bold");
+
+        t.setTextAlignment(TextAlignment.CENTER);
+
+        endG.getChildren().addAll(r,t);
+
+        globalRoot.getChildren().add(endG);
+
+        t.setTranslateX(WIDTH / 2.0 - 100.0);
+        t.setTranslateY(HEIGHT / 3.0 + 75);
+
+        globalRoot.setVisible(true);
+        globalRoot.setOpacity(1);
+
+        menu.playSon("windWin");
+
+        /* On attend 5 secondes avant de retourner au menu */
+        Timeline wait = new Timeline(new KeyFrame(Duration.seconds(4.8), event -> {
+            fadeOut(e -> menu.fadeIn());
+        }));
+        wait.setCycleCount(1);
+        wait.play();
     }
 }

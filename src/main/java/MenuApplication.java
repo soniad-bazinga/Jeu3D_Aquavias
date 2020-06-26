@@ -319,7 +319,6 @@ public class MenuApplication extends Application {
             }
         });
         for(int i = 0; i < lvls.length; i++){
-            System.out.println(lvls[i]);
             lvls[i] = lvls[i].split("\\.")[0];
             if(!lvls[i].equals("")) lvls[i] = lvls[i].substring(5);
             if(lvls[i] != null && !lvls[i].equals("-1")) {
@@ -442,6 +441,10 @@ public class MenuApplication extends Application {
 
     void pauseMusique(){
         mediaPlayer.pauseMusique();
+    }
+
+    int getMaxLevel(){
+        return levelTracker.getMaxLevel();
     }
 
     void incrementeMax(){

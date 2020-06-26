@@ -1,0 +1,1 @@
+https://openjfx.io/openjfx-docs/#install-javafx

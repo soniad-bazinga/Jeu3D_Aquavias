@@ -12,9 +12,13 @@ Cet algorithme commence par vider toutes les pièces du tableau de jeu et vérif
 **L'algorithme de propagation d'eau ( Flow(i, j) )**
 
 La fonction est appelée sur toutes les pièces remplie d'eau dans le tableau du modèle. 
-Si la case correspondante dans le modèle est remplie, alors la propagation va commencer dans la Vue. 
+Si la case correspondante dans le modèle est remplie, alors la propagation va commencer dans la Vue.
+Si ce n'est pas le cas, elle se remplit d'abord elle même (elle est composé de 5 pièce en forme de croix) puis relance la propagation dans la Vue. 
 À chaque fois qu'une pièce est remplie, elle est ajoutée à une pile. 
-On appelle cette fonction à chaque rotation d'une pièce, et toutes les pièces qui ne sont pas reliées au début du niveau sont vidées et retirées de la pile. 
+On appelle cette fonction à chaque rotation d'une pièce, et toutes les pièces qui ne sont pas reliées au début ou non remplis dans le jeu du niveau sont vidées et retirées de la pile. 
+C'est la fonction isConnectedToSource() qui vérifie si elles sont reliées au début.
+Pour chaque pièce de la pile, elle considère la dernière pièce tournée comme inaccessible et regarde si en appel recursif sur ses voisines connectées, elle peut rejoindre la source (donc sans passer par la dernière tournée).
+Si c'est le cas, elle est donc connectée à la source.
 
 **L'algorithme de validation de niveau :**
 

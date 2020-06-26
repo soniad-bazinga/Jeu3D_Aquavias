@@ -582,7 +582,6 @@ public class View extends Scene {
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.setOnFinished(EventHandler ->{
-            menu.playMusique();
             loading = false;
         });
         fade.play();
@@ -591,10 +590,6 @@ public class View extends Scene {
     /* L'EventHandler permet de specifier l'action de fin d'animation */
     void fadeOut(EventHandler e){
         loading = true;
-
-        menu.pauseMusique();
-        menu.playSon("wind");
-
         FadeTransition fade = new FadeTransition();
         fade.setDuration(Duration.millis(1000));
         fade.setNode(globalRoot);
@@ -649,8 +644,6 @@ public class View extends Scene {
 
         /* Si c'est la première piece, on ne peut pas la tourner */
         if (x == 0 && y == 0) return;
-
-        menu.playSon("rotation");
 
         /* on rotate le jeu, les pièces, et les pièces d'eau */
         /* on commence par la tourner dans le modèle */
@@ -909,13 +902,9 @@ public class View extends Scene {
 
             Text status = new Text();
 
-            if(g == 'v'){
-                /* on joue le son de la victoire */
-                menu.playSon("win");
+            if (g == 'v') {
                 status.setText("Victoire !");
-            }else{
-                /* sinon on joue le son de la défaite */
-                menu.playSon("lose");
+            } else {
                 status.setText("Perdu...");
             }
             /* on ajoute le texte de status (victoire/défaite) */
@@ -929,9 +918,11 @@ public class View extends Scene {
 
         }
         public void addButtons(char win){
+
             HBox hboite = new HBox(10);
 
             if (win == 'v') {
+
                 Button suivant = new Button("Niveau suivant");
                 suivant.setOnAction(e -> {
                     fadeOut(EventHandler -> {
@@ -939,7 +930,6 @@ public class View extends Scene {
                             menu.nextLevel(level.ID);
                         } catch (Exception exception) {
                             System.out.println("Bravo ! vous avez terminé le jeu brave puiseur");
-                            menu.fadeIn();
                         }
                     });
                 });
@@ -974,12 +964,6 @@ public class View extends Scene {
             hboite.setAlignment(Pos.CENTER);
 
             hboite.getChildren().addAll(replay, quit);
-
-            /* on ajoute les sosn a chaque noeuds */
-            for(Node n : hboite.getChildren()){
-                n.setOnMouseEntered(e -> menu.playSon("hover"));
-                n.setOnMouseClicked(e -> menu.playSon("click"));
-            }
 
             boite.getChildren().add(hboite);
         }

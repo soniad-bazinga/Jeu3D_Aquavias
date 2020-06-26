@@ -1,11 +1,11 @@
-# Aquavias
+# Aquavias, un casse-tête simple et amusant
 
-Aquavias, qu'est-ce que c'est ? 
+**Aquavias, qu'est-ce que c'est ?**
 
 Aquavias est un jeu très simple dans lequel il faut mener de l'eau d'un point A à un point B.
 Pour se faire, vous devez faire tourner des pièces en cliquant dessus pour arriver jusqu'à la fin du niveau ! 
 
-Comment y jouer ? 
+**Comment y jouer ?** 
 
 Pour compiler le jeu rien de plus simple !
 
@@ -16,9 +16,9 @@ Dans l'éventualité cependant où vous utiliseriez un Mac, il serait plus judic
 Bon jeu !
 
 
-Crédits
+**Crédits**
 
-DAHMANI Sonia       (n°21965528)    @sdahma28
-KINDIA Franck       (n°21700163)    @leskerrr
-SANTOS DUARTE Elsa  (n°21618550)    @ElsaD
-VALTY Eugène        (n°21805512)    @eugene
+**DAHMANI** Sonia       (n°21965528)    @sdahma28
+**KINDIA** Franck       (n°21700163)    @leskerrr
+**SANTOS** DUARTE Elsa  (n°21618550)    @ElsaD
+**VALTY** Eugène        (n°21805512)    @eugene

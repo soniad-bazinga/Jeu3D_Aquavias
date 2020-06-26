@@ -43,7 +43,7 @@ public class MenuApplication extends Application {
     Level enCours;
     View v;
     File levelsFolder = new File("levels");
-    String [] lvls = levelsFolder.list();
+    String [] lvls = levelsFolder.list((dir,name) -> name.contains("level"));
     AnimationTimer at;
     Stage window;
     AudioController mediaPlayer = new AudioController();
@@ -51,12 +51,12 @@ public class MenuApplication extends Application {
     public List<Pair<String, Runnable>> menuData = Arrays.asList( //Définit une liste qui comprend tous les boutons sous un couple de String et d'action à effectuer
             //Bouton Nouvelle Partie du menu principal
             new Pair<String, Runnable>("Nouvelle Partie", () -> {
-                    try{
-                        enCours = new Level(0);
-                        fadeOut(enCours);
-                    } catch (Exception e){
-                        System.out.println("Niveau manquant");
-                    }
+                try{
+                    enCours = new Level(0);
+                    fadeOut(enCours);
+                } catch (Exception e){
+                    System.out.println("Niveau manquant");
+                }
             }),
             //Bouton continuer du menu principal
             new Pair<String, Runnable>("Continuer", () -> {
@@ -71,7 +71,7 @@ public class MenuApplication extends Application {
             new Pair<String, Runnable>("Réglages", () -> {System.out.println("Modifier les réglages du jeu"); menuSettingsAnimation();}),
             new Pair<String, Runnable>("Quitter le jeu", Platform::exit)
 
-        );
+    );
 
     public ImageView retour;
     public ArrayList<Pair<String, Runnable>> levelData = new ArrayList<>();
@@ -104,7 +104,7 @@ public class MenuApplication extends Application {
         MenuItems.setAudioController(mediaPlayer);
 
         settingsBox = new settingsMenu(mediaPlayer, Color.BLACK);
-        
+
         LevelBox.setHgap(25); //Cette ligne et la suivante décident de l'écart entre les "cases" de niveau dans le menu de séléction du niveau
         LevelBox.setVgap(20);
 
@@ -203,7 +203,7 @@ public class MenuApplication extends Application {
 
     private void menuSettingsAnimation(){
         settingsBox.setTranslateY((HEIGHT - settingsBox.getHeight())/2);
-        
+
         settingsSelect = true;
         ScaleTransition st = new ScaleTransition((Duration.seconds(1)));
         st.setToY(1);
@@ -273,17 +273,17 @@ public class MenuApplication extends Application {
         });
         st.play();
     }
-    
-        public void labelAnimation(){ //Cette fonction permet l'animation du texte lorsque l'écran est celui d'une séléction
+
+    public void labelAnimation(){ //Cette fonction permet l'animation du texte lorsque l'écran est celui d'une séléction
         if (at == null) at = new AnimationTimer() {
-                @Override
-                public void handle(long l) {
-                    if (retour.getOpacity() - 0.01 > 0.1) {
-                        retour.setOpacity(retour.getOpacity() - 0.01);
-                    } else
-                        retour.setOpacity(retour.getOpacity() + 1.0);
-                }
-            };
+            @Override
+            public void handle(long l) {
+                if (retour.getOpacity() - 0.01 > 0.1) {
+                    retour.setOpacity(retour.getOpacity() - 0.01);
+                } else
+                    retour.setOpacity(retour.getOpacity() + 1.0);
+            }
+        };
         at.start();
     }
 
@@ -481,28 +481,28 @@ public class MenuApplication extends Application {
     public void start(Stage primaryStage) throws MalformedURLException {
 
 
-            Scene scene = new Scene(createContent());
-            primaryScene = scene;
-            window = primaryStage;
-            primaryStage.setTitle("Aquavias");
-            primaryStage.setScene(scene);
-            primaryStage.setWidth(WIDTH);
-            primaryStage.setHeight(HEIGHT);
-            primaryStage.show();
+        Scene scene = new Scene(createContent());
+        primaryScene = scene;
+        window = primaryStage;
+        primaryStage.setTitle("Aquavias");
+        primaryStage.setScene(scene);
+        primaryStage.setWidth(WIDTH);
+        primaryStage.setHeight(HEIGHT);
+        primaryStage.show();
 
-            cheatHandler c = new cheatHandler(10, this);
+        cheatHandler c = new cheatHandler(10, this);
 
-            scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent keyEvent) {
-                    c.addInput(keyEvent);
-                    if (lvlSelect){
-                        if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseLevelAnimation();
-                    }
-                    if(settingsSelect){
-                        if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseSettingsAnimation();
-                    }
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                c.addInput(keyEvent);
+                if (lvlSelect){
+                    if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseLevelAnimation();
                 }
-            });
-        }
+                if(settingsSelect){
+                    if(keyEvent.getCode() == KeyCode.BACK_SPACE) reverseSettingsAnimation();
+                }
+            }
+        });
+    }
 }

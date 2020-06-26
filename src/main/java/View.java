@@ -631,11 +631,7 @@ public class View extends Scene{
 
     void rotate(int x,int y){
         //Si la partie est finie, la rotation ne fonctionne plus
-        if(level.type == 'c') {
-            if (level.compteur <= 0) return;
-        }else{
-            if(timer.tmp <= 0) return;
-        }
+
 
         /* Si la rotation n'est pas finie, on peut pas en commencer une autre */
         if(models[x][y].getRotate() % 90 != 0) return;

@@ -53,11 +53,13 @@ public class AudioController {
         son.play();
     }
 
+    double finalMusique;
     double tempMusique;
     int cycle = 500;
 
     public void pauseMusique(){
         tempMusique = musique.getVolume();
+        finalMusique = musique.getVolume();
 
         double reduce = tempMusique/cycle;
 
@@ -78,6 +80,8 @@ public class AudioController {
         Timeline upVolume = new Timeline(new KeyFrame(Duration.millis(1),event -> {
             musique.setVolume(musique.getVolume() + reduce);
         }));
+
+        upVolume.setOnFinished(e ->  musique.setVolume(finalMusique));
         upVolume.setCycleCount(cycle);
         upVolume.play();
     }

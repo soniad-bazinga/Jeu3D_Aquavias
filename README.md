@@ -15,4 +15,8 @@ Après avoir lancé le run, on a le choix entre quatre options :
 Lorsqu'on accède à un niveau le but est de faire passer l'eau depuis la source (pièce située le plus à gauche) jusqu'à la fin de l'aqueduc (pièce située la plus à droite de l'écran). 
 Pour pouvoir jouer de la façon la plus agréable possible, il faut avoir conscience que lorsqu'il y a des fuites dans le niveau, elles ne sont pas visibles comme sur le jeu mobile, et il faut prêter davantage attention à la connexion des pièces entre elles.
 
+Aussi, pour faciliter la tâche gargantuesque qu'est l'arrivée au dernier niveau, nous avons créé deux cheatcodes. 
+- Le premier permet de débloquer un niveau supplémentaire avec la succession de touches : "↑ ↑ ↑ ↓". 
+- Le deuxième permet de debloquer la totalité des niveaux "↑ ↑ ↓ ↓ ← → ← → a b" .
+
 Voilà, maintenant vous avez toutes les pièces en main pour irriguer la ville de FESE.

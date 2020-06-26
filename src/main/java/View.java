@@ -617,6 +617,7 @@ public class View extends Scene{
     }
 
     void win(){
+        if(loading) return;
         loading = true;
 
         //Si le niveau est de type f (avec un timer)

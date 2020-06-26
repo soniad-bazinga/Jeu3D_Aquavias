@@ -26,28 +26,28 @@
 {"TYPE":"NONE"},{"TYPE":"NONE"},
 {"TYPE":"NONE"},{"TYPE":"NONE"}],
 
-[{"ROTATION":2,"TYPE":"I","FULL":false}
+[{"ROTATION":2,"TYPE":"I","FULL":false},
 {"ROTATION":2,"TYPE":"I","FULL":false},
 {"TYPE":"NONE"},
-{"ROTATION":1,"TYPE":"L","FULL":false}
+{"ROTATION":1,"TYPE":"L","FULL":false},
 {"ROTATION":1,"TYPE":"I","FULL":false},
 {"ROTATION":2,"TYPE":"L","FULL":false},
 {"TYPE":"NONE"},
 {"TYPE":"NONE"},
 {"TYPE":"NONE"}],
 
-[{"ROTATION":2,"TYPE":"L","FULL":false}
+[{"ROTATION":2,"TYPE":"L","FULL":false},
 {"ROTATION":2,"TYPE":"I","FULL":false},
 {"ROTATION":2,"TYPE":"I","FULL":false},
 {"ROTATION":2,"TYPE":"T","FULL":false},
 {"TYPE":"NONE"},
-{"ROTATION":1,"TYPE":"L","FULL":false}
+{"ROTATION":1,"TYPE":"L","FULL":false},
 {"ROTATION":1,"TYPE":"I","FULL":false},
 {"ROTATION":2,"TYPE":"L","FULL":false},
 {"TYPE":"NONE"}],
 
 [{"TYPE":"NONE"},{"TYPE":"NONE"},{"TYPE":"NONE"},
-{"ROTATION":2,"TYPE":"L","FULL":false}
+{"ROTATION":2,"TYPE":"L","FULL":false},
 {"ROTATION":2,"TYPE":"I","FULL":false},
 {"ROTATION":1,"TYPE":"I","FULL":false},
 {"ROTATION":1,"TYPE":"L","FULL":false},
@@ -59,4 +59,4 @@
 {"ROTATION":1,"TYPE":"T","FULL":false},
 {"ROTATION":1,"TYPE":"I","FULL":false}]],
   "type":"f",
-  "compteur": 40}
+  "compteur": 45}

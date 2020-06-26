@@ -5,8 +5,8 @@ KINDIA Franck       (n°21700163)    @leskerrr
 SANTOS DUARTE Elsa  (n°21618550)    @ElsaD
 VALTY Eugène        (n°21805512)    @eugene
 
-Après avoir lancé le run, on a le choix entre quatre options : 
-- débuter une nouvelle partie, auquel on démarre (ou redémarre) le jeu depuis le niveau 0 (et les autres niveaux redeviennent indisponibles).
+Après avoir lancé le run, il y a le choix entre quatre options : 
+- débuter une nouvelle partie, auquel cas le joueur démarre (ou redémarre) le jeu depuis le niveau 0 (et les autres niveaux redeviennent indisponibles).
 - continuer la partie précédente (elle est chargée depuis le fichier curr.json).
 - choisir parmi les niveau à disposition. Il suffit alors de choisir parmi les niveau disponibles, ou de revenir au menu depuis la touche "retour" du clavier (assimilée à la touche "supprimer").
 - choisir les réglages du jeu, qui permettent de régler les sons et la musique.

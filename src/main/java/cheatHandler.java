@@ -32,7 +32,13 @@ public class cheatHandler {
             menu.incrementeMax();
         });
 
+        Pair<KeyCode[],Runnable> c2 = new Pair<KeyCode[],Runnable>(new KeyCode[]{KeyCode.UP,KeyCode.UP,KeyCode.DOWN,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT,KeyCode.LEFT,KeyCode.RIGHT,KeyCode.A,KeyCode.B}, () -> {
+            System.out.println("Code de triche : Tout les niveaux débloqués !");
+            menu.unlockAll();
+        });
+
         cheats.add(c1);
+        cheats.add(c2);
     }
 
     public void addInput(KeyEvent k){
@@ -55,8 +61,21 @@ public class cheatHandler {
             Runnable exec = (Runnable) p.getValue();
 
             /* si oui, on execute son action */
-            if(Arrays.equals(k,cheat)) exec.run();
+            if(contains(k,cheat)){
+                inputs.clear();
+                exec.run();
+            }
         }
+    }
+
+    private boolean contains(KeyCode[] big, KeyCode[] smoll){
+        for(int i = 0; i < big.length - smoll.length + 1; i++){
+            for(int j = 0; j < smoll.length; j++){
+                if(big[i+j] != smoll[j]) break;
+                if(j == smoll.length - 1) return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -11,7 +11,7 @@ Pour compiler le jeu rien de plus simple !
 
 Ouvrez le terminal et déplacez vous à la racine du projet (aquavias/) ! Une fois là, il vous suffit simplement d'entrer "./run" sur votre terminal et voilà ! Vous voilà dans le plus beau menu que vous n'ayez jamais vu ! 
 
-Dans l'éventualité cependant où vous utiliseriez un Mac, il serait plus judicieux de vous déplacer dans le dossier RunMac (aquavits/RunMac) avant d'entrer le "./run" !
+Dans l'éventualité cependant où vous utiliseriez un Mac, il serait plus judicieux d'entrer "./runMac" !
 
 Bon jeu !
 

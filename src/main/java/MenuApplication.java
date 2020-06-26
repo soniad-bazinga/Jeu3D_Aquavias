@@ -43,7 +43,7 @@ public class MenuApplication extends Application {
     Level enCours;
     View v;
     File levelsFolder = new File("levels");
-    String [] lvls = levelsFolder.list();
+    String [] lvls = levelsFolder.list((dir,name) -> name.contains("level"));
     AnimationTimer at;
     Stage window;
     AudioController mediaPlayer = new AudioController();

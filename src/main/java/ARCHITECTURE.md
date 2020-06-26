@@ -1,4 +1,4 @@
-# Les Algorithmes
+# L'Architecture'
 
 
 Le code est organisé en plusieurs catégories contenant, pour certaines, des sous catégories. 

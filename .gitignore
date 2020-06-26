@@ -1,0 +1,13 @@
+/bin/
+target/
+#les modèles de pieces
+model_blend/
+model_test/
+pieces3D/
+#fichier de réglages IntelliJ
+.idea/
+#les niveaux
+levels/
+#on ignore les réglages
+options/
+
